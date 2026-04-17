@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: vllm-cpu
+    ports:
+      - "8000:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    environment:
+      - VLLM_CPU_ONLY=1
+    command: >
+      --model mistralai/Mistral-7B-Instruct-v0.1
+      --host 0.0.0.0
+      --port 8000
+      --device cpu
