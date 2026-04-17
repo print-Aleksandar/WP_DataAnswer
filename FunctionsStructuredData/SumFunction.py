@@ -3,7 +3,7 @@ import pandas as pd
 def FunctionSum(FileJson, SelectFilter, SumColumn):
 
 
-    # FileJson is a Json format of a table
+    # FileJson is a JSON format of a table
     # SelectFilter is Filter/s for which column/s to perform
     # SumColumn - in which column using filters to find sum
 

@@ -54,4 +54,4 @@ if __name__ == '__main__':
         {"ClubName": "Real Madrid", "Points": 95, "Year": 2024, "Rank": 1}
     ]
 
-    print(FunctionAvg(jsonFile, [("ClubName", "Barca", "==")], "Points"))
+    print(FunctionMedian(jsonFile, [("ClubName", "Barca", "=="), ("Rank", 3, ">=")], "Points"))

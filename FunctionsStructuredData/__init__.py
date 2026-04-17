@@ -4,3 +4,4 @@ from FunctionsStructuredData.MaxFunction import FunctionMax
 from FunctionsStructuredData.MinFunction import FunctionMin
 from FunctionsStructuredData.BoolFunction import FunctionBool
 from FunctionsStructuredData.AvgFunction import FunctionAvg
+from FunctionsStructuredData.MedianFunction import FunctionMedian

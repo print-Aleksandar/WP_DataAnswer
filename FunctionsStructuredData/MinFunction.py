@@ -2,7 +2,7 @@ import pandas as pd
 
 def FunctionMin(FileJson, SelectFilter, MinColumn):
 
-    #FileJson is a Json format of a table
+    #FileJson is a JSON format of a table
     #SelectFilter is Filter/s for which column/s to perform
     #MaxColumn - in which column using filters to find min value
 

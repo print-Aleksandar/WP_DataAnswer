@@ -2,7 +2,7 @@ import pandas as pd
 
 def FunctionCount(FileJson, SelectFilter):
 
-    # FileJson is a Json format of a table
+    # FileJson is a JSON format of a table
     # SelectFilter is Filter/s for which column/s to perform
 
     df = pd.DataFrame(FileJson)
