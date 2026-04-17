@@ -1,0 +1,6 @@
+from FunctionsStructuredData.SumFunction import FunctionSum
+from FunctionsStructuredData.CountFunction import FunctionCount
+from FunctionsStructuredData.MaxFunction import FunctionMax
+from FunctionsStructuredData.MinFunction import FunctionMin
+from FunctionsStructuredData.BoolFunction import FunctionBool
+from FunctionsStructuredData.AvgFunction import FunctionAvg

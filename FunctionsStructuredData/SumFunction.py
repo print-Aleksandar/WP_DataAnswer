@@ -1,12 +1,14 @@
 import pandas as pd
 
-def FunctionCount(FileJson, SelectFilter):
+def FunctionSum(FileJson, SelectFilter, SumColumn):
+
 
     # FileJson is a Json format of a table
     # SelectFilter is Filter/s for which column/s to perform
+    # SumColumn - in which column using filters to find sum
 
     df = pd.DataFrame(FileJson)
-    count = 0
+    sum = 0
 
     for index, row in df.iterrows(): # iterrows = row by row
         flag = True
@@ -32,6 +34,6 @@ def FunctionCount(FileJson, SelectFilter):
                     flag = False
                     break
         if flag:
-            count += 1
+            sum += row[SumColumn]
 
-    return count
+    return sum

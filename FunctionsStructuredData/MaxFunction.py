@@ -1,12 +1,13 @@
 import pandas as pd
 
-def FunctionCount(FileJson, SelectFilter):
+def FunctionMax(FileJson, SelectFilter, MaxColumn):
 
-    # FileJson is a Json format of a table
-    # SelectFilter is Filter/s for which column/s to perform
+    #FileJson is a Json format of a table
+    #SelectFilter is Filter/s for which column/s to perform
+    #MaxColumn - in which column using filters to find max value
 
     df = pd.DataFrame(FileJson)
-    count = 0
+    maxValue = float("-inf")
 
     for index, row in df.iterrows(): # iterrows = row by row
         flag = True
@@ -32,6 +33,6 @@ def FunctionCount(FileJson, SelectFilter):
                     flag = False
                     break
         if flag:
-            count += 1
+            maxValue = max(maxValue, row[MaxColumn])
 
-    return count
+    return maxValue

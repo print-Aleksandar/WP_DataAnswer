@@ -1,12 +1,11 @@
 import pandas as pd
 
-def FunctionCount(FileJson, SelectFilter):
+def FunctionBool(FileJson, SelectFilter):
 
-    # FileJson is a Json format of a table
-    # SelectFilter is Filter/s for which column/s to perform
+    #FileJson is a Json format of a table
+    #SelectFilter is Filter/s for which column/s to perform
 
     df = pd.DataFrame(FileJson)
-    count = 0
 
     for index, row in df.iterrows(): # iterrows = row by row
         flag = True
@@ -32,6 +31,6 @@ def FunctionCount(FileJson, SelectFilter):
                     flag = False
                     break
         if flag:
-            count += 1
+            return True
 
-    return count
+    return False

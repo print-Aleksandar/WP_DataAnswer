@@ -1,12 +1,13 @@
 import pandas as pd
 
-def FunctionCount(FileJson, SelectFilter):
+def FunctionMin(FileJson, SelectFilter, MinColumn):
 
-    # FileJson is a Json format of a table
-    # SelectFilter is Filter/s for which column/s to perform
+    #FileJson is a Json format of a table
+    #SelectFilter is Filter/s for which column/s to perform
+    #MaxColumn - in which column using filters to find min value
 
     df = pd.DataFrame(FileJson)
-    count = 0
+    minValue = float("inf")
 
     for index, row in df.iterrows(): # iterrows = row by row
         flag = True
@@ -32,6 +33,6 @@ def FunctionCount(FileJson, SelectFilter):
                     flag = False
                     break
         if flag:
-            count += 1
+            minValue = min(minValue, row[MinColumn])
 
-    return count
+    return minValue
