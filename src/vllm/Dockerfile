@@ -1,4 +1,4 @@
-FROM python:3.14
+FROM python:3.11-slim
 
 # postavuvanje direktorium vo koj raboti aplikacijata
 WORKDIR /app
@@ -6,6 +6,11 @@ WORKDIR /app
 # sprechuvanje baferiranje i/o
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 # instalacija na potrebni moduli
 COPY requirements.txt .
