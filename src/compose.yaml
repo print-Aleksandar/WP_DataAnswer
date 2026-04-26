@@ -2,16 +2,39 @@ version: "3.9"
 
 services:
   vllm:
-    image: vllm/vllm-openai:latest
-    container_name: vllm-cpu
+    build:
+      context: vllm
+      dockerfile: Dockerfile.vllm-cpu
+    environment:
+      - MODEL_NAME=${MODEL_NAME}
+      - VLLM_CPU_OMP_THREADS_BIND=0-7
+      - VLLM_CPU_KVCACHE_SPACE=2
+      - HF_TOKEN=${HF_TOKEN}
+    shm_size: '8gb'
     ports:
       - "8000:8000"
     volumes:
-      - ~/.cache/huggingface:/root/.cache/huggingface
+      - huggingface_cache:/root/.cache/huggingface
+    networks:
+      - services_net
+    
+  llm-service:
+    build:
+      context: vllm
     environment:
-      - VLLM_CPU_ONLY=1
-    command: >
-      --model mistralai/Mistral-7B-Instruct-v0.1
-      --host 0.0.0.0
-      --port 8000
-      --device cpu
+      - VLLM_URL=http://src-vllm-1:8000
+      - MODEL_NAME=${MODEL_NAME}
+    ports:
+      - "9999:9999"
+    networks:
+      - services_net
+    depends_on:
+      - vllm
+
+
+networks:
+  services_net:
+    driver: bridge
+
+volumes:
+  huggingface_cache:
