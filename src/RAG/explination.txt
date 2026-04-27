@@ -1,0 +1,59 @@
+needed packages:
+-fastapi>=0.110.0
+
+-uvicorn[standard]
+
+-python-multipart
+
+-httpx
+
+-pydantic
+
+# Embeddings
+-sentence-transformers
+
+# Text splitting
+-langchain-text-splitters
+
+-faiss-cpu          faiss-gpu if you have a GPU
+
+-pypdf
+
+-numpy
+
+
+Per-user storage layout:
+```
+storage/
+  {user_id}/
+    index.faiss     ← FAISS flat L2 index
+    chunks.pkl      ← ordered list of text chunks
+
+
+LLM
+
+Option A — Ollama (recommended for CPU) //WINDOWS USERS
+Instructions
+Install: https://ollama.com/download
+
+in cmd
+ollama serve
+ollama pull phi3:mini (ollama list - to see what models you have pulled)
+
+#Test it
+curl http://localhost:11434/v1/chat/completions -H "Content-Type: application/json" -d "{\"model\":\"phi3:mini\",\"messages\":[{\"role\":\"user\",\"content\":\"Hello\"}]}" (for cmd)
+
+BASE_URL=http://localhost:11434/v1
+
+
+Option B — vLLM (GPU) //LINUX
+
+in terminal:
+
+pip install vllm
+
+python -m vllm.entrypoints.openai.api_server \
+    --model facebook/opt-1.3b \
+    --port 8000
+
+BASE_URL=http://localhost:8000/v1
