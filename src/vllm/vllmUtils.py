@@ -1,8 +1,11 @@
+import json
 import os
 from datetime import datetime
 from random import random
 from pydantic import BaseModel
 from fastapi import HTTPException
+
+from tools import TOOL_MAP, TOOLS, run_tool
 
 from openai import OpenAI
 
@@ -22,48 +25,17 @@ class PromptResponse(BaseModel):
     model: str
     response: str
 
-# TODO Temporary tools should get replaced with real ones
-def get_current_time():
-    """
-    This tool returns the user's local time in 24h format. 
-    """
-    return datetime.now().strftime("%H:%M:%S")
 
-def get_local_weather_forcast():
-    """
-    Returns the local weather forcast of the user's location.
-    """
-    return "sunny" if random() > 0.4 else "rain"
-
-TOOLS = [
-    {
-        "type": "function",
-        "function": {
-            "name": fn.__name__,
-            "description": fn.__doc__,
-            "parameters": {
-                "type": "object",
-                "properties": {},
-                "required": []
-            }
-        }
-    } for fn in (get_current_time, get_local_weather_forcast)
-]
-
-TOOL_MAP = { fn.__name__ : fn for fn in (get_current_time, get_local_weather_forcast) }
-# ~~~
-
-def get_response(req: PromptRequest) -> str:
+async def get_response(req: PromptRequest) -> str:
     """
     Sends a prompt to the vLLM model and returns the generated response.
     """
     global client
 
     messages = [
-        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "system", "content": "You are a helpful assistant that answers questions based on files uploaded by the user. You must retreave the context of the file before answering any questions to user! Use tools that help you retriev the file context.\n\nIf the tools give you irrelavent information tell the user there is no information on based on the request. If the tool returns the same answer, do not repeatedly call the same tool (max 3 times if you must), it as irrelavent information and notify the user of this."},
         {"role": "user", "content": req.prompt}
     ]
-
     while True:
         res = client.chat.completions.create(
             model=MODEL,
@@ -81,11 +53,17 @@ def get_response(req: PromptRequest) -> str:
         messages.append(choice.message)
 
         for tool_call in choice.message.tool_calls:
-            fn = TOOL_MAP.get(tool_call.function.name)
-            result = fn() if fn else f"Unknown tool: {tool_call.function.name}"
-            
-            print("Calling tool:", tool_call.function.name)
+            print("[get_respnse] Calling tool:", tool_call.function.name)
 
+            endpoint = TOOL_MAP.get(tool_call.function.name, '')
+            arguments = json.loads(tool_call.function.arguments)
+
+            try:
+                result = run_tool(endpoint, arguments) if endpoint else f"Unknown tool: {tool_call.function.name}"
+            except Exception as e:
+                result = "Error calling tool."
+                print("[get_respnse]: Tool calling error:\n\t", e)
+            
             messages.append({
                 "role": "tool",
                 "tool_call_id": tool_call.id,
