@@ -1,16 +1,28 @@
-<header class="navbar navbar-expand-lg px-4" style="background-color: #0b1f3a;">
+<header class="navbar navbar-expand-lg px-4" 
+        style="background-color: #0b1f3a;"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div class ="container">
-        <a class="navbar-brand text-white fw-bold fs-4" href="/home">Home</a>
+    <div class="container d-flex align-items-start">
+        <a class="navbar-brand text-white fw-bold fs-4 me-auto" href="/home">Home</a>
     </div>
 
-    <div class="ms-auto d-flex gap-5">
-        <a href="/register" class="btn btn-outline-light me-2">
-            Register
-        </a>
-        <a href="/login" class="btn btn-light text-dark">
-            Login
-        </a>
+    <div class="d-flex align-items-center gap-3 me-3">
+        
+        <div sec:authorize="isAnonymous()" class="d-flex gap-3">
+            <a href="/register" class="btn btn-outline-light me-2">Register</a>
+            <a href="/login" class="btn btn-light text-dark">Login</a>
+        </div>
+
+        <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-3">
+            <span class="text-white fw-semibold">
+                Welcome, <span sec:authentication="name"></span>
+            </span>
+            <form th:action="@{/logout}" method="post" class="m-0">
+                <button type="submit" class="btn btn-outline-light">Logout</button>
+            </form>
+        </div>
+
     </div>
 
 </header>
