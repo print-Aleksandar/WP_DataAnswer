@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from vllmUtils import get_response, PromptRequest, PromptResponse
-from tools import init_tools, wait_tool_startup
+from tools import TOOLS, init_tools
 
 app = FastAPI()
 
@@ -45,3 +45,9 @@ async def ask_model(req:Request ,res:Response):
             yield word.encode("utf-8")
 
     return StreamingResponse(message_stream(), media_type="text/plain")
+
+
+# TODO TEMP REMOVE
+@app.get('/debug/tools')
+def list_tools():
+    return TOOLS

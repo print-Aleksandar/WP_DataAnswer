@@ -18,7 +18,7 @@ client = OpenAI(base_url=VLLM_URL, api_key="")
 
 class PromptRequest(BaseModel):
     prompt: str
-    max_tokens: int = 200
+    max_tokens: int = 1000
     temperature: float = 0.7
 
 class PromptResponse(BaseModel):
