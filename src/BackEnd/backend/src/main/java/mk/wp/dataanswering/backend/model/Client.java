@@ -2,12 +2,18 @@ package mk.wp.dataanswering.backend.model;
 
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,13 +21,13 @@ import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import mk.wp.dataanswering.backend.model.enums.Role;
 
-// implements UserDetails
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Client {
+public class Client implements UserDetails {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -43,41 +49,46 @@ public class Client {
     @OneToMany(mappedBy="client")
     private List<Chat> chats;
 
-    public Client(String username, String password, String email) {
+    public Client(String username, String password, String email, Role role) {
         this.username = username;
         this.password = password;
         this.email = email;
+        this.role = role;
     }
 
-    // private boolean isAccountNonExpired = true;
-    // private boolean isAccountNonLocked = true;
-    // private boolean isCredentialsNonExpired = true;
-    // private boolean isEnabled = true;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    // @Override
-    // public Collection<? extends GrantedAuthority> getAuthorities() {
-    //     return List.of();
-    // }
 
-    // @Override
-    // public boolean isAccountNonExpired() {
-    //     return isAccountNonExpired;
-    // }
+    private boolean isAccountNonExpired = true;
+    private boolean isAccountNonLocked = true;
+    private boolean isCredentialsNonExpired = true;
+    private boolean isEnabled = true;
 
-    // @Override
-    // public boolean isAccountNonLocked() {
-    //     return isAccountNonLocked;
-    // }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(role);
+    }
 
-    // @Override
-    // public boolean isCredentialsNonExpired() {
-    //     return isCredentialsNonExpired;
-    // }
+    @Override
+    public boolean isAccountNonExpired() {
+        return isAccountNonExpired;
+    }
 
-    // @Override
-    // public boolean isEnabled() {
-    //     return isEnabled;
-    // }
+    @Override
+    public boolean isAccountNonLocked() {
+        return isAccountNonLocked;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return isCredentialsNonExpired;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
+    }
 
     
 }
