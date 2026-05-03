@@ -1,15 +1,19 @@
 package mk.wp.dataanswering.backend.service;
 
-import mk.wp.dataanswering.backend.model.Message;
-
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
+import mk.wp.dataanswering.backend.model.Message;
+
 public interface MessageService {
+
+    Message findById(Long id);
     
     List<Message> findAllByChatId(Long chatId);
 
-    Message addMessage(Long chatId, String question, String answer);
+    Message createMessage(Long chatId, String question, List<MultipartFile> files);
 
-    Message findById(Long id);
+    Message updateAnswer(Long messageId, String answer);
 
 }

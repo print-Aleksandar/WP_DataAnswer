@@ -1,18 +1,18 @@
 package mk.wp.dataanswering.backend.model;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CreationTimestamp;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
-
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Data
@@ -30,15 +30,14 @@ public class UploadedFile {
     @Column(nullable = false, length = 20)
     private String processType;
     @Column(nullable = false, length = 500)
-    private String minIOKey;
+    private String minioKey;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime uploadedAt;
 
     @ManyToOne
-    @JoinColumn(name = "chat_id", nullable = false)
-    private Chat chat;
+    private Message message;
 
 }
 // CREATE TABLE uploaded_file(

@@ -94,4 +94,5 @@ networks:
 volumes:
   huggingface_cache:
   rag_storage:
-  miniio_data:
+  db_data:
+  minio_data:

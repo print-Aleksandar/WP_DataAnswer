@@ -1,16 +1,17 @@
 package mk.wp.dataanswering.backend.service;
 
-import mk.wp.dataanswering.backend.model.UploadedFile;
 import java.util.List;
+
+import mk.wp.dataanswering.backend.model.UploadedFile;
 
 public interface UploadedFileService {
 
-    UploadedFile storeFile(Long chatId, String fileName, String fileType, String minioKey);
+    UploadedFile storeFile(Long messageId, String fileName, String fileType, String processType, String minioKey);
 
-    List<UploadedFile> findByChatId(Long chatId);
+    List<UploadedFile> findByMessageId(Long messageId);
 
-    UploadedFile findById(Long id);
-
+    UploadedFile findByMinioKey(String minioKey);
+    
     void deleteFile(Long id);
     
 }

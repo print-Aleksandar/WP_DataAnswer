@@ -1,6 +1,10 @@
 package mk.wp.dataanswering.backend.model;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,16 +12,11 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.ManyToOne;
-import java.util.List;
-
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import jakarta.persistence.OneToMany;
 
 @Entity
 @Data
@@ -33,7 +32,7 @@ public class Chat {
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime uploadedAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
@@ -43,10 +42,20 @@ public class Chat {
     private Client client;
 
     @OneToMany(mappedBy="chat")
-    private List<UploadedFile> uploadedFiles;
-
-    @OneToMany(mappedBy="chat")
     private List<Message> messages;
+
+    public Chat(Client client, String chatName) {
+        this.client = client;
+        this.chatName = chatName;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public void setChatName(String chatName) {
+        this.chatName = chatName;
+    }
 }
 
 // CREATE TABLE chat(
