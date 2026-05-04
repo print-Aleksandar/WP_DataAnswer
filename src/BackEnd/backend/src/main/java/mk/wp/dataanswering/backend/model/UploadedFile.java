@@ -29,7 +29,7 @@ public class UploadedFile {
     private String fileType;
     @Column(nullable = false, length = 20)
     private String processType;
-    @Column(nullable = false, length = 500)
+    @Column(name = "minio_key",nullable = false, length = 500)
     private String minioKey;
 
     @CreationTimestamp

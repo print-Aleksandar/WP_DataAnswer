@@ -2,8 +2,6 @@ package mk.wp.dataanswering.backend.service;
 
 import java.util.List;
 
-import org.springframework.web.multipart.MultipartFile;
-
 import mk.wp.dataanswering.backend.model.Message;
 
 public interface MessageService {
@@ -12,7 +10,7 @@ public interface MessageService {
     
     List<Message> findAllByChatId(Long chatId);
 
-    Message createMessage(Long chatId, String question, List<MultipartFile> files);
+    Message createMessage(Long chatId, String question);
 
     Message updateAnswer(Long messageId, String answer);
 

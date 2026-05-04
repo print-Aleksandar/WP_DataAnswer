@@ -1,0 +1,15 @@
+<form th:action="@{/chat/{chatId}/message(chatId=${currentChat.id})}" 
+      method="post" 
+      enctype="multipart/form-data">
+    
+    <input type="file" name="files" class="form-control mb-3" 
+           accept=".pdf,.txt,.xlsx,.csv,.docx" multiple>
+
+    <div class="p-3 mb-3" style="border-radius: 15px; background-color: #f1f3f5;">
+        <input type="text" name="question" 
+               class="form-control border-0 bg-transparent"
+               placeholder="Type your question...">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Send</button>
+</form>

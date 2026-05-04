@@ -3,7 +3,6 @@ package mk.wp.dataanswering.backend.service.impl;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import lombok.AllArgsConstructor;
 import mk.wp.dataanswering.backend.model.Message;
@@ -29,7 +28,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Message createMessage(Long chatId, String question, List<MultipartFile> files) {
+    public Message createMessage(Long chatId, String question) {
         if (chatId == null || question == null) {
             throw new IllegalArgumentException();
         }

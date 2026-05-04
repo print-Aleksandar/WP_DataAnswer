@@ -13,8 +13,6 @@ public interface ChatService {
     Chat findById(Long id);
     Chat create(Long clientId, String chatName);
     void delete(Long id);
-    Chat update(Long id, String chatName, Long clientId);
-
-    public Chat addMessage(Long chatId, Long messageId);
+    Chat update(Long id, String chatName);
 
 }

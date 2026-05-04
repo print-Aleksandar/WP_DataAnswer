@@ -52,25 +52,14 @@ public class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public Chat update(Long id, String chatName, Long clientId) {
-        if (id == null || chatName == null || clientId == null) {
+    public Chat update(Long id, String chatName) {
+        if (id == null || chatName == null) {
             throw new IllegalArgumentException();
         }
 
         Chat chat = chatRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Chat with id " + id + " was not found."));
-        Client client = clientRepository.findById(clientId).orElseThrow(() -> new IllegalArgumentException("Client with id " + clientId + " was not found."));
-
         chat.setChatName(chatName);
-        chat.setClient(client);
 
-        return chatRepository.save(chat);
-    }
-
-    @Override
-    public Chat addMessage(Long chatId, Long messageId) {
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new IllegalArgumentException("Chat with id " + chatId + " was not found."));
-        Message message = messageRepository.findById(messageId).orElseThrow(() -> new IllegalArgumentException("Message with id " + messageId + " was not found."));
-        chat.getMessages().add(message);
         return chatRepository.save(chat);
     }
     
