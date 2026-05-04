@@ -141,6 +141,7 @@ async def get_tools():
                 "name": "get_file_context",
                 "description": "Returns the relevant chunks from the uploaded file of the chat based on the users question",
                 "parameters": {
+                    "type": "object",
                     "properties": {
                         'question': {
                             'type': 'string',
