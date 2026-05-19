@@ -8,6 +8,18 @@
                 <input type="text" id="username" name="username" class="form-control" placeholder="Username">
             </p>
             <p>
+                <label for="userFirstName" class="sr-only">First Name</label>
+                <input type="text" id="userFirstName" name="userFirstName" class="form-control" placeholder="First Name">
+            </p>
+            <p>
+                <label for="userLastName" class="sr-only">Last Name</label>
+                <input type="text" id="userLastName" name="userLastName" class="form-control" placeholder="Last Name">
+            </p>
+            <p>
+                <label for="userEmail" class="sr-only">Mail</label>
+                <input type="text" id="userEmail" name="userEmail" class="form-control" placeholder="Mail">
+            </p>
+            <p>
                 <label for="password" class="sr-only">Password</label>
                 <input type="password" id="password" name="password" class="form-control" placeholder="Password"
                 >
@@ -16,11 +28,6 @@
                 <label for="repeatedPassword" class="sr-only">Repeat Password</label>
                 <input type="password" id="repeatedPassword" name="repeatPassword" class="form-control"
                        placeholder="Repeat Password">
-            </p>
-            <p>
-                <label for="mail" class="sr-only">Email</label>
-                <input type="email" id="mail" class="form-control" name="mail" placeholder="Email"
-                       autofocus="">
             </p>
             
             <th:block th:if="${error != null}">
