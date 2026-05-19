@@ -28,6 +28,19 @@ import mk.wp.dataanswering.backend.model.enums.Role;
 @NoArgsConstructor
 public class RegisteredUser extends User implements UserDetails {
 
+
+    public RegisteredUser(String username,String userFirstName, String userEmail, String userLastName,String password, Role role) {
+        this.username = username;
+        this.userFirstName = userFirstName;
+        this.userEmail = userEmail;
+        this.userLastName = userLastName;
+        this.password = password;
+        this.role = role;
+    }
+
+    @Column(nullable = false, length = 50)
+    private String username;
+
     @Column(nullable = false, length = 50)
     private String userFirstName;
 
@@ -90,7 +103,7 @@ public class RegisteredUser extends User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userFirstName;
+        return username;
     }
 
 }

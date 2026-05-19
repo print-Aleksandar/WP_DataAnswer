@@ -1,7 +1,7 @@
 package mk.wp.dataanswering.backend.service;
 
-import mk.wp.dataanswering.backend.model.Client;
+import mk.wp.dataanswering.backend.model.RegisteredUser;
 
 public interface AuthService {
-    Client login(String username, String password);
+    RegisteredUser login(String username, String password);
 }
