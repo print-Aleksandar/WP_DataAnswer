@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from vllmUtils import get_response, PromptRequest, PromptResponse
+from vllmUtils import get_response, PromptRequest, PromptResponse, init_vllm
 from tools import TOOLS, init_tools
 
 app = FastAPI()
@@ -21,6 +21,7 @@ app.add_middleware(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_tools()
+    await init_vllm()
     yield
 
     # cleanup
