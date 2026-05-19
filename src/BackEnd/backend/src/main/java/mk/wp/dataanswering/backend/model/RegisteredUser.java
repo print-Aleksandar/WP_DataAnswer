@@ -1,6 +1,5 @@
 package mk.wp.dataanswering.backend.model;
 
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,54 +10,48 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import mk.wp.dataanswering.backend.model.enums.Role;
 
+
 @Entity
 @Data
+@DiscriminatorValue("REGISTERED")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Client implements UserDetails {
+public class RegisteredUser extends User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy=GenerationType.IDENTITY)
-    private Long id;
+    @Column(nullable = false, length = 50)
+    private String userFirstName;
 
-    @Column(unique = true, nullable = false, length = 100)
-    private String username;
+    @Column(unique = true, nullable = false, length = 150)
+    private String userEmail;
 
-    @Column(unique = true, nullable = false, length = 255)
-    private String email;
+    @Column(nullable = false, length = 100)
+    private String userLastName;
 
-    @Column(nullable = false, length = 255)
+    @Column(nullable = false, length = 200)
     private String password;
-    
+
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime registeredTs;
 
-    @OneToMany(mappedBy="client")
-    private List<Chat> chats;
+    @OneToMany(mappedBy="registeredUser")
+    private List<Subscription> subscriptions;
 
-    public Client(String username, String password, String email, Role role) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.role = role;
-    }
+    @OneToMany(mappedBy = "registeredUser")
+    private List<SavedChat> chats;
 
     @Enumerated(EnumType.STRING)
     private Role role;
-
 
     private boolean isAccountNonExpired = true;
     private boolean isAccountNonLocked = true;
@@ -90,13 +83,14 @@ public class Client implements UserDetails {
         return isEnabled;
     }
 
-    
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return userFirstName;
+    }
+
 }
-// CREATE TABLE client(
-//     id Serial PRIMARY KEY,
-//     username VARCHAR(100) UNIQUE NOT NULL,
-//     email VARCHAR(255) UNIQUE NOT NULL,
-//     password VARCHAR(255) NOT NULL,
-//     created_at TIMESTAMP DEFAULT now(),
-//     CONSTRAINT email_format CHECK (email LIKE '%@%.%')
-// );

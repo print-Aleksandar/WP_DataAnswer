@@ -5,13 +5,14 @@ import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,22 +22,22 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Chat {
+public class Prompt {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    @Column(name = "chat_id")
+    @Column(name="prompt_id")
     private Long id;
 
-    @Column(nullable=false, length=255)
-    private String chatName;
-
     @CreationTimestamp
-    @Column(updatable=false)
-    private LocalDateTime startTs;
+    @Column(updatable = false)
+    private LocalDateTime promptTs;
 
-    @OneToMany(mappedBy="chat")
-    private List<UploadedFile> files;
+    @ManyToOne
+    @JoinColumn(name = "chat_id", nullable = false)
+    private Chat chat;
 
+    @OneToMany(mappedBy = "prompt", cascade = CascadeType.ALL)
+    private List<Request> requests;
+    
 }
