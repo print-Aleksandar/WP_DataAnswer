@@ -59,13 +59,13 @@ def load_index(user_path : Path):
     return index, existing_chunks
 
 
-def get_user_path(user_id : int):
-    return Path(f"storage/{user_id}")
+def get_user_path(user_id : int, chat_id: int):
+    return Path(f"storage/{user_id}/{chat_id}")
 
 #===============================================================================================
 
 @app.post("/upload")
-async def upload_pdf(user_id: int, file: UploadFile = File(...)):
+async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
 
     #if user_id is null throw error
     if user_id is None:
@@ -105,7 +105,7 @@ async def upload_pdf(user_id: int, file: UploadFile = File(...)):
         raise HTTPException(status_code=422, detail=str(e))
 
     def index_and_save():
-        user_path = get_user_path(user_id)
+        user_path = get_user_path(user_id, chat_id)
         user_path.mkdir(parents=True, exist_ok=True)
 
         index, existing_chunks = load_index(user_path)
@@ -156,7 +156,7 @@ async def get_tools():
 
 @app.post('/chunks')
 async def get_chunks(request: AskRequest):
-    user_path = get_user_path(request.user_id)
+    user_path = get_user_path(request.user_id, request.chat_id)
 
     # Load index
     index, existing_chunks = await run_in_threadpool(load_index, user_path)
