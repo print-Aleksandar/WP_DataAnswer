@@ -24,7 +24,7 @@ public class Subscription {
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name="subscription_id")
-    private Long Id;
+    private Long id;
     
     @Column(nullable = false)
     private boolean isActive;
@@ -43,5 +43,22 @@ public class Subscription {
     @ManyToOne
     @JoinColumn(name="plan_id", nullable=false)
     private Plan plan;
+
+    public void setRegisteredUser(RegisteredUser savedAdmin) {
+        registeredUser = savedAdmin;
+    }
+
+    public void setPlan(Plan pro) {
+        plan = pro;
+    }
+
+    public void setActive(boolean b) {
+        isActive = b;
+    }
+
+    public void setEndTs(LocalDateTime plusYears) {
+        endTs = plusYears;
+    }
+
 
 }

@@ -31,11 +31,11 @@ public class UploadedFile {
     @Column(name = "minio_key",nullable = false, length = 500)
     private String minioKey;
 
-    @Column(name = "file_url", nullable = false, length = 500)
+    @Column(name = "file_url", nullable = true, length = 500)
     private String fileUrl;
 
     @ManyToOne
-    @JoinColumn(name="chat_id", nullable=false)
+    @JoinColumn(name="chat_id", nullable=true)
     private Chat chat;
 
 }

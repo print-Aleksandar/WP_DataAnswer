@@ -1,0 +1,32 @@
+<div class="plans-page">
+    <h2>Your Current Plan</h2>
+
+    <div class="active-plan">
+        <p>Plan: <strong th:text="${activeSub.plan.planName}"></strong></p>
+        <p>Cost: <strong th:text="${activeSub.plan.planCost} + ' $/month'"></strong></p>
+        <p>Chat limit: <strong th:text="${activeSub.plan.dayChatLimit} + ' per day'"></strong></p>
+        <p>Prompt limit: <strong th:text="${activeSub.plan.dayPromptLimit} + ' per day'"></strong></p>
+        <p>Expires: <strong th:text="${#temporals.format(activeSub.endTs, 'dd MMM yyyy')}"></strong></p>
+
+        <form th:action="@{/plans/cancel/{id}(id=${activeSub.id})}" method="post">
+            <button type="submit">Cancel Subscription</button>
+        </form>
+    </div>
+
+    <hr>
+    <h2>Available Plans</h2>
+
+    <div th:each="plan : ${plans}" class="plan-card">
+        <h3 th:text="${plan.planName}"></h3>
+        <p th:text="${plan.planCost == 0 ? 'Free' : plan.planCost + ' $/month'}"></p>
+        <p th:text="${plan.dayChatLimit} + ' chats/day'"></p>
+        <p th:text="${plan.dayPromptLimit} + ' prompts/day'"></p>
+
+        <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}" method="post">
+            <button type="submit"
+                    th:text="${ activeSub.plan.id == plan.id} ? 'Current Plan' : 'Subscribe'"
+                    th:disabled="${activeSub.plan.id == plan.id}">
+            </button>
+        </form>
+    </div>
+</div>

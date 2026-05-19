@@ -14,6 +14,10 @@
             <a href="/login" class="btn btn-light text-dark">Login</a>
         </div>
 
+        <div sec:authorize="isAuthenticated()" class="d-flex gap-3">
+            <a href="/plans" class="btn btn-outline-light me-2">Your Plan</a>
+        </div>
+
         <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-3">
             <span class="text-white fw-semibold">
                 Welcome, <span sec:authentication="name"></span>
