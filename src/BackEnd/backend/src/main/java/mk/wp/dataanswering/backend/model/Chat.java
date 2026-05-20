@@ -3,16 +3,10 @@ package mk.wp.dataanswering.backend.model;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import jakarta.persistence.*;
+import mk.wp.dataanswering.backend.model.enums.ChatType;
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,21 +16,37 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Chat {
+public class Chat {
+
+    public Chat(User user, ChatType chatType) {
+        this.user = user;
+        this.chatType = chatType;
+    }
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
     @Column(name = "chat_id")
     private Long id;
 
-    @Column(nullable=false, length=255)
+    @Column(nullable=true, length=255)
     private String chatName;
 
     @CreationTimestamp
     @Column(updatable=false)
     private LocalDateTime startTs;
 
-    @OneToMany(mappedBy="chat")
-    private List<UploadedFile> files;
+    @CreationTimestamp
+    @Column(updatable=false)
+    private LocalDateTime lastModifiedTs;
 
+    @OneToMany(mappedBy="chat")
+    private List<UploadedFile> files; // EDEN E!
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "chat_type")
+    @Enumerated(EnumType.STRING)
+    private ChatType chatType;
 }

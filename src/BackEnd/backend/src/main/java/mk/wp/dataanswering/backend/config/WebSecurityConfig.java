@@ -32,7 +32,7 @@ public class WebSecurityConfig {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/home", "/register", "/login").permitAll()
+                        .requestMatchers("/", "/home", "/register", "/login", "home/start-chat", "start-chat").permitAll() // alek: ne sakav da brisham home ili / treba da se dog
                         // .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

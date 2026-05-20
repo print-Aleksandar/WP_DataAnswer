@@ -1,20 +1,21 @@
 package mk.wp.dataanswering.backend.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @DiscriminatorValue("UNREGISTERED")
 @AllArgsConstructor
 @NoArgsConstructor
-public class UnRegisteredUser extends User {
-    
-    @Column(name = "user_tmp_id",nullable = false, unique = true, length = 100)    
-    private String UserTmpId;
+public class TmpUser extends User {
+    @Column(name = "session_id", nullable = false, unique = true)
+    private String sessionId;
 
+    @OneToOne(mappedBy = "user")
+    private Chat chat;
 }
