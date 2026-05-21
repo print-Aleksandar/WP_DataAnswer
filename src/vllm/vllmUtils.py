@@ -11,10 +11,10 @@ from openai import OpenAI
 
 
 VLLM_URL = os.getenv("VLLM_URL", "http://localhost:8000") + '/v1'
-MODEL = os.getenv("MODEL_NAME")
+MODEL = ''
 
 
-client = OpenAI(base_url=VLLM_URL, api_key="")
+client = OpenAI(base_url=VLLM_URL, api_key="DUMMY_KEY")
 
 class PromptRequest(BaseModel):
     prompt: str
@@ -24,6 +24,15 @@ class PromptRequest(BaseModel):
 class PromptResponse(BaseModel):
     model: str
     response: str
+
+async def init_vllm():
+    global MODEL, client
+
+    model_list = client.models.list()
+    MODEL = model_list.data[0].id
+
+    print('[init_vllm]: fetched model', MODEL)
+
 
 
 async def get_response(req: PromptRequest) -> str:

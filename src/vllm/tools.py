@@ -52,6 +52,7 @@ def run_tool(url, params:dict):
         payload = params.copy()
 
         payload['user_id'] = 1 # TODO Temp for testing - remove!
+        payload['chat_id'] = 1 # TODO Temp for testing - remove!
         response = httpx.post(url, json=payload)
         response.raise_for_status()
         return response.text

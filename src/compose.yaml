@@ -6,7 +6,7 @@ services:
       context: vllm
       dockerfile: Dockerfile.vllm-cpu
     environment:
-      - MODEL_NAME=${MODEL_NAME}
+      - MODEL_NAME=Qwen/Qwen2.5-0.5B-Instruct
       - VLLM_CPU_OMP_THREADS_BIND=0-7
       - VLLM_CPU_KVCACHE_SPACE=2
       - HF_TOKEN=${HF_TOKEN}
@@ -30,7 +30,6 @@ services:
     environment:
       - VLLM_URL=http://src-vllm-1:8000
       - TOOL_SERVICE_URLS=http://src-rag-service-1:7000,http://src-aggregate-service-1:7100
-      - MODEL_NAME=${MODEL_NAME}
     ports:
       - "9999:9999"
     networks:
