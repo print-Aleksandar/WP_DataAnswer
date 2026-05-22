@@ -102,6 +102,26 @@ services:
     networks:
       - services_net
 
+  spring-service:
+    build:
+      context: BackEnd/backend
+    environment:
+      - DB_HOST=src-db:5433
+      - DB_NAME=wp_dataanswer
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - MINIO_URL=http://src-minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - MINIO_BUCKET=wp-dataanswer
+    ports:
+      - "9090:9090"
+    networks:
+      - services_net
+    depends_on:
+      - db
+      - llm-service
+
 networks:
   services_net:
     driver: bridge
