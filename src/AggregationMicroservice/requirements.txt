@@ -5,3 +5,8 @@ numpy
 pydantic
 pytest
 httpx
+python-multipart
+openpyxl
+odfpy
+xlrd
+psycopg2-binary
