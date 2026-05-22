@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -20,7 +21,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import mk.wp.dataanswering.backend.model.enums.Role;
 
-
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
 @DiscriminatorValue("REGISTERED")
@@ -60,16 +61,16 @@ public class RegisteredUser extends User implements UserDetails {
     @OneToMany(mappedBy="registeredUser")
     private List<Subscription> subscriptions;
 
-    @OneToMany(mappedBy = "registeredUser")
-    private List<SavedChat> chats;
+    @OneToMany(mappedBy = "user")
+    private List<Chat> chats;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private boolean isAccountNonExpired = true;
-    private boolean isAccountNonLocked = true;
-    private boolean isCredentialsNonExpired = true;
-    private boolean isEnabled = true;
+    private boolean accountNonExpired = true;
+    private boolean accountNonLocked = true;
+    private boolean credentialsNonExpired = true;
+    private boolean enabled = true;
 
     
 
@@ -80,22 +81,22 @@ public class RegisteredUser extends User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return isAccountNonExpired;
+        return accountNonExpired;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return isAccountNonLocked;
+        return accountNonLocked;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return isCredentialsNonExpired;
+        return credentialsNonExpired;
     }
 
     @Override
     public boolean isEnabled() {
-        return isEnabled;
+        return enabled;
     }
 
     @Override

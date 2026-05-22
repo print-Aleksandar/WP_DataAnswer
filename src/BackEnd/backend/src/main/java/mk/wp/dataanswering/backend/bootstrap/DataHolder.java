@@ -43,7 +43,13 @@ public class DataHolder {
             pro.setDayChatLimit(50);
             pro.setDayPromptLimit(200);
 
-            planRepository.saveAll(List.of(free, pro));
+            Plan tmp = new Plan();
+            tmp.setPlanName("TemporaryChat");
+            tmp.setPlanCost(0.0);
+            tmp.setDayChatLimit(1);
+            tmp.setDayPromptLimit(5);
+
+            planRepository.saveAll(List.of(free, pro, tmp));
         }
 
         if (registeredUserRepository.findAll().isEmpty()) {
