@@ -165,6 +165,7 @@ async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
         # embedding chunks
         embeddings = model.encode(chunks, show_progress_bar=False, batch_size=32)
         embeddings = np.array(embeddings).astype("float32")
+        faiss.normalize_L2(embeddings)
 
         return chunks, embeddings
 
@@ -180,7 +181,8 @@ async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
         index, existing_chunks = load_index(user_path)
 
         if index is None:
-            index = faiss.IndexFlatL2(embeddings.shape[1])
+            # index = faiss.IndexFlatL2(embeddings.shape[1])
+            index = faiss.IndexFlatIP(embeddings.shape[1])
 
         index.add(embeddings)
         existing_chunks.extend(chunks)
@@ -239,7 +241,9 @@ async def get_chunks(request: AskRequest):
     # Embed the question (blocking → threadpool)
     def embed_question():
         emb_q = model.encode([request.question], show_progress_bar=False)
-        return np.array(emb_q, dtype="float32")
+        np.array(emb_q, dtype="float32")
+        faiss.normalize_L2(emb_q)
+        return emb_q
 
     embedded_question = await run_in_threadpool(embed_question)
 
@@ -250,7 +254,7 @@ async def get_chunks(request: AskRequest):
         return [
             existing_chunks[i]
             for i, d in zip(indices[0], distances[0])
-            if 0 <= i < len(existing_chunks) and d > 0.5
+            if 0 <= i < len(existing_chunks) and d > 0.3
         ]
 
     retrieved_chunks = await run_in_threadpool(search)

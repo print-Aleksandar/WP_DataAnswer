@@ -15,12 +15,24 @@
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
+
+    <style>
+        body {
+                display: flex;
+                flex-direction: column;
+                height: 100vh;
+        }
+
+        .main {
+                flex-grow: 100vh;
+        }
+    </style>    
 </head>
 <body>
 
 <header th:replace="fragments/header"></header>
 
-<section th:replace="${bodyContent}"></section>
+<section class="main" th:replace="${bodyContent}"></section>
 
 <footer th:replace="fragments/footer"></footer>
 
