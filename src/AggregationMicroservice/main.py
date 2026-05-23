@@ -1,6 +1,8 @@
 import json
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
+from contextlib import asynccontextmanager
+from storage import DB_Storage
 from pydantic import BaseModel
 from typing import List, Any, Optional, Tuple
 from static import AGG_MAP, BOOLEAN_TRANSFORMS, NUMERIC_PREDICATES, NUMERIC_TRANSFORMS, TEXT_PREDICATES, TEXT_TRANSFORMS, VALUE_NEEDED_TRANSFORMS
@@ -10,7 +12,7 @@ app = FastAPI()
 
 class AggregationRequest(BaseModel):
     user_id: int
-    json_data: List[dict]
+    chat_id: int
     aggregate_function: str
     target_column: str
     filters: Optional[List[Tuple[str, str, Any]]] = None
@@ -24,11 +26,20 @@ class ColumnsRequest(BaseModel):
     user_id: int
     json_data: List[dict]
 
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     init_storage()
+#     yield
+#     DB.close()
+
+
 @app.post("/aggregate")
 async def run_aggregator(request: AggregationRequest):
     try:
+        db = DB_Storage()
+
         agg = Aggregator(
-            json_data=request.json_data,
+            json_data=db.get_data(request.user_id, request.chat_id),
             aggregate_function=request.aggregate_function,
             target_column=request.target_column,
             filters=request.filters,
@@ -38,6 +49,8 @@ async def run_aggregator(request: AggregationRequest):
             transforms=request.transforms,
             exclude_cols=request.exclude_cols
         )
+
+        db.close()
 
         result = agg.get_result()
         return result
@@ -103,34 +116,39 @@ def get_tools():
                             'description': f"Columns to exclude from the result set before aggregation is applied."
                         },
                         # TODO target_criteria_predicate, target_criteria_value
-                        'json_data': {
-                            'type': 'array',
-                            'items': { 'type': 'object', 'minItems': 1},
-                            'description': 'A list of objects with the structure { column_name: value, ... }. This is the the file data in json form.'
-                        },
                     },
-                    "required": ["aggregate_function", "target_column", "json_data"]
+                    "required": ["aggregate_function", "target_column"]
                 },
                 "endpoint": "/aggregate"
             },
-            {
-                "name": "get_columns_from_file",
-                "description": "Returns an array of [column_names, dtypes] from a tablular data file.",
-                "parameters": {
-                    'type': "object",
-                    'properties': {
-                        'json_data': {
-                            'type': 'array',
-                            'items': { 'type': 'object', 'minItems': 1},
-                            'description': 'A list of objects with the structure { column_name: value, ... }. This is the the file data in json form.'
-                        },
-                    },
-                    'required': ["json_data"]
-                },
-                "endpoint": "/columns"
-            },
+            # {
+            #     "name": "get_columns_from_file",
+            #     "description": "Returns an array of [column_names, dtypes] from a tablular data file.",
+            #     "parameters": {
+            #         'type': "object",
+            #         'properties': {
+            #             'json_data': {
+            #                 'type': 'array',
+            #                 'items': { 'type': 'object', 'minItems': 1},
+            #                 'description': 'A list of objects with the structure { column_name: value, ... }. This is the the file data in json form.'
+            #             },
+            #         },
+            #         'required': ["json_data"]
+            #     },
+            #     "endpoint": "/columns"
+            # },
            ]
 
 @app.get("/health")
 async def health():
     return {"status": "ok"}
+
+from file_utils import handle_upload, get_supported_filetypes
+
+@app.get('/upload')
+async def supported_filetypes():
+    return get_supported_filetypes()
+
+@app.post('/upload')
+async def upload_file(user_id:int, chat_id:int, file: UploadFile = File(...)):
+    return await handle_upload(user_id, chat_id, file)
