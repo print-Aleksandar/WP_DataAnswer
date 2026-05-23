@@ -10,6 +10,30 @@ import numpy as np
 import pickle
 from fastapi.concurrency import run_in_threadpool
 from Requests.ask_request import AskRequest
+import os
+import io
+import tempfile
+from minio import Minio
+
+def init_minio():
+    # get credentials
+    minio_url = os.getenv("MINIO_URL")
+    access_key = os.getenv("MINIO_ACCESS_KEY")
+    secret_key = os.getenv("MINIO_SECRET_KEY")
+    bucket_name = os.getenv("MINIO_BUCKET")
+    
+    if not all([minio_url, access_key, secret_key, bucket_name]):
+        raise ValueError("minio credentails not fount!")
+    
+    # parse url
+    host = minio_url.replace("https://", "").replace("http://", "")
+    
+    return Minio(
+        host,
+        access_key=access_key,
+        secret_key=secret_key,
+        secure=minio_url.startswith("https")
+    ), bucket_name
 
 app = FastAPI()
 
@@ -22,6 +46,7 @@ app.add_middleware(
 )
 
 model = SentenceTransformer("all-MiniLM-L6-v2")
+MINIO_CLIENT, MINIO_BUCKET = init_minio()
 
 _user_locks: dict[int, asyncio.Lock] = {}
 
@@ -40,22 +65,66 @@ def get_user_lock(user_id: int) -> asyncio.Lock:
     return _user_locks[user_id]
 
 
-def save_index( index: faiss.Index, chunks, path: Path):
-    faiss.write_index(index, str(path / "index.faiss"))
-
-    with open(path / "chunks.pkl", "wb") as f:
-        pickle.dump(chunks, f)
+def save_index(index: faiss.Index, chunks, path: Path):
+    # Create object paths
+    index_object_name = str("rag" / path / "index.faiss")
+    chunks_object_name = str("rag" / path / "chunks.pkl")
+    
+    # Save index - write to temp file, then upload to MinIO
+    with tempfile.NamedTemporaryFile(delete=False) as tmp_index:
+        faiss.write_index(index, tmp_index.name)
+        with open(tmp_index.name, "rb") as f:
+            MINIO_CLIENT.put_object(
+                MINIO_BUCKET,
+                index_object_name,
+                f,
+                length=os.path.getsize(tmp_index.name)
+            )
+        os.unlink(tmp_index.name)
+    
+    # Save chunks - pickle to BytesIO, then upload to MinIO
+    chunks_buffer = io.BytesIO()
+    pickle.dump(chunks, chunks_buffer)
+    chunks_buffer.seek(0)
+    
+    MINIO_CLIENT.put_object(
+        MINIO_BUCKET,
+        chunks_object_name,
+        chunks_buffer,
+        length=len(chunks_buffer.getvalue())
+    )
 
 def load_index(user_path : Path):
-    index_path = user_path / "index.faiss"
-    chunks_path = user_path / "chunks.pkl"
+    # Create object paths
+    index_object_name = f"rag/{user_path}/index.faiss"
+    chunks_object_name = f"rag/{user_path}/chunks.pkl"
+    
     existing_chunks = []
     index = None
-    if index_path.exists() and chunks_path.exists():
-        index = faiss.read_index(str(index_path))
-        with open(chunks_path, "rb") as f:
-            existing_chunks = pickle.load(f)
-
+    
+    try:
+        # Load index from MinIO
+        response = MINIO_CLIENT.get_object(MINIO_BUCKET, index_object_name)
+        with tempfile.NamedTemporaryFile(delete=False) as tmp_index:
+            for data in response.stream(1024 * 1024):
+                tmp_index.write(data)
+            tmp_index_path = tmp_index.name
+        
+        index = faiss.read_index(tmp_index_path)
+        os.unlink(tmp_index_path)
+        
+        # Load chunks from MinIO
+        response = MINIO_CLIENT.get_object(MINIO_BUCKET, chunks_object_name)
+        chunks_buffer = io.BytesIO()
+        for data in response.stream(1024 * 1024):
+            chunks_buffer.write(data)
+        chunks_buffer.seek(0)
+        existing_chunks = pickle.load(chunks_buffer)
+        
+    except Exception:
+        # If objects don't exist in MinIO, return empty values
+        pass
+    
     return index, existing_chunks
 
 
