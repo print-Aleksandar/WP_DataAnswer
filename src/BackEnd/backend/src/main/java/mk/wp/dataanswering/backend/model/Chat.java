@@ -10,16 +10,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Inheritance(strategy = InheritanceType.JOINED)
 public class Chat {
 
-    public Chat(User user, ChatType chatType) {
-        this.user = user;
+    public Chat(ChatType chatType) {
         this.chatType = chatType;
     }
 
@@ -35,15 +34,14 @@ public class Chat {
     @Column(updatable=false)
     private LocalDateTime startTs;
 
-    @CreationTimestamp
-    @Column(updatable=false)
+    @UpdateTimestamp
     private LocalDateTime lastModifiedTs;
 
-    @OneToMany(mappedBy="chat")
-    private List<UploadedFile> files; // EDEN E!
+    @OneToOne(mappedBy="chat")
+    private UploadedFile file;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = true)
     private User user;
 
     @Column(name = "chat_type")

@@ -1,11 +1,13 @@
 package mk.wp.dataanswering.backend.config;
 
-import jakarta.servlet.http.HttpServletRequest;
-import mk.wp.dataanswering.backend.model.RegisteredUser;
+import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+import jakarta.servlet.http.HttpServletRequest;
+import mk.wp.dataanswering.backend.model.RegisteredUser;
 
 @Component
 public class AuthUtils {
@@ -21,8 +23,8 @@ public class AuthUtils {
         return auth != null && !(auth instanceof AnonymousAuthenticationToken);
     }
 
-    public RegisteredUser getCurrentUser() {
-        if (!isLoggedIn()) return null;
+    public RegisteredUser getCurrentRegisteredUser() {
+        if (!isLoggedIn()) throw new InvalidUserException();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return (RegisteredUser) auth.getPrincipal();
     }

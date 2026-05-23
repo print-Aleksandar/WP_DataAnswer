@@ -1,13 +1,15 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.model.exceptions.NoChatServiceFoundException;
 import mk.wp.dataanswering.backend.service.ChatService;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Service
+@Component
 public class ChatServiceRegistry {
+    // Strategy Design Pattern for more context
 
     private final List<ChatService<? extends User>> chatServices;
 
@@ -15,10 +17,10 @@ public class ChatServiceRegistry {
         this.chatServices = chatServices;
     }
 
-    public ChatService<? extends User> getCorrectChatService(User u) {
+    public ChatService<? extends User> getCorrectChatService() {
         return chatServices.stream()
-                .filter(s -> s.supports(u))
+                .filter(s -> s.supports())
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new NoChatServiceFoundException());
     }
 }
