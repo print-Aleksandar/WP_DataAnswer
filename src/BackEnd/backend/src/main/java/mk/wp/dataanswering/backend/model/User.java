@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Data
 @Table(name="users")
-@Inheritance(strategy=InheritanceType.JOINED) //pomaga da vidime od koj tim e sekoj user
+@Inheritance(strategy=InheritanceType.JOINED)
 @AllArgsConstructor
 @NoArgsConstructor
 public abstract class User {

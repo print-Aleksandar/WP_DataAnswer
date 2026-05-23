@@ -16,6 +16,7 @@ public class TmpUser extends User {
     @Column(name = "session_id", nullable = false, unique = true)
     private String sessionId;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "chat_id", nullable = true)
     private Chat chat;
 }

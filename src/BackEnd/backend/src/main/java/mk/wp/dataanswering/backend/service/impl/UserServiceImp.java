@@ -1,9 +1,9 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import mk.wp.dataanswering.backend.config.AuthUtils;
-import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.repository.TmpUserRepository;
+import mk.wp.dataanswering.backend.service.TmpUserService;
 import mk.wp.dataanswering.backend.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -14,32 +14,22 @@ public class UserServiceImp implements UserService {
 
     private final AuthUtils authUtils;
     private final TmpUserRepository tmpUserRepository;
+    private final TmpUserService tmpUserService;
 
-    public UserServiceImp(AuthUtils authUtils, TmpUserRepository tmpUserRepository) {
+    public UserServiceImp(AuthUtils authUtils,
+                          TmpUserRepository tmpUserRepository,
+                          TmpUserService tmpUserService) {
         this.authUtils = authUtils;
         this.tmpUserRepository = tmpUserRepository;
-    }
-
-    @Override
-    public TmpUser createTmpUser(String sessionId) {
-        TmpUser tmpUser = new TmpUser();
-        tmpUser.setSessionId(sessionId);
-        tmpUserRepository.save(tmpUser);
-        return tmpUser;
-    }
-
-    @Override
-    public TmpUser getTmpUserBySession(String sessionId) {
-        Optional<TmpUser> found = tmpUserRepository.findBySessionId(sessionId);
-        return found.orElseGet(() -> createTmpUser(sessionId));
+        this.tmpUserService = tmpUserService;
     }
 
     @Override
     public User getCurrentUser() {
         if (authUtils.isLoggedIn()) {
-            return authUtils.getCurrentUser();
+            return authUtils.getCurrentRegisteredUser();
         } else {
-            return getTmpUserBySession(authUtils.getTempSessionId());
+            return tmpUserService.getTmpUserBySession(authUtils.getTempSessionId());
         }
     }
 }

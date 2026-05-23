@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import lombok.EqualsAndHashCode;
+import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -67,12 +68,17 @@ public class RegisteredUser extends User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    @ColumnDefault("true")
     private boolean accountNonExpired = true;
-    private boolean accountNonLocked = true;
-    private boolean credentialsNonExpired = true;
-    private boolean enabled = true;
 
-    
+    @ColumnDefault("true")
+    private boolean accountNonLocked = true;
+
+    @ColumnDefault("true")
+    private boolean credentialsNonExpired = true;
+
+    @ColumnDefault("true")
+    private boolean enabled = true;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
