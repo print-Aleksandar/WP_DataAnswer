@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Table(name="uploaded_files")
 @AllArgsConstructor
 @NoArgsConstructor
 public class UploadedFile {
@@ -31,5 +32,4 @@ public class UploadedFile {
     @OneToOne
     @JoinColumn(name="chat_id", nullable=true)
     private Chat chat;
-
 }

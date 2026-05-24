@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import jakarta.persistence.*;
-import mk.wp.dataanswering.backend.model.enums.ChatType;
 import org.hibernate.annotations.CreationTimestamp;
 
 import lombok.AllArgsConstructor;
@@ -14,13 +13,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Data
+@Table(name="chats")
+@Inheritance(strategy=InheritanceType.JOINED)
 @AllArgsConstructor
 @NoArgsConstructor
-public class Chat {
-
-    public Chat(ChatType chatType) {
-        this.chatType = chatType;
-    }
+public abstract class Chat {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -39,12 +36,4 @@ public class Chat {
 
     @OneToOne(mappedBy="chat")
     private UploadedFile file;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = true)
-    private User user;
-
-    @Column(name = "chat_type")
-    @Enumerated(EnumType.STRING)
-    private ChatType chatType;
 }

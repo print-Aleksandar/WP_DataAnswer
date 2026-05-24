@@ -15,8 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query(value = """
         DELETE FROM users 
-        WHERE user_id NOT IN (SELECT user_id FROM registered_user)
-        AND user_id NOT IN (SELECT user_id FROM tmp_user)
+        WHERE user_id NOT IN (SELECT user_id FROM registered_users)
+        AND user_id NOT IN (SELECT user_id FROM tmp_users)
         """, nativeQuery = true)
     void deleteOrphanedUsers();
 }

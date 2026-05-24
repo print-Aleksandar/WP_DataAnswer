@@ -67,5 +67,4 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         return subscriptionRepository.save(subscription);
     }
-    
 }

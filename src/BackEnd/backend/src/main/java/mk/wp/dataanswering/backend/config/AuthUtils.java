@@ -1,5 +1,6 @@
 package mk.wp.dataanswering.backend.config;
 
+import jakarta.servlet.http.HttpSession;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,7 +30,7 @@ public class AuthUtils {
         return (RegisteredUser) auth.getPrincipal();
     }
 
-    public String getTempSessionId() {
-        return request.getSession().getId();
+    public HttpSession getCurrentSession() {
+        return request.getSession();
     }
 }
