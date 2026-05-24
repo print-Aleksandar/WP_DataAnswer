@@ -1,39 +1,13 @@
-import asyncio
 import faiss
-import fitz
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer
-from pathlib import Path
 import numpy as np
-import pickle
 from fastapi.concurrency import run_in_threadpool
+from Requests.upload_request import UploadRequest
 from Requests.ask_request import AskRequest
-import os
-import io
-import tempfile
-from minio import Minio
-
-def init_minio():
-    # get credentials
-    minio_url = os.getenv("MINIO_URL")
-    access_key = os.getenv("MINIO_ACCESS_KEY")
-    secret_key = os.getenv("MINIO_SECRET_KEY")
-    bucket_name = os.getenv("MINIO_BUCKET")
-    
-    if not all([minio_url, access_key, secret_key, bucket_name]):
-        raise ValueError("minio credentails not fount!")
-    
-    # parse url
-    host = minio_url.replace("https://", "").replace("http://", "")
-    
-    return Minio(
-        host,
-        access_key=access_key,
-        secret_key=secret_key,
-        secure=minio_url.startswith("https")
-    ), bucket_name
+from file_utils import get_supported_types, parse_file
+from index_utils import load_index, save_index, get_user_lock, get_user_path, MODEL
 
 app = FastAPI()
 
@@ -45,114 +19,29 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-model = SentenceTransformer("all-MiniLM-L6-v2")
-MINIO_CLIENT, MINIO_BUCKET = init_minio()
-
-_user_locks: dict[int, asyncio.Lock] = {}
-
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
 @app.get("/health")
 async def health():
     return {"status": "ok"}
 
-#=====================================================================================
-def get_user_lock(user_id: int) -> asyncio.Lock:
-    if user_id not in _user_locks:
-        _user_locks[user_id] = asyncio.Lock()
-    return _user_locks[user_id]
-
-
-def save_index(index: faiss.Index, chunks, path: Path):
-    # Create object paths
-    index_object_name = str("rag" / path / "index.faiss")
-    chunks_object_name = str("rag" / path / "chunks.pkl")
-    
-    # Save index - write to temp file, then upload to MinIO
-    with tempfile.NamedTemporaryFile(delete=False) as tmp_index:
-        faiss.write_index(index, tmp_index.name)
-        with open(tmp_index.name, "rb") as f:
-            MINIO_CLIENT.put_object(
-                MINIO_BUCKET,
-                index_object_name,
-                f,
-                length=os.path.getsize(tmp_index.name)
-            )
-        os.unlink(tmp_index.name)
-    
-    # Save chunks - pickle to BytesIO, then upload to MinIO
-    chunks_buffer = io.BytesIO()
-    pickle.dump(chunks, chunks_buffer)
-    chunks_buffer.seek(0)
-    
-    MINIO_CLIENT.put_object(
-        MINIO_BUCKET,
-        chunks_object_name,
-        chunks_buffer,
-        length=len(chunks_buffer.getvalue())
-    )
-
-def load_index(user_path : Path):
-    # Create object paths
-    index_object_name = f"rag/{user_path}/index.faiss"
-    chunks_object_name = f"rag/{user_path}/chunks.pkl"
-    
-    existing_chunks = []
-    index = None
-    
-    try:
-        # Load index from MinIO
-        response = MINIO_CLIENT.get_object(MINIO_BUCKET, index_object_name)
-        with tempfile.NamedTemporaryFile(delete=False) as tmp_index:
-            for data in response.stream(1024 * 1024):
-                tmp_index.write(data)
-            tmp_index_path = tmp_index.name
-        
-        index = faiss.read_index(tmp_index_path)
-        os.unlink(tmp_index_path)
-        
-        # Load chunks from MinIO
-        response = MINIO_CLIENT.get_object(MINIO_BUCKET, chunks_object_name)
-        chunks_buffer = io.BytesIO()
-        for data in response.stream(1024 * 1024):
-            chunks_buffer.write(data)
-        chunks_buffer.seek(0)
-        existing_chunks = pickle.load(chunks_buffer)
-        
-    except Exception:
-        # If objects don't exist in MinIO, return empty values
-        pass
-    
-    return index, existing_chunks
-
-
-def get_user_path(user_id : int, chat_id: int):
-    return Path(f"storage/{user_id}/{chat_id}")
-
-#===============================================================================================
+@app.get("/upload")
+def supported_types():
+    return get_supported_types()
 
 @app.post("/upload")
-async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
+async def upload_file(request:UploadRequest):
 
     #if user_id is null throw error
-    if user_id is None:
+    if request.user_id is None:
         raise HTTPException(status_code=400, detail="user_id cannot be empty")
 
     #proverkata dali e pdf e proverena vo java delot
 
     #getting the text from the document
-    file_content = await file.read()
+    file_content = await request.file.read()
 
     def extract_and_embed():
-        with fitz.open(stream=file_content, filetype="pdf") as pdf:
-            text = ""
-            for page in pdf:
-                text += page.get_text()
-
-        if not text.strip():
-            raise ValueError("Could not extract text from PDF.")
+        # Extract text from file
+        text = parse_file(request.file, file_content)
 
         # splitting into chunks
         text_spliter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
@@ -163,7 +52,7 @@ async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
             raise ValueError("No text chunks produced.")
 
         # embedding chunks
-        embeddings = model.encode(chunks, show_progress_bar=False, batch_size=32)
+        embeddings = MODEL.encode(chunks, show_progress_bar=False, batch_size=32)
         embeddings = np.array(embeddings).astype("float32")
         faiss.normalize_L2(embeddings)
 
@@ -171,11 +60,11 @@ async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
 
     try:
         chunks, embeddings = await run_in_threadpool(extract_and_embed)
-    except ValueError as e:
+    except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
 
     def index_and_save():
-        user_path = get_user_path(user_id, chat_id)
+        user_path = get_user_path(request.user_id, request.chat_id)
         user_path.mkdir(parents=True, exist_ok=True)
 
         index, existing_chunks = load_index(user_path)
@@ -190,20 +79,16 @@ async def upload_pdf(user_id: int, chat_id: int, file: UploadFile = File(...)):
         save_index(index, existing_chunks, user_path)
         return len(chunks)
 
-    async with get_user_lock(user_id):  # one upload at a time per user
+    async with get_user_lock(request.user_id):  # one upload at a time per user
         chunk_count = await run_in_threadpool(index_and_save)
 
     return {
-        "filename": file.filename,
+        "filename": request.file.filename,
         "chunks_indexed": chunk_count,
     }
 
-
-# RAG_SYSTEM_PROMPT = """You are a helpful assistant that answers questions based strictly on the provided context.
-# If the answer is not found in the context, say "I don't have enough information in the provided documents to answer this question."
-# Be concise and accurate."""
-
 #=================================
+
 @app.get("/tools")
 async def get_tools():
 
@@ -240,7 +125,7 @@ async def get_chunks(request: AskRequest):
 
     # Embed the question (blocking → threadpool)
     def embed_question():
-        emb_q = model.encode([request.question], show_progress_bar=False)
+        emb_q = MODEL.encode([request.question], show_progress_bar=False)
         np.array(emb_q, dtype="float32")
         faiss.normalize_L2(emb_q)
         return emb_q
