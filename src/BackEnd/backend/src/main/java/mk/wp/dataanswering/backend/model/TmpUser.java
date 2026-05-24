@@ -9,14 +9,16 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+@Table(name="tmp_users")
 @DiscriminatorValue("UNREGISTERED")
 @AllArgsConstructor
 @NoArgsConstructor
 public class TmpUser extends User {
+
     @Column(name = "session_id", nullable = false, unique = true)
     private String sessionId;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JoinColumn(name = "chat_id", nullable = true)
-    private Chat chat;
+    @JoinColumn(name = "chat_id")
+    private TmpChat chat;
 }

@@ -60,5 +60,4 @@ public class WebSecurityConfig {
         authenticationManagerBuilder.authenticationProvider(authProvider);
         return authenticationManagerBuilder.build();
     }
-    
 }

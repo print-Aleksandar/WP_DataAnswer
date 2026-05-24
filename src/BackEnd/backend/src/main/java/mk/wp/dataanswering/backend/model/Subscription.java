@@ -2,21 +2,16 @@ package mk.wp.dataanswering.backend.model;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Table(name="subscriptions")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Subscription {
@@ -59,6 +54,4 @@ public class Subscription {
     public void setEndTs(LocalDateTime plusYears) {
         endTs = plusYears;
     }
-
-
 }

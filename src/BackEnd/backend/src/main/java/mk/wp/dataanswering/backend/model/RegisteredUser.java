@@ -5,18 +5,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,11 +20,11 @@ import mk.wp.dataanswering.backend.model.enums.Role;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 @Data
+@Table(name="registered_users")
 @DiscriminatorValue("REGISTERED")
 @AllArgsConstructor
 @NoArgsConstructor
 public class RegisteredUser extends User implements UserDetails {
-
 
     public RegisteredUser(String username,String userFirstName, String userEmail, String userLastName,String password, Role role) {
         this.username = username;
@@ -63,7 +58,7 @@ public class RegisteredUser extends User implements UserDetails {
     private List<Subscription> subscriptions;
 
     @OneToMany(mappedBy = "user")
-    private List<Chat> chats;
+    private List<SavedChat> chats;
 
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -114,5 +109,4 @@ public class RegisteredUser extends User implements UserDetails {
     public String getUsername() {
         return username;
     }
-
 }

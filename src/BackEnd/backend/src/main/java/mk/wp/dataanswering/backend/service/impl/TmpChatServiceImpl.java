@@ -1,29 +1,24 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
+import mk.wp.dataanswering.backend.model.TmpChat;
 import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.model.User;
-import mk.wp.dataanswering.backend.model.enums.ChatType;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
-import mk.wp.dataanswering.backend.repository.ChatRepository;
+import mk.wp.dataanswering.backend.repository.TmpChatRepository;
 import mk.wp.dataanswering.backend.repository.TmpUserRepository;
 import mk.wp.dataanswering.backend.service.ChatService;
 import mk.wp.dataanswering.backend.service.UserService;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
-public class TmpUserChatServiceImpl implements ChatService<TmpUser> {
+public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser, TmpChatRepository> {
 
     private final UserService userService;
-    private final ChatRepository chatRepository;
+    private final TmpChatRepository tmpChatRepository;
     private final TmpUserRepository tmpUserRepository;
-
-    public TmpUserChatServiceImpl(UserService userService,
-                                  ChatRepository chatRepository, TmpUserRepository tmpUserRepository) {
-        this.userService = userService;
-        this.chatRepository = chatRepository;
-        this.tmpUserRepository = tmpUserRepository;
-    }
 
     @Override
     public boolean supports() {
@@ -36,8 +31,7 @@ public class TmpUserChatServiceImpl implements ChatService<TmpUser> {
         if (!supports()) throw new InvalidUserException();
         TmpUser tmpUser = (TmpUser) currentUser;
         freeSpaceIfNeeded(tmpUser);
-        Chat newChat = new Chat(ChatType.TEMPORARY);
-        chatRepository.save(newChat);
+        TmpChat newChat = new TmpChat();
         tmpUser.setChat(newChat);
         tmpUserRepository.save(tmpUser);
         return newChat;
@@ -46,9 +40,13 @@ public class TmpUserChatServiceImpl implements ChatService<TmpUser> {
     @Override
     public void freeSpaceIfNeeded(TmpUser tmpUser) {
         if (tmpUser.getChat() != null) {
-            chatRepository.delete(tmpUser.getChat());
             tmpUser.setChat(null);
             tmpUserRepository.save(tmpUser);
         }
+    }
+
+    @Override
+    public TmpChatRepository getCorrectChatRepository() {
+        return tmpChatRepository;
     }
 }

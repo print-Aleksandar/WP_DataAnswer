@@ -1,18 +1,13 @@
 package mk.wp.dataanswering.backend.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Table(name="responses")
 @AllArgsConstructor
 @NoArgsConstructor
 public class Response {
@@ -37,5 +32,4 @@ public class Response {
     @OneToOne
     @JoinColumn(name = "request_id", nullable = false, unique = true)
     private Request request;
-
 }

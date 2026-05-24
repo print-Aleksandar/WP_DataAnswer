@@ -1,32 +1,38 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import jakarta.servlet.http.HttpSession;
+import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.repository.TmpUserRepository;
 import mk.wp.dataanswering.backend.service.TmpUserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Service
 public class TmpUserServiceImpl implements TmpUserService {
 
-    private final TmpUserRepository tmpUserRepository;
+    @Value("${app.session.timeout-seconds}")
+    private int sessionTimeout;
 
-    public TmpUserServiceImpl(TmpUserRepository tmpUserRepository) {
-        this.tmpUserRepository = tmpUserRepository;
-    }
+    private final TmpUserRepository tmpUserRepository;
+    private final TmpUserLoggerService tmpUserLoggerService;
 
     @Override
-    public TmpUser createTmpUser(String sessionId) {
+    public TmpUser createTmpUser(HttpSession session) {
         TmpUser tmpUser = new TmpUser();
-        tmpUser.setSessionId(sessionId);
+        tmpUser.setSessionId(session.getId());
         tmpUserRepository.save(tmpUser);
+        session.setMaxInactiveInterval(sessionTimeout);
+        tmpUserLoggerService.logCreated(tmpUser);
         return tmpUser;
     }
 
     @Override
-    public TmpUser getTmpUserBySession(String sessionId) {
-        Optional<TmpUser> found = tmpUserRepository.findBySessionId(sessionId);
-        return found.orElseGet(() -> createTmpUser(sessionId));
+    public TmpUser getTmpUserBySession(HttpSession session) {
+        Optional<TmpUser> found = tmpUserRepository.findBySessionId(session.getId());
+        return found.orElseGet(() -> createTmpUser(session));
     }
 }
