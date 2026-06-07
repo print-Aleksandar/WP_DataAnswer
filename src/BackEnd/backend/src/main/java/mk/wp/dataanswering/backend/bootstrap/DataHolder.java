@@ -3,6 +3,12 @@ package mk.wp.dataanswering.backend.bootstrap;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -15,11 +21,27 @@ import mk.wp.dataanswering.backend.model.enums.Role;
 import mk.wp.dataanswering.backend.repository.PlanRepository;
 import mk.wp.dataanswering.backend.repository.RegisteredUserRepository;
 import mk.wp.dataanswering.backend.repository.SubscriptionRepository;
+import org.springframework.stereotype.Service;
 
 @Component
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class DataHolder {
-    
+
+    @Value("${free.plan.day.chat.limit}")
+    private int freePlanDayChatLimit;
+    @Value("${free.plan.request.limit-per-chat}")
+    private int freePlanRequestLimitPerChat;
+
+    @Value("${pro.plan.day.chat.limit}")
+    private int proPlanDayChatLimit;
+    @Value("${pro.plan.request.limit-per-chat}")
+    private int proPlanRequestLimitPerChat;
+    @Value("${pro.plan.monthly.price}")
+    private double proPlanMonthlyPrice;
+
+    @Value("${guest.plan.request.limit-per-chat}")
+    private int guestPlanRequestLimitPerChat;
+
     public static List<RegisteredUser> users = null;
 
     private final RegisteredUserRepository registeredUserRepository;
@@ -27,53 +49,33 @@ public class DataHolder {
     private final PasswordEncoder passwordEncoder;
     private final SubscriptionRepository subscriptionRepository;
 
+
     @PostConstruct
     public void init() {
-
         if (planRepository.findAll().isEmpty()) {
-            Plan free = new Plan();
-            free.setPlanName("Free");
-            free.setPlanCost(0.0);
-            free.setDayChatLimit(5);
-            free.setDayPromptLimit(10);
+            Plan free = new Plan("FREE", 0.0, freePlanDayChatLimit, freePlanRequestLimitPerChat);
 
-            Plan pro = new Plan();
-            pro.setPlanName("Pro");
-            pro.setPlanCost(9.99);
-            pro.setDayChatLimit(50);
-            pro.setDayPromptLimit(200);
+            Plan pro = new Plan("PRO", proPlanMonthlyPrice, proPlanDayChatLimit, proPlanRequestLimitPerChat);
 
-            Plan tmp = new Plan();
-            tmp.setPlanName("TemporaryChat");
-            tmp.setPlanCost(0.0);
-            tmp.setDayChatLimit(1);
-            tmp.setDayPromptLimit(5);
+            Plan guest = new Plan("GUEST", 0.0, Integer.MAX_VALUE, guestPlanRequestLimitPerChat);
 
-            planRepository.saveAll(List.of(free, pro, tmp));
+            planRepository.saveAll(List.of(free, pro, guest));
         }
 
         if (registeredUserRepository.findAll().isEmpty()) {
-            // users = new ArrayList<>();
-            // users.add(new RegisteredUser(
-            //     "admin",
-            //     "admin",
-            //     "admin@dataanswering.mk",
-            //     "admin",
-            //     passwordEncoder.encode("admin"),
-            //     Role.ROLE_ADMIN));
-            // registeredUserRepository.saveAll(users);
 
             RegisteredUser admin = new RegisteredUser(
                     "admin",
                     "admin",
-                    "admin@dataanswering.mk",
+                    "admin@dataanswer.mk",
                     "admin",
                     passwordEncoder.encode("admin"),
                     Role.ROLE_ADMIN
             );
+
             RegisteredUser savedAdmin = registeredUserRepository.save(admin);
 
-            Plan pro = planRepository.findByPlanName("Pro")
+            Plan pro = planRepository.findByPlanName("PRO")
                 .orElseThrow(() -> new RuntimeException("Pro plan not found"));
 
             Subscription subscription = new Subscription();
@@ -83,7 +85,6 @@ public class DataHolder {
             subscription.setEndTs(LocalDateTime.now().plusYears(200));
 
             subscriptionRepository.save(subscription);
-        }   
-
+        }
     }
 }

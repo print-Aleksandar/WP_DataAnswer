@@ -1,12 +1,17 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import mk.wp.dataanswering.backend.model.TmpUser;
+import mk.wp.dataanswering.backend.service.SubscriptionService;
 import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class TmpUserLoggerService {
+
+    private final SubscriptionService subscriptionService;
 
     public void logCreated(TmpUser tmpUser) {
         log.info("TmpUser created — sessionId: {}, userId: {}",
@@ -25,7 +30,15 @@ public class TmpUserLoggerService {
         log.info("TmpChat created — userId: {}", tmpUser.getUserId());
     }
 
+    public void logGuestPlanCreated(TmpUser tmpUser) {
+        log.info("Guest plan created - userId: {}", subscriptionService.getActiveSubscription(tmpUser.getUserId()));
+    }
+
     public void logChatDeleted(TmpUser tmpUser) {
         log.info("TmpChat deleted — userId: {}", tmpUser.getUserId());
+    }
+
+    public void logGuestPlanDeleted(TmpUser tmpUser) {
+        log.info("Guest plan deleted - userId: {}", subscriptionService.getActiveSubscription(tmpUser.getUserId()));
     }
 }

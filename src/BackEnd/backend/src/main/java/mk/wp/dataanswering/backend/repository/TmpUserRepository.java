@@ -12,4 +12,5 @@ import java.util.Optional;
 @Repository
 public interface TmpUserRepository extends JpaRepository<TmpUser, Long> {
     Optional<TmpUser> findBySessionId(String sessionId);
+    Optional<TmpUser> findByUserId(Long userId);
 }

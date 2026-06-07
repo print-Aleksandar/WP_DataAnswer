@@ -54,9 +54,6 @@ public class RegisteredUser extends User implements UserDetails {
     @Column(updatable = false)
     private LocalDateTime registeredTs;
 
-    @OneToMany(mappedBy="registeredUser")
-    private List<Subscription> subscriptions;
-
     @OneToMany(mappedBy = "user")
     private List<SavedChat> chats;
 

@@ -2,6 +2,8 @@ package mk.wp.dataanswering.backend.service.impl;
 
 import java.time.LocalDateTime;
 
+import mk.wp.dataanswering.backend.service.SubscriptionService;
+import mk.wp.dataanswering.backend.service.UserDeletionService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,14 +24,12 @@ import mk.wp.dataanswering.backend.service.RegisteredUserService;
 
 @Service
 @AllArgsConstructor
-public class RegisteredUserServiceImpl implements RegisteredUserService {
+public class RegisteredUserServiceImpl implements RegisteredUserService, UserDeletionService {
 
     private final RegisteredUserRepository registeredUserRepository;
-    private final PlanRepository planRepository;
+    private final SubscriptionService subscriptionService;
 
     private final PasswordEncoder passwordEncoder;
-
-    private final SubscriptionRepository subscriptionRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -59,20 +59,18 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
 
         RegisteredUser savedUser = registeredUserRepository.save(registeredUser);
 
-        Plan free = planRepository.findByPlanName("Free").orElseThrow(() -> new RuntimeException("Free plan not found — check DataHolder"));
-
-        Subscription subscription = new Subscription();
-        subscription.setRegisteredUser(savedUser);
-        subscription.setPlan(free);
-        subscription.setActive(true);
-        subscription.setEndTs(LocalDateTime.now().plusYears(200)); //200 zashto e free plan nikogash nema da isteche
-
-        subscriptionRepository.save(subscription);
+        subscriptionService.subscribe(savedUser.getUserId(), "FREE");
 
         return registeredUser;
 
     }
 
-    
-    
+    @Override
+    public void CleanUpAfterUserDeletion(long userId) {
+        RegisteredUser current = registeredUserRepository.findById(userId).orElseThrow();
+        current.setUserEmail("[DELETED]");
+        current.setPassword("[DELETED]");
+        current.setUserFirstName("[DELETED]");
+        current.setUserLastName("[DELETED]");
+    }
 }

@@ -2,6 +2,7 @@ package mk.wp.dataanswering.backend.service.impl;
 
 import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.service.PlanService;
 import mk.wp.dataanswering.backend.service.TmpUserService;
 import mk.wp.dataanswering.backend.service.UserService;
 import org.springframework.stereotype.Service;

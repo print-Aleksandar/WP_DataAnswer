@@ -1,13 +1,11 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import mk.wp.dataanswering.backend.model.Chat;
-import mk.wp.dataanswering.backend.model.RegisteredUser;
-import mk.wp.dataanswering.backend.model.SavedChat;
-import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.model.*;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import mk.wp.dataanswering.backend.repository.SavedChatRepository;
 import mk.wp.dataanswering.backend.service.ChatService;
+import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -18,11 +16,12 @@ import java.util.List;
 @Service
 public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUser, SavedChatRepository> {
 
-    @Value("${registered.user.max.saved.chats}")
-    private int maxSavedChats;
+    @Value("${saved.chats.limit}")
+    private int savedChatsLimit;
 
     private final UserService userService;
     private final SavedChatRepository savedChatRepository;
+    private final SubscriptionService subscriptionService;
 
     @Override
     public boolean supports() {
@@ -35,8 +34,7 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         if (!supports()) throw new InvalidUserException();
         RegisteredUser registeredUser = (RegisteredUser) currentUser;
         freeSpaceIfNeeded(registeredUser);
-        SavedChat newChat = new SavedChat();
-        newChat.setUser(registeredUser);
+        SavedChat newChat = new SavedChat(registeredUser);
         savedChatRepository.save(newChat);
         return newChat;
     }
@@ -44,13 +42,20 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
     @Override
     public void freeSpaceIfNeeded(RegisteredUser registeredUser) {
         List<SavedChat> chats = savedChatRepository.findSavedChatsByUserUserId(registeredUser.getUserId());
-        if (chats.size() >= 5) {
+        if (chats.size() >= savedChatsLimit) {
             SavedChat oldest = chats.stream()
                     .min(Comparator.comparing(Chat::getLastModifiedTs))
                     .orElseThrow();
             oldest.setUser(null);
             savedChatRepository.save(oldest);
         }
+    }
+
+    @Override
+    public boolean isLimitExceeded(RegisteredUser registeredUser) {
+        Subscription current = subscriptionService.getActiveSubscription(registeredUser.getUserId());
+        // barame po created_user_id e fiksno, user_id e relaciska kolona na brishenje ja nema
+
     }
 
     @Override

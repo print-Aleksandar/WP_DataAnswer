@@ -13,9 +13,18 @@ import lombok.NoArgsConstructor;
 @DiscriminatorValue("SAVED")
 @AllArgsConstructor
 @NoArgsConstructor
-public class SavedChat extends Chat{
+public class SavedChat extends Chat {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private RegisteredUser user;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by_user_id", nullable = false, updatable = false)
+    private RegisteredUser createdBy;
+
+    public SavedChat(RegisteredUser user) {
+        this.user = user;
+        this.createdBy = user;
+    }
 }

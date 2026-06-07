@@ -46,8 +46,7 @@ public class PlanController {
         try {
             subscriptionService.subscribe(
                     user.getUserId(),
-                    planId,
-                    LocalDateTime.now().plusDays(30));
+                    "AHA"); // alek: ne chepkam ovde ne znam shto se deshava
             return "redirect:/plans";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());

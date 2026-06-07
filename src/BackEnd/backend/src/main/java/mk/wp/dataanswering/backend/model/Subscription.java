@@ -31,16 +31,17 @@ public class Subscription {
     @Column(nullable=false)
     private LocalDateTime endTs;
 
+    // Tmp user has guest plan, changed to abstract
     @ManyToOne
-    @JoinColumn(name="user_id", nullable=false)
-    private RegisteredUser registeredUser;
+    @JoinColumn(name="user_id")
+    private User user;
 
     @ManyToOne
     @JoinColumn(name="plan_id", nullable=false)
     private Plan plan;
 
-    public void setRegisteredUser(RegisteredUser savedAdmin) {
-        registeredUser = savedAdmin;
+    public void setRegisteredUser(User savedAdmin) {
+        user = savedAdmin;
     }
 
     public void setPlan(Plan pro) {
@@ -51,7 +52,7 @@ public class Subscription {
         isActive = b;
     }
 
-    public void setEndTs(LocalDateTime plusYears) {
-        endTs = plusYears;
+    public void setEndTs(LocalDateTime EndTs) {
+        endTs = EndTs;
     }
 }

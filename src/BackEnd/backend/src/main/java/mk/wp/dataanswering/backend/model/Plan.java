@@ -4,6 +4,7 @@ import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -23,13 +24,20 @@ public class Plan {
     private String planName;
 
     @Column(nullable = false)
-    private double planCost;
+    private double planMonthlyCost;
 
     @Column(nullable = false)
     private int dayChatLimit;
     
     @Column(nullable = false)
-    private int dayPromptLimit;
+    private int requestPerChatLimit;
+
+    public Plan(String planName, double planMonthlyCost, int dayChatLimit, int requestPerChatLimit) {
+        this.planName = planName;
+        this.planMonthlyCost = planMonthlyCost;
+        this.dayChatLimit = dayChatLimit;
+        this.requestPerChatLimit = requestPerChatLimit;
+    }
 
     @OneToMany(mappedBy="plan")
     private List<Subscription> subscriptions;
