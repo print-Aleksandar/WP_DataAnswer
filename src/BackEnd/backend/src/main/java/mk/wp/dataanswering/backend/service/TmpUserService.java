@@ -5,6 +5,8 @@ import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.model.User;
 
 public interface TmpUserService {
+
     TmpUser getTmpUserBySession(HttpSession session);
     TmpUser createTmpUser(HttpSession session);
+    void cleanUpBeforeUserDeletion(long userId);
 }

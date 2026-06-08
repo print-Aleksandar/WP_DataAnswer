@@ -106,4 +106,16 @@ public class RegisteredUser extends User implements UserDetails {
     public String getUsername() {
         return username;
     }
+
+    public void softDelete() {
+        username = "[DELETED_" + getUserId() + "]";
+        userEmail = "[DELETED_" + getUserId() + "]";
+        password = "[DELETED]";
+        userFirstName = "[DELETED]";
+        userLastName = "[DELETED]";
+        enabled = false;
+        credentialsNonExpired = false;
+        accountNonLocked = false;
+        accountNonExpired = false;
+    }
 }

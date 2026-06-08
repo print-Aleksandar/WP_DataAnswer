@@ -1,23 +1,19 @@
 package mk.wp.dataanswering.backend.service.impl;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import mk.wp.dataanswering.backend.model.Subscription;
 import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.repository.TmpUserRepository;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.TmpUserService;
-import mk.wp.dataanswering.backend.service.UserDeletionService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
-public class TmpUserServiceImpl implements TmpUserService, UserDeletionService {
+public class TmpUserServiceImpl implements TmpUserService {
 
     @Value("${app.session.timeout-seconds}")
     private int sessionTimeout;
@@ -44,7 +40,7 @@ public class TmpUserServiceImpl implements TmpUserService, UserDeletionService {
     }
 
     @Override
-    public void CleanUpAfterUserDeletion(long userId) {
+    public void cleanUpBeforeUserDeletion(long userId) {
         if (tmpUserRepository.findByUserId(userId).isPresent()) {
             subscriptionService.deleteAllByUserId(userId);
         }

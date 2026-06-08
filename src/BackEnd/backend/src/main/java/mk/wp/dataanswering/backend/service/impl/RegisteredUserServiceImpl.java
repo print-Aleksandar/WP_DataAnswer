@@ -1,30 +1,23 @@
 package mk.wp.dataanswering.backend.service.impl;
 
-import java.time.LocalDateTime;
-
 import mk.wp.dataanswering.backend.service.SubscriptionService;
-import mk.wp.dataanswering.backend.service.UserDeletionService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import lombok.AllArgsConstructor;
-import mk.wp.dataanswering.backend.model.Plan;
 import mk.wp.dataanswering.backend.model.RegisteredUser;
-import mk.wp.dataanswering.backend.model.Subscription;
 import mk.wp.dataanswering.backend.model.enums.Role;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidArgumentsException;
 import mk.wp.dataanswering.backend.model.exceptions.PasswordsDoNotMatchException;
 import mk.wp.dataanswering.backend.model.exceptions.UsernameAlreadyExistsException;
-import mk.wp.dataanswering.backend.repository.PlanRepository;
 import mk.wp.dataanswering.backend.repository.RegisteredUserRepository;
-import mk.wp.dataanswering.backend.repository.SubscriptionRepository;
 import mk.wp.dataanswering.backend.service.RegisteredUserService;
 
 @Service
 @AllArgsConstructor
-public class RegisteredUserServiceImpl implements RegisteredUserService, UserDeletionService {
+public class RegisteredUserServiceImpl implements RegisteredUserService {
 
     private final RegisteredUserRepository registeredUserRepository;
     private final SubscriptionService subscriptionService;
@@ -66,11 +59,7 @@ public class RegisteredUserServiceImpl implements RegisteredUserService, UserDel
     }
 
     @Override
-    public void CleanUpAfterUserDeletion(long userId) {
-        RegisteredUser current = registeredUserRepository.findById(userId).orElseThrow();
-        current.setUserEmail("[DELETED]");
-        current.setPassword("[DELETED]");
-        current.setUserFirstName("[DELETED]");
-        current.setUserLastName("[DELETED]");
+    public boolean isAccountActive(Long id) {
+        return registeredUserRepository.findByUserIdAndEnabledIsTrue(id);
     }
 }

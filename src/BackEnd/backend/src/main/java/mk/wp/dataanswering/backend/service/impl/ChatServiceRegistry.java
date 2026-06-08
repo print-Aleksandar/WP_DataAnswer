@@ -13,13 +13,13 @@ import java.util.List;
 public class ChatServiceRegistry {
     // Strategy Design Pattern for more context
 
-    private final List<ChatService<? extends Chat, ? extends User, ? extends JpaRepository<?, Long>>> chatServices;
+    private final List<ChatService<? extends Chat, ? extends User>> chatServices;
 
-    public ChatServiceRegistry(List<ChatService<? extends Chat, ? extends User, ? extends JpaRepository<?, Long>>> chatServices) {
+    public ChatServiceRegistry(List<ChatService<? extends Chat, ? extends User>> chatServices) {
         this.chatServices = chatServices;
     }
 
-    public ChatService<? extends Chat, ? extends User, ? extends JpaRepository<?, Long>> getCorrectChatService() {
+    public ChatService<? extends Chat, ? extends User> getCorrectChatService() {
         return chatServices.stream()
                 .filter(s -> s.supports())
                 .findFirst()

@@ -14,4 +14,5 @@ public interface RegisteredUserRepository extends JpaRepository<RegisteredUser, 
     
     Optional<RegisteredUser> findByUsername(String username);
     Optional<RegisteredUser> findByUsernameAndPassword(String username, String password);
+    boolean findByUserIdAndEnabledIsTrue(Long id);
 }

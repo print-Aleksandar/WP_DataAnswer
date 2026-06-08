@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 @RequiredArgsConstructor
 @Service
-public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser, TmpChatRepository> {
+public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
 
     private final UserService userService;
     private final TmpChatRepository tmpChatRepository;
@@ -46,7 +46,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser, TmpChat
     }
 
     @Override
-    public TmpChatRepository getCorrectChatRepository() {
-        return tmpChatRepository;
+    public boolean isChatLimitExceeded(TmpUser user) {
+        return true;
     }
 }

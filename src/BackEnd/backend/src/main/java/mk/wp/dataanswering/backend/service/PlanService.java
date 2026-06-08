@@ -10,5 +10,4 @@ public interface PlanService {
     Plan findById(Long planId);
     Plan create(String planName, Double planCost, Integer dayChatLimit, Integer dayPromptLimit);
     Plan findByPlanName(String planName);
-
 }

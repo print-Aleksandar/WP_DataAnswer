@@ -2,6 +2,7 @@ package mk.wp.dataanswering.backend.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.*;
+import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import mk.wp.dataanswering.backend.repository.SavedChatRepository;
 import mk.wp.dataanswering.backend.service.ChatService;
@@ -9,12 +10,14 @@ import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
 @RequiredArgsConstructor
 @Service
-public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUser, SavedChatRepository> {
+public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUser> {
 
     @Value("${saved.chats.limit}")
     private int savedChatsLimit;
@@ -31,8 +34,13 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
     @Override
     public Chat startNewChat() {
         User currentUser = userService.getCurrentUser();
-        if (!supports()) throw new InvalidUserException();
+        if (!supports()) {
+            throw new InvalidUserException();
+        }
         RegisteredUser registeredUser = (RegisteredUser) currentUser;
+        if (!isChatLimitNotExceeded(registeredUser)) {
+            throw new ExceededDayChatLimitException();
+        }
         freeSpaceIfNeeded(registeredUser);
         SavedChat newChat = new SavedChat(registeredUser);
         savedChatRepository.save(newChat);
@@ -46,20 +54,26 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
             SavedChat oldest = chats.stream()
                     .min(Comparator.comparing(Chat::getLastModifiedTs))
                     .orElseThrow();
-            oldest.setUser(null);
-            savedChatRepository.save(oldest);
+
+            unlinkChatFromRegisteredUser(registeredUser, oldest);
         }
     }
 
-    @Override
-    public boolean isLimitExceeded(RegisteredUser registeredUser) {
-        Subscription current = subscriptionService.getActiveSubscription(registeredUser.getUserId());
-        // barame po created_user_id e fiksno, user_id e relaciska kolona na brishenje ja nema
-
+    // will be used intern (in this class) and on registered user delete chat (we will delete from their side only)
+    public void unlinkChatFromRegisteredUser(RegisteredUser registeredUser, SavedChat savedChat) {
+        if (!savedChatRepository.existsByIdAndCreatedByUserId(savedChat.getId(), registeredUser.getUserId())) {
+            throw new RuntimeException();
+        }
+        savedChat.setUser(null);
+        savedChatRepository.save(savedChat);
     }
 
+    // tmpChatService must implement this which will be true everytime
     @Override
-    public SavedChatRepository getCorrectChatRepository() {
-        return savedChatRepository;
+    public boolean isChatLimitNotExceeded(RegisteredUser registeredUser) {
+        Subscription current = subscriptionService.getActiveSubscription(registeredUser.getUserId());
+        // search by createdBy because user is relational and can be unlinked
+        return savedChatRepository.findSavedChatsByCreatedBy_UserIdAndStartTsAfter(registeredUser.getUserId(),
+                LocalDateTime.now().minusDays(1)).size() < current.getPlan().getDayChatLimit();
     }
 }

@@ -42,22 +42,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 LocalDateTime.now().plusMonths(1) : LocalDateTime.now().plusYears(200));
 
         return subscriptionRepository.save(subscription);
-
     }
 
     @Override
     public Subscription getActiveSubscription(Long userId) {
         return subscriptionRepository
                 .findSubscriptionByUser_UserIdAndIsActiveTrue(userId)
-                .orElseThrow(() -> new RuntimeException("SYSTEM ERROR: Every user must have an active subscription"));
+                .orElseThrow(() -> new RuntimeException("SYSTEM ERROR: Every user must have an active subscription."));
     }
 
     @Override
     public void cancel(Long subscriptionId) {
         Subscription subscription = subscriptionRepository.findById(subscriptionId)
-                .orElseThrow(() -> new RuntimeException("Subscription not found"));
+                .orElseThrow(() -> new RuntimeException("Subscription not found."));
         if (subscription.getPlan().getPlanName().equals("GUEST")) {
-            throw new RuntimeException("Guest plan cannot be changed");
+            throw new RuntimeException("Guest plan cannot be canceled.");
         }
         subscription.setActive(false);
         subscriptionRepository.save(subscription);
