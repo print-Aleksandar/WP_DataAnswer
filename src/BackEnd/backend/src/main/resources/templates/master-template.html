@@ -17,24 +17,20 @@
     <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
 
     <style>
-        body {
-                display: flex;
-                flex-direction: column;
-                height: 100vh;
+        .btn-custom:hover{
+                background-color: #888888 !important;   
         }
-
-        .main {
-                flex-grow: 100vh;
+        .link-custom:hover{
+                background-color: #888888 !important;
+                border-radius: 10px;
         }
-    </style>    
+  </style>  
 </head>
 <body>
 
-<header th:replace="fragments/header"></header>
+<header th:replace="~{fragments/header}"></header>
 
 <section class="main" th:replace="${bodyContent}"></section>
-
-<footer th:replace="fragments/footer"></footer>
 
 
 </body>

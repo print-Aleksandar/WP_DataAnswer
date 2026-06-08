@@ -24,7 +24,7 @@ public class LoginController {
     @GetMapping
     public String getLoginPage(Model model) {
         model.addAttribute("bodyContent", "login");
-        return "master-template";
+        return "login.html";
     }
 
     @PostMapping
@@ -41,7 +41,7 @@ public class LoginController {
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("bodyContent", "login");
-            return "master-template";
+            return "login.html";
         }
     }
 

@@ -1,22 +1,52 @@
-<div xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+>
+<head>
+    <meta charset="UTF-8"/>
+    <title>DataAnswering</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
 
-    <div class="container mb-4 d-flex flex-column align-items-center">
-        <form class="form-signin mt-xl-5" action="/login" method="post">
-            <h2 class="form-signin-heading">Login</h2>
-            <p>
-                <label for="username" class="sr-only">Username</label>
-                <input type="text" id="username" name="username" class="form-control" placeholder="Username">
-            </p>
-            <p>
-                <label for="password" class="sr-only">Password</label>
-                <input type="password" id="password" name="password" class="form-control" placeholder="Password"
-                >
-            </p>
-            
-            <div th:if="${param.error}" th:text="${param.error}" class="text-danger"></div>
-
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-            <a href="/register" class="btn btn-block btn-light">Don't have an account? Register here!</a>
+    <style>
+        .btn-custom:hover{
+                background-color: #888888 !important;   
+        }
+        .link-custom:hover{
+                background-color: #888888 !important;
+                border-radius: 10px;
+        }
+  </style>  
+</head>
+<body>
+    <div class="container-fluid" style="background-color: #121212; height: 100vh;">
+    <div class="row d-flex justify-content-center align-items-center">
+      <div class="col-9" style="background-color: #444444; height: 400px; margin-top: 220px; width: 200px; border-radius: 20px">
+        <p class="display-6" style="font-size: 20px; font-weight: bold; color: #E0E0E0; text-align: center; margin-top: 20px">Log In or sign up</p>
+        <form class="form-signin mt-xl-5 d-flex flex-column" method="post" action="/login">
+          <p>
+            <input type="text" style="background-color: #B0B0B0;border-color: #B0B0B0; border-radius: 30px; padding: 10px 15px" id="username" name="username" class="form-control" placeholder="Username"
+                   autofocus="">
+          </p>
+          <p>
+            <input type="password" style="background-color: #B0B0B0 ; border-color: #B0B0B0; border-radius: 30px; padding: 10px 15px" id="password" name="password" class="form-control" placeholder="Password"
+            >
+          </p>
+          <div th:if="${param.error}" th:text="${param.error}" class="text-danger"></div>
+          <button id="submit" style="margin-bottom: 20px; background-color: #B0B0B0; border-color: #B0B0B0; height: 45px; width: 120px" class="btn btn-lg btn-primary mx-auto btn-custom" type="submit">Sign in</button>
+          <a href="/register" class="btn" style="color: #B0B0B0;">Don't have an account? Register here!</a>
         </form>
+      </div>
     </div>
-</div>
+  </div>
+
+</body>
+</html>

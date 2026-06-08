@@ -1,14 +1,16 @@
 package mk.wp.dataanswering.backend.web.controler;
 
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import mk.wp.dataanswering.backend.service.ChatService;
-import mk.wp.dataanswering.backend.service.UserService;
-import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import lombok.RequiredArgsConstructor;
+import mk.wp.dataanswering.backend.model.RegisteredUser;
+import mk.wp.dataanswering.backend.model.Subscription;
+import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.service.UserService;
+import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 
 
 @Controller
@@ -23,6 +25,22 @@ public class HomeController {
     @GetMapping()
     public String getHomePage(Model model) {
         model.addAttribute("bodyContent", "home");
+
+        try{
+            User currentUser = userService.getCurrentUser();
+            if (currentUser instanceof RegisteredUser registeredUser){
+                model.addAttribute("username", registeredUser.getUserFirstName());
+
+                registeredUser.getSubscriptions().stream()
+                            .filter(Subscription::isActive)
+                            .findFirst()
+                            .ifPresent(sub -> model.addAttribute("plan", sub.getPlan().getPlanName()));
+                            
+            }
+        } catch (Exception e) {
+
+        }
+
         return "master-template";
     }
 
