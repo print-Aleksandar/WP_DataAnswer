@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.RegisteredUser;
 import mk.wp.dataanswering.backend.model.Subscription;
 import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 
@@ -20,6 +21,7 @@ public class HomeController {
 
     private final UserService userService;
     private final ChatServiceRegistry chatServiceRegistry;
+    private final SubscriptionService subscriptionService;
 
 
     @GetMapping()
@@ -31,14 +33,12 @@ public class HomeController {
             if (currentUser instanceof RegisteredUser registeredUser){
                 model.addAttribute("username", registeredUser.getUserFirstName());
 
-                registeredUser.getSubscriptions().stream()
-                            .filter(Subscription::isActive)
-                            .findFirst()
-                            .ifPresent(sub -> model.addAttribute("plan", sub.getPlan().getPlanName()));
+                Subscription sub = subscriptionService.getActiveSubscription(registeredUser.getUserId());
+                model.addAttribute("plan", sub.getPlan().getPlanName());
                             
             }
         } catch (Exception e) {
-
+            System.out.println("Exception: " + e.getMessage());
         }
 
         return "master-template";

@@ -24,13 +24,25 @@
                 background-color: #888888 !important;
                 border-radius: 10px;
         }
+        input[type="file"]::-webkit-file-upload-button {
+          background-color: #444444;
+          color: #E0E0E0;
+          border: none;
+          border-radius: 8px;
+          padding: 5px 10px;
+          margin-left: 1px;
+          cursor: pointer;
+      }
+      .placehodlerCustom::placeholder {
+          color: #E0E0E0;
+      }
   </style>  
 </head>
 <body>
 
 <header th:replace="~{fragments/header}"></header>
 
-<section class="main" th:replace="${bodyContent}"></section>
+<section class="main" th:replace="~{${bodyContent}}"></section>
 
 
 </body>

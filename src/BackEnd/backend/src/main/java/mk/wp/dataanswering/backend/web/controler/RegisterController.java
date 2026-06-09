@@ -21,7 +21,7 @@ public class RegisterController {
     @GetMapping
     public String getRegisterPage(Model model) {
         model.addAttribute("bodyContent", "register");
-        return "master-template";
+        return "register.html";
     }
 
     @PostMapping
@@ -39,7 +39,7 @@ public class RegisterController {
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("bodyContent", "register");
-            return "master-template";
+            return "register.html";
         }
 
     }
