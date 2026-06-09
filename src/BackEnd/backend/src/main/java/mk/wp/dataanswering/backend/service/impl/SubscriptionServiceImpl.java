@@ -26,13 +26,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     // exact match by plan name upper case
     @Override
-    public Subscription subscribe(Long userId, String planName) {
+    public Subscription subscribe(Long userId, Long planId) {
         subscriptionRepository.findSubscriptionByUser_UserIdAndIsActiveTrue(userId)
                 .ifPresent(s -> cancel(s.getId()));
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Plan plan = planService.findByPlanName(planName);
+        Plan plan = planService.findById(planId);
 
         Subscription subscription = new Subscription();
         subscription.setRegisteredUser(user);

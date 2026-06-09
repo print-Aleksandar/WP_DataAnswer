@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.autoconfigure.wavefront.WavefrontProperties.Application;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -21,14 +20,15 @@ import mk.wp.dataanswering.backend.model.dto.MultipartInputStreamFileResource;
 import mk.wp.dataanswering.backend.service.ToolServiceInteractor;
 
 @Service
-public class RagInteractor implements ToolServiceInteractor {
-    @Value("${services.rag.url}")
+public class AggregateInteractor implements ToolServiceInteractor {
+    @Value("${services.aggregate.url}")
     private String baseUrl;
 
     private RestClient client;
     private final RestClient.Builder builder;
 
-    public RagInteractor(RestClient.Builder builder) {
+
+    public AggregateInteractor(RestClient.Builder builder) {
         this.builder = builder;
     }
 
@@ -51,7 +51,7 @@ public class RagInteractor implements ToolServiceInteractor {
                 file.getSize()
             ));
             
-            ResponseEntity<Void> res = this.client
+            this.client
             .post()
             .uri("/upload")
             .body(body)
@@ -60,12 +60,10 @@ public class RagInteractor implements ToolServiceInteractor {
                 throw new RuntimeException("Response code: " + response.getStatusCode());
             })
             .toBodilessEntity();
-            
-            
         // } catch (IOException e) {
-            // throw new RuntimeException("Failed to read file input stream", e);
+        //     throw new RuntimeException("Failed to read file input stream", e);
         // } catch (HttpClientErrorException | HttpServerErrorException e){
-            // return;
+        //     return;
         // }
     }
 

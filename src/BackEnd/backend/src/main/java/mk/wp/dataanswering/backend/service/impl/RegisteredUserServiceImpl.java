@@ -13,6 +13,7 @@ import mk.wp.dataanswering.backend.model.exceptions.InvalidArgumentsException;
 import mk.wp.dataanswering.backend.model.exceptions.PasswordsDoNotMatchException;
 import mk.wp.dataanswering.backend.model.exceptions.UsernameAlreadyExistsException;
 import mk.wp.dataanswering.backend.repository.RegisteredUserRepository;
+import mk.wp.dataanswering.backend.service.PlanService;
 import mk.wp.dataanswering.backend.service.RegisteredUserService;
 
 @Service
@@ -21,6 +22,7 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
 
     private final RegisteredUserRepository registeredUserRepository;
     private final SubscriptionService subscriptionService;
+    private final PlanService planService;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -52,7 +54,8 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
 
         RegisteredUser savedUser = registeredUserRepository.save(registeredUser);
 
-        subscriptionService.subscribe(savedUser.getUserId(), "FREE");
+        Long planId = planService.findByPlanName("FREE").getId();
+        subscriptionService.subscribe(savedUser.getUserId(), planId);
 
         return registeredUser;
 

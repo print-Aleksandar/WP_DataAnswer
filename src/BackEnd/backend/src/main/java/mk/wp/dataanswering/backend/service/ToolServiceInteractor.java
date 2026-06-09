@@ -1,11 +1,12 @@
 package mk.wp.dataanswering.backend.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ToolServiceInteractor {
-    void tryUpload(Long user_id, Long chat_id, MultipartFile file);
+    void tryUpload(Long user_id, Long chat_id, MultipartFile file) throws Exception;
     List<String> getSupportedFileTypes();
 
     boolean healty();

@@ -2,8 +2,10 @@ package mk.wp.dataanswering.backend.service.impl;
 
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import mk.wp.dataanswering.backend.model.Plan;
 import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.repository.TmpUserRepository;
+import mk.wp.dataanswering.backend.service.PlanService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.TmpUserService;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +23,7 @@ public class TmpUserServiceImpl implements TmpUserService {
     private final TmpUserRepository tmpUserRepository;
     private final TmpUserLoggerService tmpUserLoggerService;
     private final SubscriptionService subscriptionService;
+    private final PlanService planService;
 
     @Override
     public TmpUser createTmpUser(HttpSession session) {
@@ -29,7 +32,8 @@ public class TmpUserServiceImpl implements TmpUserService {
         tmpUserRepository.save(tmpUser);
         session.setMaxInactiveInterval(sessionTimeout);
         tmpUserLoggerService.logCreated(tmpUser);
-        subscriptionService.subscribe(tmpUser.getUserId(), "GUEST");
+        Long planId = planService.findByPlanName("GUEST").getId();
+        subscriptionService.subscribe(tmpUser.getUserId(), planId);
         return tmpUser;
     }
 

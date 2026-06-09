@@ -46,7 +46,7 @@ public class PlanController {
         try {
             subscriptionService.subscribe(
                     user.getUserId(),
-                    "AHA"); // alek: ne chepkam ovde ne znam shto se deshava
+                    planId);
             return "redirect:/plans";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
