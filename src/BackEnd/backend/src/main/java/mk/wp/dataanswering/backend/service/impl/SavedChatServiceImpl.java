@@ -1,19 +1,24 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
 import lombok.RequiredArgsConstructor;
-import mk.wp.dataanswering.backend.model.*;
+import mk.wp.dataanswering.backend.model.Chat;
+import mk.wp.dataanswering.backend.model.RegisteredUser;
+import mk.wp.dataanswering.backend.model.SavedChat;
+import mk.wp.dataanswering.backend.model.Subscription;
+import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import mk.wp.dataanswering.backend.repository.SavedChatRepository;
 import mk.wp.dataanswering.backend.service.ChatService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -43,6 +48,7 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         }
         freeSpaceIfNeeded(registeredUser);
         SavedChat newChat = new SavedChat(registeredUser);
+        newChat.setChatName("DOCUMENT TO BE ANSWERD"); // IME TREBA DA SE SMENI
         savedChatRepository.save(newChat);
         return newChat;
     }
@@ -75,5 +81,16 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         // search by createdBy because user is relational and can be unlinked
         return savedChatRepository.findSavedChatsByCreatedBy_UserIdAndStartTsAfter(registeredUser.getUserId(),
                 LocalDateTime.now().minusDays(1)).size() < current.getPlan().getDayChatLimit();
+    }
+
+    @Override
+    public Chat findById(Long chatId){
+        return savedChatRepository.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
+    }
+
+    @Override
+    public List<SavedChat> getChatsForCurrentUser() {
+        RegisteredUser user = (RegisteredUser) userService.getCurrentUser();
+        return savedChatRepository.findSavedChatsByUserUserId(user.getUserId());
     }
 }

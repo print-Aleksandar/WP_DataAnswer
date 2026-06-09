@@ -35,10 +35,10 @@ public class HomeController {
 
                 Subscription sub = subscriptionService.getActiveSubscription(registeredUser.getUserId());
                 model.addAttribute("plan", sub.getPlan().getPlanName());
-                            
+                model.addAttribute("chats", registeredUser.getChats());   
             }
         } catch (Exception e) {
-            System.out.println("Exception: " + e.getMessage());
+            
         }
 
         return "master-template";

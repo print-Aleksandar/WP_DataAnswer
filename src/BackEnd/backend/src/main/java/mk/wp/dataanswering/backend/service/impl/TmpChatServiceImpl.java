@@ -1,5 +1,7 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +36,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
         freeSpaceIfNeeded(tmpUser);
         TmpChat newChat = new TmpChat();
         tmpUser.setChat(newChat);
+        newChat.setChatName("DOCUMENT TO BE ANSWERD"); // IME TREBA DA SE SMENI
         tmpUserRepository.save(tmpUser);
         return newChat;
     }
@@ -49,5 +52,16 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     @Override
     public boolean isChatLimitNotExceeded(TmpUser user) {
         return true;
+    }
+
+    @Override   
+    public Chat findById(Long chatId){
+        return tmpChatRepository.findById(chatId)
+            .orElseThrow(() -> new RuntimeException("Chat not found"));
+    }
+
+    @Override
+    public List<TmpChat> getChatsForCurrentUser() {
+        return List.of();
     }
 }

@@ -5,15 +5,22 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import jakarta.persistence.*;
-import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import mk.wp.dataanswering.backend.model.enums.Role;
 
@@ -54,7 +61,7 @@ public class RegisteredUser extends User implements UserDetails {
     @Column(updatable = false)
     private LocalDateTime registeredTs;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private List<SavedChat> chats;
 
     @Enumerated(EnumType.STRING)
