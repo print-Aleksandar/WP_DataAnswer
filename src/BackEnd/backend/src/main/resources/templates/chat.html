@@ -92,7 +92,7 @@
 
             </form>
 
-            <script>
+            <script th:inline="javascript">
                 document.addEventListener('DOMContentLoaded', () => {
                     document.querySelector("#file-input")
                     .addEventListener('change', async (e) => {
@@ -103,15 +103,18 @@
                         const formData = new FormData();
                         formData.append('file', files[0]);
 
+                        formData.append('chatId', [[${chat.id}]])
+
                         setStatus('uploading');
 
                         try {
                             const response = await fetch('/upload', {
                                 method: 'POST',
+                                contentType: 'multipart/form-data',
                                 body: formData
                             });
 
-                            if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                            if (!response.status != 200) throw new Error(`Server error: ${response.status}`);
 
                             setStatus('success', 'uploaded successful.');
                         } catch (err) {

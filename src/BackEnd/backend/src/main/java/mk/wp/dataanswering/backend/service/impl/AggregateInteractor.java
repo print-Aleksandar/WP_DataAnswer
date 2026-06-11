@@ -86,7 +86,7 @@ public class AggregateInteractor implements ToolServiceInteractor {
                 .toBodilessEntity();
                 
             return true;
-        } catch (HttpClientErrorException | HttpServerErrorException e) {
+        } catch (Exception e) {
             return false;
         }
 

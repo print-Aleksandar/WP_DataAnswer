@@ -1,5 +1,5 @@
 import faiss
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, Request, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 import numpy as np
@@ -27,21 +27,19 @@ async def health():
 def supported_types():
     return get_supported_types()
 
-@app.post("/upload")
-async def upload_file(request:UploadRequest):
-
+@app.post("/upload/{user_id}/{chat_id}")
+async def upload_file(user_id:int, chat_id:int, file:UploadFile=File(...)):
     #if user_id is null throw error
-    if request.user_id is None:
+    if user_id is None:
         raise HTTPException(status_code=400, detail="user_id cannot be empty")
 
-    #proverkata dali e pdf e proverena vo java delot
 
-    #getting the text from the document
-    file_content = await request.file.read()
+    #getting the contents of the document
+    file_content = await file.read()
 
     def extract_and_embed():
         # Extract text from file
-        text = parse_file(request.file, file_content)
+        text = parse_file(file, file_content)
 
         # splitting into chunks
         text_spliter = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
@@ -64,7 +62,7 @@ async def upload_file(request:UploadRequest):
         raise HTTPException(status_code=422, detail=str(e))
 
     def index_and_save():
-        user_path = get_user_path(request.user_id, request.chat_id)
+        user_path = get_user_path(user_id, chat_id)
         user_path.mkdir(parents=True, exist_ok=True)
 
         index, existing_chunks = load_index(user_path)
@@ -79,11 +77,11 @@ async def upload_file(request:UploadRequest):
         save_index(index, existing_chunks, user_path)
         return len(chunks)
 
-    async with get_user_lock(request.user_id):  # one upload at a time per user
+    async with get_user_lock(user_id):  # one upload at a time per user
         chunk_count = await run_in_threadpool(index_and_save)
 
     return {
-        "filename": request.file.filename,
+        "filename": file.filename,
         "chunks_indexed": chunk_count,
     }
 

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,6 @@ import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 
 
@@ -69,14 +69,15 @@ public class HomeController {
         model.addAttribute("chat", chat);
 
 
+        // return "chat";
         return "chatDUMMY";
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<Void> uploadFile(@RequestBody MultipartFile file) {
+    public ResponseEntity<Void> uploadFile(@RequestPart("file") MultipartFile file, @RequestPart("chatId") String chatId) {
         externalToolService.tryUploadToAll(
             userService.getCurrentUser().getUserId(), 
-            -1l, 
+            Long.parseLong(chatId),
             file
         );
         
