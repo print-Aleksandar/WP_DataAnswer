@@ -9,3 +9,6 @@ faiss-cpu          #faiss-gpu
 pymupdf
 numpy
 minio
+python-docx
+odfpy
+docx2txt
