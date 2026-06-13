@@ -36,7 +36,6 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
         freeSpaceIfNeeded(tmpUser);
         TmpChat newChat = new TmpChat();
         tmpUser.setChat(newChat);
-        newChat.setChatName("DOCUMENT TO BE ANSWERD"); // IME TREBA DA SE SMENI
         tmpUserRepository.save(tmpUser);
         return newChat;
     }

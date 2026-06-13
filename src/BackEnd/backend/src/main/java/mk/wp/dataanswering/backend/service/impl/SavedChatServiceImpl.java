@@ -48,7 +48,6 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         }
         freeSpaceIfNeeded(registeredUser);
         SavedChat newChat = new SavedChat(registeredUser);
-        newChat.setChatName("DOCUMENT TO BE ANSWERD"); // IME TREBA DA SE SMENI
         savedChatRepository.save(newChat);
         return newChat;
     }
