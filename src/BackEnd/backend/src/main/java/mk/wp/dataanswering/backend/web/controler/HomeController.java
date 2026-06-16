@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.RegisteredUser;
 import mk.wp.dataanswering.backend.model.Subscription;
 import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.service.ExternalToolService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
@@ -24,13 +25,17 @@ public class HomeController {
     private final UserService userService;
     // private final ChatServiceRegistry chatServiceRegistry;
     private final SubscriptionService subscriptionService;
-    // private final ExternalToolService externalToolService;
+    private final ExternalToolService externalToolService;
     private final ChatServiceRegistry chatServiceRegistry;
 
 
     @GetMapping()
     public String getHomePage(@RequestParam(value="error", required=false) String error, Model model) {
         model.addAttribute("bodyContent", "home");
+        model.addAttribute(
+            "supportedFileTypes",  
+            String.join(",", externalToolService.getSupportedFileTypes())
+        );
 
         if(error!=null){
             model.addAttribute("error", error);

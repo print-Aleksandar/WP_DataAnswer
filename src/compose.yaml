@@ -142,6 +142,7 @@ services:
       - services_net
     depends_on:
       - db
+      - minio
       # - llm-service
 
 networks:

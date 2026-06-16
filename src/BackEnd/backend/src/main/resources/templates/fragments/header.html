@@ -59,7 +59,7 @@
         <div class="d-flex flex-column align-items-center justify-content-center mx-auto mt-auto" style="background-color: #131313; height: calc(100vh - 50px);">
             <p class="" style="color: #E0E0E0; font-weight: bold; font-size: 30px">Lets start answering?</p>
             <form action="/chat/start" method="post" enctype="multipart/form-data">
-                <input name="fileDocument" style="background-color: #2a2a2a; border: 1px solid #333333; border-radius: 10px; color: #E0E0E0; height: 47px;" class="form-control mb-2 placehodlerCustom" type="file" placeholder="Your Document">
+                <input name="fileDocument" style="background-color: #2a2a2a; border: 1px solid #333333; border-radius: 10px; color: #E0E0E0; height: 47px;" class="form-control mb-2 placehodlerCustom" type="file" th:accept="${supportedFileTypes}" placeholder="Your Document">
                 <input name="prompt" style="background-color: #444444; color: #E0E0E0; border-radius: 10px; padding: 10px; border: none;" class="form-control btn-custom placehodlerCustom" type="text" placeholder="Your question?">
                 <button class="btn d-flex justify-content-center mx-auto btn-custom mt-1" style="background-color: #444444; height: 35px; border-color: #444444; text-align: center; color: #E0E0E0" type="submit">Start</button>
                 <div th:if="${error}" 

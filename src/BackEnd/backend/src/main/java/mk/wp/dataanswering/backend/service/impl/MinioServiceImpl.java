@@ -1,6 +1,7 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import java.io.InputStream;
+import java.util.StringJoiner;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -48,13 +49,14 @@ public class MinioServiceImpl implements MinioService {
     }
 
     @Override
-    public String uploadFile(MultipartFile file) throws Exception {
+    public String uploadFile(MultipartFile file, Long userId, Long chatId) throws Exception {
         String minioKey = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        String path = "upload/" + userId + "/" + chatId + "/" + minioKey;
 
         minioClient.putObject(
             PutObjectArgs.builder()
                 .bucket(bucket)
-                .object(minioKey)
+                .object(path)
                 .stream(file.getInputStream(), file.getSize(), -1)
                 .contentType(file.getContentType())
                 .build()
@@ -63,23 +65,26 @@ public class MinioServiceImpl implements MinioService {
     }
 
     @Override
-    public InputStream downloadFile(String minioKey) throws Exception {
+    public InputStream downloadFile(String minioKey, Long userId, Long chatId) throws Exception {
+        String path = "upload/" + userId + "/" + chatId + "/" + minioKey;
         
         return minioClient.getObject(
             GetObjectArgs.builder()
                 .bucket(bucket)
-                .object(minioKey)
+                .object(path)
                 .build()
         );
 
     }
 
     @Override
-    public void deleteFile(String minioKey) throws Exception {
+    public void deleteFile(String minioKey, Long userId, Long chatId) throws Exception {
+        String path = "upload/" + userId + "/" + chatId + "/" + minioKey;
+
         minioClient.removeObject(
             RemoveObjectArgs.builder()
                 .bucket(bucket)
-                .object(minioKey)
+                .object(path)
                 .build()
         );
     }

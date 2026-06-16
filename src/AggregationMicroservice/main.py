@@ -26,12 +26,6 @@ class ColumnsRequest(BaseModel):
     user_id: int
     json_data: List[dict]
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     init_storage()
-#     yield
-#     DB.close()
-
 
 @app.post("/aggregate")
 async def run_aggregator(request: AggregationRequest):
@@ -149,6 +143,6 @@ from file_utils import handle_upload, get_supported_filetypes
 async def supported_filetypes():
     return get_supported_filetypes()
 
-@app.post('/upload')
+@app.post('/upload/{user_id}/{chat_id}')
 async def upload_file(user_id:int, chat_id:int, file: UploadFile = File(...)):
     return await handle_upload(user_id, chat_id, file)

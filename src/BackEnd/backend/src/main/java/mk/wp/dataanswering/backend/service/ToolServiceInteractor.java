@@ -1,6 +1,5 @@
 package mk.wp.dataanswering.backend.service;
 
-import java.io.IOException;
 import java.util.List;
 
 import org.springframework.web.multipart.MultipartFile;

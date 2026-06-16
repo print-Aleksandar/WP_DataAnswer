@@ -19,7 +19,7 @@ import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UploadFileService;
 import mk.wp.dataanswering.backend.service.UserService;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
-
+import mk.wp.dataanswering.backend.service.ExternalToolService;
 
 @Controller
 @RequestMapping("/chat")
@@ -31,6 +31,7 @@ public class ChatController {
     private final PromptService promptService;
     private final SubscriptionService subscriptionService;
     private final UploadFileService uploadFileService;
+    private final ExternalToolService externalToolService;
 
     @GetMapping("/{chatId}")
     public String getChat(@PathVariable Long chatId, Model model) {
@@ -75,7 +76,14 @@ public class ChatController {
         }
 
         Chat chat = chatServiceRegistry.getCorrectChatService().startNewChat();
-        uploadFileService.saveFile(fileDocument, chat);
+        User user = userService.getCurrentUser();
+
+        try {
+            uploadFileService.saveFile(fileDocument, user, chat);
+        } catch (Exception e) {
+            return "redirect:/home?error=Upload Failed!";
+        }
+        
         promptService.createPrompt(chat.getId(), prompt);
 
         return "redirect:/chat/" + chat.getId();

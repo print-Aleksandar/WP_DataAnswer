@@ -58,7 +58,7 @@ public class RagInteractor implements ToolServiceInteractor {
     public boolean healty() {
         try {
             return this.restTemplate.getForEntity(
-                baseUrl + "/healthy", 
+                baseUrl + "/health", 
                 Void.class
             ).getStatusCode() == HttpStatus.OK;
         } catch (Exception e) {

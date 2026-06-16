@@ -2,7 +2,6 @@ package mk.wp.dataanswering.backend.service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
@@ -24,6 +23,8 @@ public class ExternalToolService {
         List<String> errors = new ArrayList<>();
 
         for (ToolServiceInteractor interactor : interactors) {
+            if(!interactor.healty()) continue;
+            
             try {
                 interactor.tryUpload(userId, chatId, file);
             } catch (Exception e) {
