@@ -136,6 +136,7 @@ services:
       - APP_SESSION_TIMEOUT_SECONDS=${APP_SESSION_TIMEOUT_SECONDS}
       - AGGREGATE_URL=http://aggregate-service:7100
       - RAG_URL=http://rag-service:7000
+      - LLM_SERVICE_URL=http://llm-service:9999
     ports:
       - "9090:9090"
     networks:
@@ -143,7 +144,7 @@ services:
     depends_on:
       - db
       - minio
-      # - llm-service
+      - llm-service
 
 networks:
   services_net:

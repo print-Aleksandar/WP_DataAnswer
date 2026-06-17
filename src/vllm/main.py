@@ -28,27 +28,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/ask")
-async def ask_model(req:Request ,res:Response):
-    prompt = req.query_params.get("prompt", "")
-
-    if len(prompt) == 0:
-        raise HTTPException(400, "needs query parameter 'prompt'")
-
-    request = PromptRequest(prompt=prompt.strip())
-
-    message= await get_response(request)
-
-    return {"response": message}
-
-    async def message_stream():
-        for word in message:
-            yield word.encode("utf-8")
-
-    return StreamingResponse(message_stream(), media_type="text/plain")
-
-
-# TODO TEMP REMOVE
-@app.get('/debug/tools')
-def list_tools():
-    return TOOLS
+@app.post("/ask", response_class=StreamingResponse)
+async def ask_model(req:PromptRequest):
+    return StreamingResponse(
+        get_response(req), 
+        media_type="text/event-stream"
+    )

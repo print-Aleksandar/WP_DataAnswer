@@ -46,13 +46,13 @@ async def init_tools():
 
     print("[init_tool] Colecteded tools:", TOOL_MAP)
 
-def run_tool(url, params:dict):
+def run_tool(url, params:dict, user_id:int, chat_id:int):
         print('run_tool:', params, type(params))
         
         payload = params.copy()
 
-        payload['user_id'] = 1 # TODO Temp for testing - remove!
-        payload['chat_id'] = 1 # TODO Temp for testing - remove!
+        payload['user_id'] = user_id
+        payload['chat_id'] = chat_id
         response = httpx.post(url, json=payload)
         response.raise_for_status()
         return response.text
