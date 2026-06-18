@@ -2,6 +2,35 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
     
-    
+      <div class="col-10 p-0 d-flex flex-column">
+        <header th:replace="~{fragments/header}"></header>
+
+        <div class="d-flex flex-column align-items-center justify-content-center mt-auto flex-grow-1 bg-dark-1" 
+        >
+            <p class="fs-2 fw-bold text-light-1">Lets start answering?</p>
+            <form action="/chat/start" method="post" enctype="multipart/form-data">
+                <input 
+                  name="fileDocument" 
+                  class="form-control mb-2 placehodlerCustom p-2 border-1 radius-10 upload-input" 
+                  type="file" th:accept="${supportedFileTypes}" 
+                  placeholder="Your Document"
+                  >
+                <input 
+                  name="prompt" 
+                  class="form-control btn-custom placehodlerCustom text-light-1 border-0 p-2 radius-10 bg-gray-1" 
+                  type="text" 
+                  placeholder="Your question?"
+                  >
+                <button 
+                  class="btn d-flex justify-content-center mx-auto btn-custom mt-1 text-light-1 text-center gray-button"  
+                  type="submit"
+                  >Start</button>
+
+                <div class="text-center mb-2 error-text" th:if="${error}" 
+                        th:text="${error}">
+                </div>
+            </form>
+        </div>
+      </div> 
 
 </body>

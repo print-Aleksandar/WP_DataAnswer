@@ -1,0 +1,48 @@
+
+<div class="col-2 sidebar p-0 d-flex flex-column bg-dark-1" 
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+>
+    <a class="nav-link active p-2 text-light-1 fs-4" href="/">Data Answer</a>
+    <a class="nav-link link-custom text-light-1 p-1 fs-6 radius-10 ms-2 new-chat-button" href="/home">New Chat</a>
+    <hr>
+    <hr>
+    <div sec:authorize="isAuthenticated()">
+        <p class="p-2 text-gray-1 mb-0 fs-12px">Recent</p>
+        <div class="sidebar-chats overflow-auto p-2 text-light-1 bg-active">
+            <div th:each="chat : ${chats}">
+                <a th:href="@{'/chat/{chatId}' (chatId=${chat.getId()})}" 
+                class="text-truncate link-custom d-block mb-1 text-light-1 p-1 fs-12px" 
+                th:text="${chat.chatName}"></a>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="isAnonymous()" class="d-flex justify-content-center align-items-center mx-auto mt-auto">
+        <p class="text-gray-1 fs-12px">Login to see your chat history</p>
+    </div>
+
+    <div sec:authorize="isAuthenticated()" class="mt-auto">
+        <hr class="bg-gray-1">
+        <div class="d-flex align-items-center ps-2">
+        <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1" 
+        style="width: 40px;" th:text="${#strings.substring(username, 0, 1).toUpperCase()}"></p>
+        <div class="d-flex flex-column ps-2">
+            <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}" ></p>
+            <p class="fs-12px text-gray-1 d-inline-block" th:text="${plan}"></p>
+        </div>
+        </div>
+    </div>
+
+    <div sec:authorize="isAnonymous()" class="mt-auto">
+        <hr class="bg-gray-1">
+        <div class="d-flex align-items-center p-2">
+        <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1" 
+        style="width: 40px;">A</p>
+        <div class="d-flex flex-column" style="padding-left: 10px; ">
+            <p class="fs-12px text-light-1 d-inline-block m-0">Anonymous</p>
+            <p class="fs-12px text-gray-1 d-inline-block">Guest</p>
+        </div>
+        </div>
+    </div>
+</div>

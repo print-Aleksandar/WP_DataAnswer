@@ -3,6 +3,22 @@
 <head>
     <meta charset="UTF-8"/>
     <title>DataAnswering</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" 
+            integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
+            crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" 
+             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" 
+             crossorigin="anonymous"></script>
+    <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
+    
+    <!--
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
@@ -15,46 +31,125 @@
             integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
             crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
+    -->
 
     <style>
+        :root {
+                /* Override core theme colors */
+                --dark-1: #131313;
+                --dark-2: #2a2a2a;
+                --dark-3: #333333;
+
+                --gray-1: #444444;
+                --gray-2: #888888;
+
+                --light-1: #E0E0E0;
+
+                --red-1: #ff6b6b;
+                
+        }
+
         .btn-custom:hover{
-                background-color: #888888 !important;   
+                background-color: var(--gray-2) !important;   
         }
         .link-custom:hover{
-                background-color: #888888 !important;
+                background-color: var(--gray-2) !important;
                 border-radius: 10px;
                 text-decoration: none;
         }
         input[type="file"]::-webkit-file-upload-button {
-          background-color: #444444;
-          color: #E0E0E0;
+          background-color: var(--gray-1);
+          color: var(--light-1);
           border: none;
           border-radius: 8px;
           padding: 5px 10px;
           margin-left: 1px;
           cursor: pointer;
         }
+
+
         .placehodlerCustom::placeholder {
-                color: #E0E0E0;
+                color: var(--light-1);
         }
         .sidebar-chats::-webkit-scrollbar {
                 width: 4px;
         }
         .sidebar-chats::-webkit-scrollbar-track {
-                background: #131313;
+                background: var(--dark-1);
         }
         .sidebar-chats::-webkit-scrollbar-thumb {
-                background-color: #444444;
+                background-color: var(--gray-1);
                 border-radius: 10px;
+        }
+
+        .bg-dark-1 {
+                background-color: var(--dark-1) !important;
+        }
+        .text-light-1 {
+                color: var(--light-1) !important;
+        }
+        .text-gray-1 {
+                color: var(--gray-1) !important;
+        }
+        .bg-gray-1 {
+                background-color: var(--gray-1) !important;
+        }
+        .bg-light-1 {
+                background-color: var(--light-1) !important;
+
+        }
+        .radius-10 {
+                border-radius: 10px !important;
+        }
+
+        .fs-12px {
+                font-size: 12px !important;
+        }
+
+        .header-title {
+                font-size: 14px; 
+                padding: 10px; 
+                color: var(--light-1) !important;
+        }
+
+        .gray-button {
+                background-color: var(--gray-1) !important; 
+                height: 35px; 
+                border-color: var(--gray-1) !important; 
+        }
+
+        .upload-input {
+                background-color: var(--dark-2);    
+
+                border-color: var(--dark-3);  
+                color: var(--light-1); 
+        }
+
+        .upload-input:focus::-webkit-file-upload-button, 
+        .upload-input:hover::-webkit-file-upload-button {
+                background-color: var(--gray-2) !important;
+                color: var(--light-1);
+        }
+
+        .error-text {
+                color: var(--red-1); 
+                font-size: 13px;
+        }
+
+        .new-chat-button {
+                margin-right: 10px; 
         }
   </style>  
 </head>
 <body>
+<div class="container-fluid">
+   <div class="row" style="height: 100vh;">
+      <div class="sidebar" th:replace="~{fragments/sidebar}"></div>
 
-<header th:replace="~{fragments/header}"></header>
+      <section class="main" th:replace="~{${bodyContent}}"></section>
 
-<section class="main" th:replace="~{${bodyContent}}"></section>
-
+   </div>
+</div>
 
 </body>
 </html>

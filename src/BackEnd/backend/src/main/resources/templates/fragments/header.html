@@ -1,98 +1,20 @@
 <header xmlns:th="http://www.thymeleaf.org"
         xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div class="container-fluid">
-    <div class="row" style="height: 100vh;">
-      <div class="col-2 sidebar p-0 d-flex flex-column" style="background-color: #131313">
-        <a class="nav-link active" href="/" style="font-size: 25px; padding: 10px; color: #E0E0E0;">Data Answer</a>
-        <a sec:authorize="isAuthenticated()" class="nav-link link-custom" href="/home" style="font-size: 17px; border-radius: 10px; padding: 5px; margin-right: 10px; margin-left: 7px; color: #E0E0E0">New Chat</a>
-        <a sec:authorize="isAnonymous()" class="nav-link link-custom" href="/login" style="font-size: 17px; border-radius: 10px; padding: 5px; margin-right: 10px; margin-left: 7px; color: #E0E0E0">You must log in for New Chat</a>
-        <hr>
-        <hr>
-        <div sec:authorize="isAuthenticated()">
-            <p class="" style="padding: 10px; font-size: 12px; color: #444444">Recent</p>
-            <div class="sidebar-chats overflow-auto" style="padding: 10px; color: #E0E0E0; margin-top: -30px">
-              <div th:each="chat : ${chats}">
-                  <a th:href="@{'/chat/{chatId}' (chatId=${chat.getId()})}" 
-                    style="color: #E0E0E0; padding: 5px 4px; font-size: 12px;" 
-                    class="text-truncate link-custom d-block mb-1" 
-                    th:text="${chat.chatName}"></a>
-              </div>
-            </div>
-        </div>
+    <div
+    class="d-flex align-items-center justify-content-between bg-dark-1" 
+    style="height: 50px;"
+    >
+      <p class="nav-link mb-0 header-title">Start New Chat</p>
 
-        <div sec:authorize="isAnonymous()" class="d-flex justify-content-center align-items-center mx-auto mt-auto">
-          <p style="color: #444444; font-size: 12px">Login to see your chat history</p>
-        </div>
-
-        <div sec:authorize="isAuthenticated()" class="mt-auto">
-          <hr style="background-color: #444444;">
-          <div class="d-flex align-items-center" style="padding-left: 10px; ">
-            <p class="d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; background-color: #E0E0E0; display: inline-block; border-radius: 100%;" th:text="${#strings.substring(username, 0, 1).toUpperCase()}"></p>
-            <div class="d-flex flex-column" style="padding-left: 10px; ">
-              <p style="font-size: 12px;color: #E0E0E0; display: inline-block" th:text="${username}" ></p>
-              <p style="font-size: 12px;color: #444444; display: inline-block; margin-top: -15px" th:text="${plan}"></p>
-            </div>
-          </div>
-        </div>
-
-        <div sec:authorize="isAnonymous()" class="mt-auto">
-          <hr style="background-color: #444444;">
-          <div class="d-flex align-items-center" style="padding-left: 10px; ">
-            <p class="d-flex justify-content-center align-items-center" style="width: 40px; height: 40px; background-color: #E0E0E0; display: inline-block; border-radius: 100%;">D</p>
-            <div class="d-flex flex-column" style="padding-left: 10px; ">
-              <p style="font-size: 12px;color: #E0E0E0; display: inline-block">Your Account</p>
-              <p style="font-size: 12px;color: #444444; display: inline-block; margin-top: -15px">Plan</p>
-            </div>
-          </div>
-        </div>
+      <div class="p-4" sec:authorize="isAnonymous()">
+        <a class="btn btn-secondary mb-0 btn-custom text-center gray-button" href="/login">Login</a>
+        <a class="btn btn-secondary btn-custom text-center gray-button" href="/register">Register</a>
       </div>
 
-      <div sec:authorize="isAnonymous()" class="col-10 p-0">
-        <div class="d-flex align-items-center justify-content-between" style="height: 50px; background-color: #131313">
-          <p class="nav-link mb-0" style="font-size: 14px; padding: 10px; color: #E0E0E0">Log in to see your Chats</p>
-          <div  style="padding: 20px">
-            <a class="btn btn-secondary mb-0 btn-custom" style="background-color: #444444; height: 35px; border-color: #444444; text-align: center" href="/login">Login</a>
-            <a class="btn btn-secondary btn-custom" style="background-color: #444444; height: 35px; border-color: #444444; text-align: center" href="/register">Register</a>
-          </div>
-        </div>
-        <div class="d-flex flex-column align-items-center justify-content-center mx-auto mt-auto" style="background-color: #131313; height: calc(100vh - 50px);">
-            <p class="" style="color: #E0E0E0; font-weight: bold; font-size: 30px">Lets start answering?</p>
-            <form action="/chat/start" method="post" enctype="multipart/form-data">
-                <input name="fileDocument" style="background-color: #2a2a2a; border: 1px solid #333333; border-radius: 10px; color: #E0E0E0; height: 47px;" class="form-control mb-2 placehodlerCustom" type="file" th:accept="${supportedFileTypes}" placeholder="Your Document">
-                <input name="prompt" style="background-color: #444444; color: #E0E0E0; border-radius: 10px; padding: 10px; border: none;" class="form-control btn-custom placehodlerCustom" type="text" placeholder="Your question?">
-                <button class="btn d-flex justify-content-center mx-auto btn-custom mt-1" style="background-color: #444444; height: 35px; border-color: #444444; text-align: center; color: #E0E0E0" type="submit">Start</button>
-                <div th:if="${error}" 
-                        style="color: #ff6b6b; font-size: 13px; margin-bottom: 8px; text-align: center;"
-                        th:text="${error}">
-                </div>
-            </form>
-        </div>
-      </div>
-
-      <div sec:authorize="isAuthenticated()" class="col-10 p-0">
-        <div class="d-flex align-items-center justify-content-between" style="height: 50px; background-color: #131313">
-          <p class="nav-link mb-0" style="font-size: 14px; padding: 10px; color: #E0E0E0">Chat Title</p>
-          <div  style="padding: 20px">
-            <a class="btn btn-secondary mb-0 btn-custom" style="background-color: #444444; height: 35px; border-color: #444444; text-align: center" href="/logout">Logout</a>
-          </div>
-        </div>
-        <div class="d-flex flex-column align-items-center justify-content-center mx-auto mt-auto" style="background-color: #131313; height: calc(100vh - 50px);">
-            <p class="" style="color: #E0E0E0; font-weight: bold; font-size: 30px">Lets start answering?</p>
-            <div>
-                <form action="/chat/start" method="post" enctype="multipart/form-data">
-                    <input name="fileDocument" style="background-color: #2a2a2a; border: 1px solid #333333; border-radius: 10px; color: #E0E0E0; height: 47px;" class="form-control mb-2 placehodlerCustom" type="file" placeholder="Your Document">
-                    <input name="prompt" style="background-color: #444444; color: #E0E0E0; border-radius: 10px; padding: 10px; border: none;" class="form-control btn-custom placehodlerCustom" type="text" placeholder="Your question?">
-                    <button class="btn d-flex justify-content-center mx-auto btn-custom mt-1" style="background-color: #444444; height: 35px; border-color: #444444; text-align: center; color: #E0E0E0" type="submit">Start</button>
-                    <div th:if="${error}" 
-                        style="color: #ff6b6b; font-size: 13px; margin-bottom: 8px; text-align: center;"
-                        th:text="${error}">
-                    </div>
-                </form>
-            </div>
-        </div>
+      <div class="p-4" sec:authorize="isAuthenticated()">
+        <a class="btn btn-secondary mb-0 btn-custom text-center gray-button" href="/logout">Logout</a>
       </div>
     </div>
-  </div>
 
 </header>

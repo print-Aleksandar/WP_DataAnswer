@@ -28,7 +28,7 @@ public class ApiController {
 
     private final LlmService llmService;
     private final UserService userService;
-    private final ChatServiceRegistry chatServiceRegistry;
+    // private final ChatServiceRegistry chatServiceRegistry;
 
 
     @GetMapping("/stream-chunks")
