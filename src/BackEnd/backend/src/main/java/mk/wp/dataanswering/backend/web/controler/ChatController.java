@@ -1,5 +1,7 @@
 package mk.wp.dataanswering.backend.web.controler;
 
+import java.util.List;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +12,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
+import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.RegisteredUser;
 import mk.wp.dataanswering.backend.model.Subscription;
 import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.service.PromptService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UploadFileService;
@@ -31,32 +35,40 @@ public class ChatController {
     private final PromptService promptService;
     private final SubscriptionService subscriptionService;
     private final UploadFileService uploadFileService;
-    private final ExternalToolService externalToolService;
+    private final AuthUtils authUtils;
+
 
     @GetMapping("/{chatId}")
     public String getChat(@PathVariable Long chatId, Model model) {
         model.addAttribute("bodyContent", "chat");
-        model.addAttribute("chatId", chatId);
-        model.addAttribute("prompts", promptService.getPromptsForChat(chatId));
+
+        List<MessageDto> history = promptService.createHistory(
+            promptService.getPromptsForChat(chatId)
+        ); 
+        model.addAttribute("prompts", history);
+    
         Chat chat = chatServiceRegistry.getCorrectChatService().findById(chatId);
         model.addAttribute("chat", chat);
+
+        model.addAttribute("headerText", "");
 
         model.addAttribute("chats",chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
         
         try{
-            User currentUser = userService.getCurrentUser();
-            if (currentUser instanceof RegisteredUser registeredUser){
+            if (authUtils.isLoggedIn()){
+                RegisteredUser registeredUser = authUtils.getCurrentRegisteredUser();
+
                 model.addAttribute("username", registeredUser.getUserFirstName());
 
                 Subscription sub = subscriptionService.getActiveSubscription(registeredUser.getUserId());
-                model.addAttribute("plan", sub.getPlan().getPlanName()); 
-                model.addAttribute("user", registeredUser); 
+                model.addAttribute("plan", sub.getPlan().getPlanName());
+                model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());   
             }
         } catch (Exception e) {
-            
+            return "redirect:/logout";
         }
 
-        return "master-templateChat"; // TODO fix template
+        return "master-template";
     }
 
     @PostMapping("/start")

@@ -5,7 +5,7 @@
     class="d-flex align-items-center justify-content-between bg-dark-1" 
     style="height: 50px;"
     >
-      <p class="nav-link mb-0 header-title">Start New Chat</p>
+      <p class="nav-link mb-0 header-title" th:text="${headerText} ?: 'Start New Chat'"></p>
 
       <div class="p-4" sec:authorize="isAnonymous()">
         <a class="btn btn-secondary mb-0 btn-custom text-center gray-button" href="/login">Login</a>
