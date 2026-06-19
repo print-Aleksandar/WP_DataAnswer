@@ -1,26 +1,25 @@
 package mk.wp.dataanswering.backend.config;
 
+import java.rmi.registry.Registry;
+
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import mk.wp.dataanswering.backend.service.RegisteredUserService;
+import lombok.RequiredArgsConstructor;
+import mk.wp.dataanswering.backend.model.RegisteredUser;
+import mk.wp.dataanswering.backend.repository.RegisteredUserRepository;
 
 @Component
+@RequiredArgsConstructor
 public class CustomUsernamePasswordAuthenticationProvider implements AuthenticationProvider {
 
-    private final RegisteredUserService registeredUserService;
+    private final RegisteredUserRepository registeredUserRepository;
     private final PasswordEncoder passwordEncoder;
-
-    public CustomUsernamePasswordAuthenticationProvider(RegisteredUserService registeredUserService, PasswordEncoder passwordEncoder) {
-        this.registeredUserService = registeredUserService;
-        this.passwordEncoder = passwordEncoder;
-    }
 
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
@@ -31,13 +30,18 @@ public class CustomUsernamePasswordAuthenticationProvider implements Authenticat
             throw new BadCredentialsException("Empty credentials!");
         }
 
-        UserDetails userDetails = registeredUserService.loadUserByUsername(username);
+        RegisteredUser user = registeredUserRepository.findByUsername(username)
+        .orElseThrow(() -> new BadCredentialsException("User with usernamed doesn't exist!"));
 
-        if (!passwordEncoder.matches(password, userDetails.getPassword())) {
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BadCredentialsException("Password is incorrect!");
         }
 
-        return new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        return new UsernamePasswordAuthenticationToken(
+            user, 
+            null, 
+            user.getAuthorities()
+        );
     }
 
     @Override

@@ -10,10 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 @RequestMapping("/logout")
 public class LogoutController {
 
-    @GetMapping
-    public String logout(HttpServletRequest req) {
-        req.getSession().invalidate();
-        return "redirect:/login";
-    }
+    // @GetMapping
+    // public String logout(HttpServletRequest req) {
+    //     req.getSession().invalidate();
+    //     return "redirect:/login";
+    // }
 }
 

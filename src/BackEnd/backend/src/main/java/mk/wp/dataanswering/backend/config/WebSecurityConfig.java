@@ -9,7 +9,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 import lombok.AllArgsConstructor;
@@ -21,7 +20,6 @@ import lombok.AllArgsConstructor;
 public class WebSecurityConfig {
 
     private final CustomUsernamePasswordAuthenticationProvider authProvider;
-    private final PasswordEncoder passwordEncoder;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,12 +30,17 @@ public class WebSecurityConfig {
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/", "/home", "/register", "/login", "home/start-chat", "start-chat").permitAll() // alek: ne sakav da brisham home ili / treba da se dog
-                        // .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers(
+                        "/", "/home", 
+                        "/register", "/login", 
+                        "home/start-chat", "/start-chat", 
+                        "/chat/**")
+                        .permitAll() // alek: ne sakav da brisham home ili / treba da se dog
                         .anyRequest().authenticated()
                 )
                 .formLogin((form) -> form
                         .loginPage("/login")
+                        .loginProcessingUrl("/login")
                         .permitAll()
                         .failureUrl("/login?error=BadCredentials")
                         .defaultSuccessUrl("/home", true)

@@ -56,7 +56,7 @@ public class ChatController {
             
         }
 
-        return "master-templateChat";
+        return "master-templateChat"; // TODO fix template
     }
 
     @PostMapping("/start")
