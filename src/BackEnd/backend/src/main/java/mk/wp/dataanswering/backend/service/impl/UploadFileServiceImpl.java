@@ -1,5 +1,7 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import java.io.FileNotFoundException;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -42,6 +44,13 @@ public class UploadFileServiceImpl implements UploadFileService {
         );
 
         return uploadedFileRepository.save(uploadedFile);
+    }
+
+    @Override
+    public UploadedFile findByChat(Chat chat) throws Exception {
+
+        return uploadedFileRepository.findByChat(chat)
+        .orElseThrow(() -> new FileNotFoundException("File not fount!"));
     }
     
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.Prompt;
+import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.repository.ChatRepository;
 import mk.wp.dataanswering.backend.repository.PromptRepository;
@@ -45,11 +46,11 @@ public class PromptServiceImpl implements PromptService{
         )
         .map( p -> new MessageDto(
             p.getPromptText(),
-            // p.getRequests().stream()
-            // .map(r -> r.getResponse())
-            // .findFirst()
-            // .orElse(null)
-            "TMP RESPONSE"
+            p.getRequests().stream()
+            .map(r -> r.getResponse())
+            .map(Response::getResponseText)
+            .findFirst() // TODO Mosh treba podobra logika
+            .orElse(null)
         )).toList()
        ;
     }

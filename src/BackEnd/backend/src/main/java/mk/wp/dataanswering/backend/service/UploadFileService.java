@@ -9,4 +9,5 @@ import mk.wp.dataanswering.backend.model.User;
 public interface  UploadFileService {
 
     UploadedFile saveFile(MultipartFile file, User user, Chat chat) throws Exception;
+    UploadedFile findByChat(Chat chat) throws Exception;
 }

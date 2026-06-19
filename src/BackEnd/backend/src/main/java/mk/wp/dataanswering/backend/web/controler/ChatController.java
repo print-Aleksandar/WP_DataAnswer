@@ -57,6 +57,7 @@ public class ChatController {
         try{
             if (authUtils.isLoggedIn()){
                 RegisteredUser registeredUser = authUtils.getCurrentRegisteredUser();
+                model.addAttribute("userId", registeredUser.getUserId());
 
                 model.addAttribute("username", registeredUser.getUserFirstName());
 

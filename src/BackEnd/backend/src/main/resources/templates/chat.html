@@ -13,6 +13,24 @@
                 <p>No messages yet.</p>
             </div>
 
+            <div class="mb-4 mx-auto col-8">
+                <div class="d-flex justify-content-end mb-2">
+                    <div role="button" class="p-3 rounded text-white d-flex flex-column align-items-center bg-gray-1 cursor-pointer" 
+                        style="max-width: 80%;">
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        height="64px" viewBox="0 -960 960 960" 
+                        width="64px" fill="#e3e3e3">
+                        <!-- https://fonts.google.com/icons?selected=Material+Symbols+Sharp:docs:FILL@1;wght@400;GRAD@0;opsz@24&icon.query=doc&icon.style=Sharp&icon.size=24&icon.color=%23e3e3e3 -->
+                        <path d="M480-880v280h280v520H200v-800h280Zm80 0 200 200H560v-200ZM360-200h160v-80H360v80Zm0-160h240v-80H360v80Z"/>
+                        </svg>
+                        <a 
+                        th:href="@{ /download/file/{userId}/{chatId}(userId=${userId}, chatId=${chat.id}) }" 
+                        class="text-decoration-none text-light-1"
+                        >File name</a>
+                    </div>
+                </div>
+            </div>
+
             <div th:each="msg : ${prompts}" 
                 class="mb-4 mx-auto col-8">
 
