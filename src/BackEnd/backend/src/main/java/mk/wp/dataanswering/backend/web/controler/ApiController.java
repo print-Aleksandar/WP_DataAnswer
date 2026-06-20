@@ -1,5 +1,6 @@
 package mk.wp.dataanswering.backend.web.controler;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -7,14 +8,17 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.core.io.Resource;
@@ -23,13 +27,18 @@ import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.Prompt;
 import mk.wp.dataanswering.backend.model.Request;
+import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.UploadedFile;
+import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
+import mk.wp.dataanswering.backend.model.dto.MessageDto;
+import mk.wp.dataanswering.backend.model.dto.PromptRequest;
 import mk.wp.dataanswering.backend.service.LlmService;
 import mk.wp.dataanswering.backend.service.UploadFileService;
 import mk.wp.dataanswering.backend.service.UserService;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 import mk.wp.dataanswering.backend.service.MinioService;
+import mk.wp.dataanswering.backend.service.PromptService;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.UrlResource;
@@ -48,32 +57,7 @@ public class ApiController {
     private final MinioService minioService;
     private final ChatServiceRegistry chatServiceRegistry;
     private final UploadFileService fileService;
-
-    @GetMapping("/stream-chunks")
-    @PreAuthorize("permitAll()")
-    public ResponseEntity<StreamingResponseBody> streamChunks() {
-        
-        StreamingResponseBody responseBody = (OutputStream outputStream) -> {
-            for (int i = 1; i <= 10; i++) {
-                try {
-                    String chunk = "Chunk #" + i + " data packet\n";
-                    outputStream.write(chunk.getBytes(StandardCharsets.UTF_8));
-                    outputStream.flush(); // Forces the chunk to be sent immediately
-                    
-                    // Simulate processing delay
-                    Thread.sleep(500); 
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    break;
-                }
-            }
-        };
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
-                .header(HttpHeaders.TRANSFER_ENCODING, "chunked") 
-                .body(responseBody);
-    }
+    private final PromptService promptService;
 
     @GetMapping("/download/file/{userId}/{chatId}")
     public ResponseEntity<Resource> downloadFileFromChat(@PathVariable Long userId, @PathVariable Long chatId) {
@@ -106,24 +90,67 @@ public class ApiController {
     }
 
     @PostMapping("/prompt")
-    public ResponseEntity<StreamingResponseBody> streamResponse(@RequestBody String prompt) {
-        // Prompt prompt = new Prompt(, prompt, null, null)
-        // Request req;
-        StreamingResponseBody responseBody = (OutputStream outputStream) -> {
-                try {
-                    llmService.streamPrompt(new LlmRequest(
-                        userService.getCurrentUser().getUserId(), 
-                        1L, // TODO: Get current active chat id for current user
-                        prompt
+    public ResponseEntity<StreamingResponseBody> streamResponse(
+        @RequestBody PromptRequest promptRequest
+    ) {
+        Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
+        User user = userService.getCurrentUser();
+        
+        Request req = promptService.createPrompt(chat.getId(), promptRequest.promptText());
 
-                    ), outputStream);
-                    
-                } catch (Exception e) {
-                    Thread.currentThread().interrupt();
-                    System.out.print("ERROR: " + e.getMessage());
+
+        StreamingResponseBody responseBody = (OutputStream outputStream) -> {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            boolean corrupted = false;
+            boolean stopped = false;
+
+            // Write to both streams
+            OutputStream helperStream = new OutputStream() {
+                @Override
+                public void write(int b) throws IOException {
+                    outputStream.write(b);
+                    baos.write(b);
                 }
 
-                // Add response to prompt 
+                @Override
+                public void write(byte[] b, int off, int len) throws IOException {
+                    outputStream.write(b, off, len);
+                    baos.write(b, off, len);
+                }
+
+                @Override
+                public void flush() throws IOException {
+                    outputStream.flush();
+                    // baos.flush();
+                }
+            };
+
+            try {
+                llmService.streamPrompt(new LlmRequest(
+                    promptRequest.chatId(),
+                    user.getUserId(), 
+                    promptRequest.promptText(),
+                    promptService.createHistory(
+                        promptService.getPromptsForChat(promptRequest.chatId())
+                    )
+                ), helperStream);
+                
+            } catch (Exception e) {
+                stopped = e.getClass().getName().contains("ClientAbortException");
+                corrupted = !stopped;
+
+                Thread.currentThread().interrupt();
+                // System.out.print("ERROR: " + e.getMessage());
+            } finally {
+                // get set response text to response object
+                String responseText = baos.toString(StandardCharsets.UTF_8);
+                // response.setResponseText(responseText);
+                // response.setAnswered(true);
+                promptService.saveResult(req.getId(), responseText, corrupted, stopped);
+            }
+
+            // chatServiceRegistry.getCorrectChatService().addPrompt(chat, prompt, req, response);
+            
         };
 
         return ResponseEntity.ok()
@@ -131,4 +158,86 @@ public class ApiController {
                 .header(HttpHeaders.TRANSFER_ENCODING, "chunked") 
                 .body(responseBody);
     }
+    
+    //*
+    @PostMapping("/prompt/regenarate/last")
+    public ResponseEntity<StreamingResponseBody> regeneratePrompt(
+        @RequestBody PromptRequest promptRequest
+    ) {
+        Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
+        User user = userService.getCurrentUser();
+        
+        
+
+        Request req = promptService.regeneratePrompt(
+            chat.getId(), 
+            promptRequest.promptText()
+        );
+
+
+        StreamingResponseBody responseBody = (OutputStream outputStream) -> {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            boolean corrupted = false;
+            boolean stopped = false;
+
+            // Write to both streams
+            OutputStream helperStream = new OutputStream() {
+                @Override
+                public void write(int b) throws IOException {
+                    outputStream.write(b);
+                    baos.write(b);
+                }
+
+                @Override
+                public void write(byte[] b, int off, int len) throws IOException {
+                    outputStream.write(b, off, len);
+                    baos.write(b, off, len);
+                }
+
+                @Override
+                public void flush() throws IOException {
+                    outputStream.flush();
+                    // baos.flush();
+                }
+            };
+            
+            List<MessageDto> history = promptService.createHistory(
+                        promptService.getPromptsForChat(promptRequest.chatId())
+                    );
+            
+            if (!history.isEmpty()) 
+                history.removeLast(); 
+
+            try {
+                llmService.streamPrompt(new LlmRequest(
+                    promptRequest.chatId(),
+                    user.getUserId(), 
+                    promptRequest.promptText(),
+                    history
+                ), helperStream);
+                
+            } catch (Exception e) {
+                stopped = e.getClass().getName().contains("ClientAbortException");
+                corrupted = !stopped;
+                
+                Thread.currentThread().interrupt();
+                // System.out.print("ERROR: " + e.getMessage());
+            } finally {
+                // get set response text to response object
+                String responseText = baos.toString(StandardCharsets.UTF_8);
+                // response.setResponseText(responseText);
+                // response.setAnswered(true);
+                promptService.saveResult(req.getId(), responseText, corrupted, stopped);
+            }
+
+            // chatServiceRegistry.getCorrectChatService().addPrompt(chat, prompt, req, response);
+            
+        };
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
+                .header(HttpHeaders.TRANSFER_ENCODING, "chunked") 
+                .body(responseBody);
+    }
+    //*/
 }

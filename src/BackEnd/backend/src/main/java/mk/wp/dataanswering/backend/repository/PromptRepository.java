@@ -10,4 +10,5 @@ import mk.wp.dataanswering.backend.model.Prompt;
 @Repository
 public interface PromptRepository extends JpaRepository<Prompt, Long> {
     List<Prompt> findByChatIdOrderByPromptTsAsc(Long chatId);
+    List<Prompt> findAllByChatId(Long chatId);
 }

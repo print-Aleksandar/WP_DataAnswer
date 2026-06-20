@@ -3,10 +3,13 @@ package mk.wp.dataanswering.backend.model;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name="requests")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,4 +29,5 @@ public class Request {
 
     @OneToOne(mappedBy = "request", cascade = CascadeType.ALL)
     private Response response;
+
 }

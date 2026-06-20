@@ -1,6 +1,7 @@
 package mk.wp.dataanswering.backend.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,10 +19,13 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name="prompts")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -52,5 +56,19 @@ public class Prompt {
 
     public void setChat(Chat chat) {
         this.chat = chat;
+    }
+
+    public void addRequest(Request request) {
+        if(requests == null){
+            this.requests = new ArrayList<>();
+        }
+        requests.add(request);
+        request.setPrompt(this);
+    }
+
+    public Prompt(String promptText, Chat chat){
+        this.promptText = promptText;
+        this.chat = chat;
+        this.promptTs = LocalDateTime.now();
     }
 }

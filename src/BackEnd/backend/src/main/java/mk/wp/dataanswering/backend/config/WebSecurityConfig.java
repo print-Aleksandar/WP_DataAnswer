@@ -2,6 +2,7 @@ package mk.wp.dataanswering.backend.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -34,7 +35,8 @@ public class WebSecurityConfig {
                         "/", "/home", 
                         "/register", "/login", 
                         "home/start-chat", "/start-chat", 
-                        "/chat/**")
+                        "/chat/**",
+                        "/api/prompt", "/prompt/regenarate/last" )
                         .permitAll() // alek: ne sakav da brisham home ili / treba da se dog
                         .anyRequest().authenticated()
                 )
