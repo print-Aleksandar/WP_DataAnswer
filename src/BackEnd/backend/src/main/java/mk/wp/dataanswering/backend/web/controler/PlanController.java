@@ -2,6 +2,9 @@ package mk.wp.dataanswering.backend.web.controler;
 
 import java.time.LocalDateTime;
 
+import lombok.RequiredArgsConstructor;
+import mk.wp.dataanswering.backend.model.Subscription;
+import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -25,6 +28,7 @@ public class PlanController {
     private final PlanService planService;
     private final SubscriptionService subscriptionService;
     private final RegisteredUserRepository registeredUserRepository;
+    private final ChatServiceRegistry chatServiceRegistry;
 
     @GetMapping
     public String getPlansPage(Authentication authentication, Model model) {
@@ -32,10 +36,16 @@ public class PlanController {
         
         RegisteredUser user = registeredUserRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User '" + username + "' not found in database"));
-        
+
+        Subscription sub = subscriptionService.getActiveSubscription(user.getUserId());
+
         model.addAttribute("activeSub", subscriptionService.getActiveSubscription(user.getUserId()));
         model.addAttribute("plans", planService.listAll());
-        model.addAttribute("bodyContent", "plans");
+    model.addAttribute("bodyContent", "plans");
+
+        model.addAttribute("username", user.getUserFirstName());
+        model.addAttribute("plan", sub.getPlan().getPlanName());
+        model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
         return "master-template";
     }
 

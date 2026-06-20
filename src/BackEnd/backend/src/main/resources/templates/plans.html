@@ -1,32 +1,103 @@
-<div class="plans-page">
-    <h2>Your Current Plan</h2>
+<!--<div class="plans-page">-->
+<!--    <h2>Your Current Plan</h2>-->
 
-    <div class="active-plan">
-        <p>Plan: <strong th:text="${activeSub.plan.planName}"></strong></p>
-        <p>Cost: <strong th:text="${activeSub.plan.planCost} + ' $/month'"></strong></p>
-        <p>Chat limit: <strong th:text="${activeSub.plan.dayChatLimit} + ' per day'"></strong></p>
-        <p>Prompt limit: <strong th:text="${activeSub.plan.dayPromptLimit} + ' per day'"></strong></p>
-        <p>Expires: <strong th:text="${#temporals.format(activeSub.endTs, 'dd MMM yyyy')}"></strong></p>
+<!--    <div class="active-plan">-->
+<!--        <p>Plan: <strong th:text="${activeSub.plan.planName}"></strong></p>-->
+<!--        <p>Cost: <strong th:text="${activeSub.plan.planMonthlyCost} + ' $/month'"></strong></p>-->
+<!--        <p>Chat limit: <strong th:text="${activeSub.plan.dayChatLimit} + ' per day'"></strong></p>-->
+<!--        <p>Prompt limit: <strong th:text="${activeSub.plan.requestPerChatLimit} + ' per day'"></strong></p>-->
+<!--        <p>Expires: <strong th:text="${#temporals.format(activeSub.endTs, 'dd MMM yyyy')}"></strong></p>-->
 
-        <form th:action="@{/plans/cancel/{id}(id=${activeSub.id})}" method="post">
-            <button type="submit">Cancel Subscription</button>
-        </form>
-    </div>
+<!--        <form th:action="@{/plans/cancel/{id}(id=${activeSub.id})}" method="post">-->
+<!--            <button type="submit">Cancel Subscription</button>-->
+<!--        </form>-->
+<!--    </div>-->
 
-    <hr>
-    <h2>Available Plans</h2>
+<!--    <hr>-->
+<!--    <h2>Available Plans</h2>-->
 
-    <div th:each="plan : ${plans}" class="plan-card">
-        <h3 th:text="${plan.planName}"></h3>
-        <p th:text="${plan.planCost == 0 ? 'Free' : plan.planCost + ' $/month'}"></p>
-        <p th:text="${plan.dayChatLimit} + ' chats/day'"></p>
-        <p th:text="${plan.dayPromptLimit} + ' prompts/day'"></p>
+<!--    <div th:each="plan : ${plans}" class="plan-card">-->
+<!--        <h3 th:text="${plan.planName}"></h3>-->
+<!--        <p th:text="${plan.planMonthlyCost == 0 ? 'Free' : plan.planMonthlyCost + ' $/month'}"></p>-->
+<!--        <p th:text="${plan.dayChatLimit} + ' chats/day'"></p>-->
+<!--        <p th:text="${plan.requestPerChatLimit} + ' prompts/day'"></p>-->
 
-        <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}" method="post">
-            <button type="submit"
-                    th:text="${ activeSub.plan.id == plan.id} ? 'Current Plan' : 'Subscribe'"
-                    th:disabled="${activeSub.plan.id == plan.id}">
+<!--        <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}" method="post">-->
+<!--            <button type="submit"-->
+<!--                    th:text="${ activeSub.plan.id == plan.id} ? 'Current Plan' : 'Subscribe'"-->
+<!--                    th:disabled="${activeSub.plan.id == plan.id}">-->
+<!--            </button>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--</div>-->
+
+<div class="col p-4 bg-dark-1 text-light-1"
+     style="overflow-y: auto; height: 100vh;"
+     xmlns:th="http://www.thymeleaf.org"
+>
+
+    <div th:if="${error}" class="alert error-text bg-dark-2 radius-10" th:text="${error}"
+         style="background-color: var(--dark-2); border: 1px solid var(--red-1);"></div>
+
+    <p class="header-title px-0 mb-2">Your Plan</p>
+
+    <div class="p-3 mb-4 radius-10" style="background-color: var(--dark-2); max-width: 480px;">
+        <div class="d-flex justify-content-between align-items-start mb-2">
+            <div>
+                <h5 class="mb-0" th:text="${activeSub.plan.planName}"></h5>
+                <span class="text-light-2 fs-12px">Active subscription</span>
+            </div>
+            <span class="badge fs-12px align-self-center"
+                  style="background-color: var(--light-1); color: var(--dark-1);"
+                  th:text="${activeSub.plan.planMonthlyCost == 0 ? 'Free' : activeSub.plan.planMonthlyCost + ' $/month'}"></span>
+        </div>
+
+        <hr style="border-color: var(--gray-1); opacity: 1;">
+
+        <div class="row gx-3 fs-12px text-gray-1">
+            <div class="col-6 mb-2">
+                <div class="text-light-1 fs-5" th:text="${activeSub.plan.dayChatLimit}"></div>
+                <div class="text-light-2">chats / day</div>
+            </div>
+            <div class="col-6 mb-2">
+                <div class="text-light-1 fs-5" th:text="${activeSub.plan.requestPerChatLimit}"></div>
+                <div class="text-light-2">prompts / chat</div>
+            </div>
+            <div class="col-12 text-light-2">
+                Renews / expires
+                <span class="text-light-1" th:text="${#temporals.format(activeSub.endTs, 'dd MMM yyyy')}"></span>
+            </div>
+        </div>
+
+        <form th:action="@{/plans/cancel/{id}(id=${activeSub.id})}" method="post" class="mt-3">
+            <button type="submit" class="btn btn-sm w-100"
+                    style="background-color: var(--red-1); color: var(--dark-1); border: none;">
+                Cancel Subscription
             </button>
         </form>
     </div>
+
+    <hr class="bg-light-1" style="opacity: 1; height: 1px;">
+
+    <p class="header-title px-0 mt-3 mb-2">Available Plans</p>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+        <div class="col" th:each="plan : ${plans}">
+            <div class="p-3 h-100 d-flex flex-column radius-10" style="background-color: var(--dark-2);">
+                <h6 class="mb-1" th:text="${plan.planName}"></h6>
+                <p class="fs-12px text-light-2 mb-1"
+                   th:text="${plan.planMonthlyCost == 0 ? 'Free' : plan.planMonthlyCost + ' $/month'}"></p>
+                <p class="fs-12px text-light-2 mb-1" th:text="${plan.dayChatLimit} + ' chats/day'"></p>
+                <p class="fs-12px text-light-2 mb-3" th:text="${plan.requestPerChatLimit} + ' prompts/chat'"></p>
+
+                <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}" method="post" class="mt-auto">
+                    <button type="submit" class="btn btn-sm w-100 gray-button text-light-1 border-0"
+                            th:text="${activeSub.plan.id == plan.id ? 'Current Plan' : 'Subscribe'}"
+                            th:disabled="${activeSub.plan.id == plan.id || plan.id == 3}" >
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
 </div>
