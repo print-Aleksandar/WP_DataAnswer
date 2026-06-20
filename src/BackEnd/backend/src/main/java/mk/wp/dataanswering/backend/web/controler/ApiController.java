@@ -21,6 +21,8 @@ import org.springframework.core.io.Resource;
 
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
+import mk.wp.dataanswering.backend.model.Prompt;
+import mk.wp.dataanswering.backend.model.Request;
 import mk.wp.dataanswering.backend.model.UploadedFile;
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
 import mk.wp.dataanswering.backend.service.LlmService;
@@ -73,11 +75,11 @@ public class ApiController {
                 .body(responseBody);
     }
 
-    @GetMapping("/download/file/{userid}/{chatId}")
+    @GetMapping("/download/file/{userId}/{chatId}")
     public ResponseEntity<Resource> downloadFileFromChat(@PathVariable Long userId, @PathVariable Long chatId) {
         Chat chat;
         UploadedFile file;
-        try{    // TODO: Ne raboti zaradi getCurrentUser vvv
+        try{
             chat = chatServiceRegistry.getCorrectChatService().findById(chatId);
             file = fileService.findByChat(chat);
         } catch (Exception e) {
@@ -105,6 +107,8 @@ public class ApiController {
 
     @PostMapping("/prompt")
     public ResponseEntity<StreamingResponseBody> streamResponse(@RequestBody String prompt) {
+        // Prompt prompt = new Prompt(, prompt, null, null)
+        // Request req;
         StreamingResponseBody responseBody = (OutputStream outputStream) -> {
                 try {
                     llmService.streamPrompt(new LlmRequest(
@@ -118,6 +122,8 @@ public class ApiController {
                     Thread.currentThread().interrupt();
                     System.out.print("ERROR: " + e.getMessage());
                 }
+
+                // Add response to prompt 
         };
 
         return ResponseEntity.ok()

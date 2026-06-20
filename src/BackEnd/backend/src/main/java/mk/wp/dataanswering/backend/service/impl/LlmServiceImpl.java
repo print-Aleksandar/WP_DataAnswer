@@ -60,6 +60,9 @@ public class LlmServiceImpl implements LlmService {
                     outputStream.write(buffer, 0, read);
                     outputStream.flush(); // send chunks to client
                 }
+            } catch (Exception e) {
+                outputStream.flush();
+                throw new IOException("Streaming failed with reason: " + e.getMessage());
             }
 
             return null;
