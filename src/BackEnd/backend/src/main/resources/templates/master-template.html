@@ -34,6 +34,22 @@
                 
         }
 
+        .btn-cancel-sub {
+            background-color: var(--red-1);
+            color: var(--dark-1);
+            border: none;
+            /* Adds a smooth animated transition when hovering */
+            transition: all 0.2s ease-in-out;
+        }
+
+        .btn-cancel-sub:hover {
+            /* Automatically darkens the button by 15% on hover */
+            filter: brightness(0.85);
+
+            /* Ensures the text color stays consistent */
+            color: var(--dark-1);
+        }
+
         .btn-custom:hover{
                 background-color: var(--gray-2) !important;   
         }

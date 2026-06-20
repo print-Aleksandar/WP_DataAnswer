@@ -24,13 +24,22 @@
 
     <div sec:authorize="isAuthenticated()" class="mt-auto">
         <hr class="bg-gray-1">
-        <div class="d-flex align-items-center ps-2">
-        <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1" 
-        style="width: 40px;" th:text="${#strings.substring(username, 0, 1).toUpperCase()}"></p>
-        <div class="d-flex flex-column ps-2">
-            <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}" ></p>
-            <p class="fs-12px text-gray-1 d-inline-block" th:text="${plan}"></p>
-        </div>
+        <div class="d-flex flex-row justify-content-between align-items-center ps-2">
+            <div class="d-flex align-items-center ps-2">
+                <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1"
+                    style="width: 40px;" th:text="${#strings.substring(username, 0, 1).toUpperCase()}">
+                </p>
+                <div class="d-flex flex-column ps-2">
+                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}" ></p>
+                    <p class="fs-12px text-gray-1 d-inline-block" th:text="${plan}"></p>
+                </div>
+            </div>
+            <div>
+                <a th:href="@{/plans}"
+                   class="btn gray-button btn-custom rounded-pill text-white d-inline-flex align-items-center justify-content-center"
+                   role="button"
+                >Change Plan</a>
+            </div>
         </div>
     </div>
 
