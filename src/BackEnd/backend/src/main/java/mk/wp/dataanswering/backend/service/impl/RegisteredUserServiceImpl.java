@@ -1,5 +1,6 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import jakarta.transaction.Transactional;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -64,5 +65,14 @@ public class RegisteredUserServiceImpl implements RegisteredUserService {
     @Override
     public boolean isAccountActive(Long id) {
         return registeredUserRepository.findByUserIdAndEnabledIsTrue(id);
+    }
+
+    @Transactional
+    @Override
+    public void softDelete(long userId) {
+        RegisteredUser user = registeredUserRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.softDelete();
+        registeredUserRepository.save(user);
     }
 }

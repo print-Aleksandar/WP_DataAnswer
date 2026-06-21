@@ -9,4 +9,5 @@ public interface RegisteredUserService extends UserDetailsService {
     
     RegisteredUser register(String username,String userFirstName, String userEmail, String userLastName,String password, String repeatPassword,Role role);
     boolean isAccountActive(Long id);
+    void softDelete(long userId);
 }

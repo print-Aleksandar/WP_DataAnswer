@@ -35,18 +35,42 @@
         <div class="d-flex flex-row justify-content-between align-items-center ps-2">
             <div class="d-flex align-items-center ps-2">
                 <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1"
-                    style="width: 40px;" th:text="${#strings.substring(username, 0, 1).toUpperCase()}">
+                   style="width: 40px; cursor:pointer;"
+                   th:text="${#strings.substring(username, 0, 1).toUpperCase()}"
+                   onclick="document.getElementById('deleteAccountModal').style.display='flex'">
                 </p>
                 <div class="d-flex flex-column ps-2">
-                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}" ></p>
+                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}"></p>
                     <p class="fs-12px text-gray-1 d-inline-block" th:text="${plan}"></p>
                 </div>
             </div>
             <div>
                 <a th:href="@{/plans}"
                    class="mb-2 btn gray-button btn-custom rounded-pill text-white d-inline-flex align-items-center justify-content-center"
-                   role="button"
-                >Change Plan</a>
+                   role="button">Change Plan</a>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteAccountModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65);
+     align-items:center; justify-content:center; z-index:300;">
+        <div style="background:#1e1e1e; border:1px solid #333; border-radius:10px; padding:1.5rem; max-width:340px; width:90%;">
+            <p class="text-light-1 m-0 mb-1" style="font-size:15px; font-weight:500;">Delete account?</p>
+            <p class="text-gray-1 m-0 mb-4 fs-12px">
+                This will permanently delete your account and all associated data. This cannot be undone.
+            </p>
+            <div class="d-flex justify-content-end gap-2">
+                <button type="button"
+                        class="btn btn-outline-secondary"
+                        onclick="document.getElementById('deleteAccountModal').style.display='none'">
+                    Cancel
+                </button>
+
+                <form action="/user/delete" method="post" class="m-0">
+                    <button type="submit" class="btn btn-danger">
+                        Delete my account
+                    </button>
+                </form>
             </div>
         </div>
     </div>

@@ -53,6 +53,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
         TmpUser tmpUser = (TmpUser) currentUser;
         freeSpaceIfNeeded(tmpUser);
         TmpChat newChat = new TmpChat();
+        tmpChatRepository.save(newChat);
         tmpUser.setChat(newChat);
         tmpUserRepository.save(tmpUser);
         return newChat;
@@ -61,8 +62,10 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     @Override
     public void freeSpaceIfNeeded(TmpUser tmpUser) {
         if (tmpUser.getChat() != null) {
+            TmpChat oldChat = tmpUser.getChat();
             tmpUser.setChat(null);
             tmpUserRepository.save(tmpUser);
+            tmpChatRepository.delete(oldChat);
         }
     }
 
