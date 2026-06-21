@@ -123,6 +123,14 @@
                         body: JSON.stringify(body)
 
                     });
+
+                    if (response.status === 429) {
+                        bubble.querySelector('span:not(.loader)').innerText = 'Message limit reached, please start a new chat.';
+                        document.querySelector("#prompt-input").disabled = true;
+                        document.querySelector("button[type='submit']").disabled = true;
+                        streaming = false;
+                        return;
+                    }
                     const reader = response.body.getReader();
                     const decoder = new TextDecoder();
                     let res = '';
@@ -229,6 +237,6 @@
                 }
             </script>
         </div>
-
+        <p class="inline-error" th:text="${error} ?: ' '"></p>
     </div>
 </div>

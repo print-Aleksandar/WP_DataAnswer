@@ -1,8 +1,10 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -23,8 +25,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private final UserRepository userRepository;
     private final PlanService planService;
+    private final AuthUtils authUtils;
 
-    // exact match by plan name upper case
     @Override
     public Subscription subscribe(Long userId, Long planId) {
         subscriptionRepository.findSubscriptionByUser_UserIdAndIsActiveTrue(userId)
@@ -65,5 +67,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public void deleteAllByUserId(Long userId) {
         subscriptionRepository.deleteAllByUser_UserId(userId);
+    }
+
+    @Override
+    public List<Subscription> getSubscriptionHistory(Long userId) throws AccessDeniedException {
+
+        RegisteredUser current = authUtils.getCurrentRegisteredUser();
+        if (userId != current.getUserId()) {
+            throw new AccessDeniedException("NotUsersChat");
+        }
+        return subscriptionRepository.findAllByUser_UserId(userId);
     }
 }

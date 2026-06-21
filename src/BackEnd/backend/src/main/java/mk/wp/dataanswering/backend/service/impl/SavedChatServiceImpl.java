@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
+import mk.wp.dataanswering.backend.repository.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +19,6 @@ import mk.wp.dataanswering.backend.model.Subscription;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
-import mk.wp.dataanswering.backend.repository.PromptRepository;
-import mk.wp.dataanswering.backend.repository.RequestRepository;
-import mk.wp.dataanswering.backend.repository.ResponseRepository;
-import mk.wp.dataanswering.backend.repository.SavedChatRepository;
-import mk.wp.dataanswering.backend.repository.TmpUserRepository;
 import mk.wp.dataanswering.backend.service.ChatService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
@@ -31,6 +27,7 @@ import mk.wp.dataanswering.backend.service.UserService;
 @Service
 public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUser> {
 
+    private final RegisteredUserRepository registeredUserRepository;
     @Value("${saved.chats.limit}")
     private int savedChatsLimit;
 

@@ -43,6 +43,8 @@ public class HomeController {
             String.join(",", externalToolService.getSupportedFileTypes())
         );
 
+        model.addAttribute("usersName", userService.getUsersName());
+
         if(error!=null){
             model.addAttribute("error", error);
         }

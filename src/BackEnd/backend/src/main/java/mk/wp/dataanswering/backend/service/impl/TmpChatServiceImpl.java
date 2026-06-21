@@ -5,6 +5,7 @@ import java.util.List;
 import mk.wp.dataanswering.backend.repository.ChatRepository;
 import mk.wp.dataanswering.backend.repository.PromptRepository;
 
+import mk.wp.dataanswering.backend.service.RequestService;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -34,6 +35,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     private final RequestRepository requestRepository;
     private final ResponseRepository responseRepository;
     private final PromptRepository promptRepository;
+    private final RequestService requestService;
 
     // TmpChatServiceImpl(ChatRepository chatRepository) {
     //     this.chatRepository = chatRepository;
@@ -81,7 +83,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     }
 
     @Override
-    public void addPrompt(Chat chat, Prompt prompt, Request request, Response response) {
+    public void addPrompt(Chat chat, Prompt prompt, Request request, Response response) throws RuntimeException {
 
         prompt.getRequests().add(request);
         prompt.setChat(chat);

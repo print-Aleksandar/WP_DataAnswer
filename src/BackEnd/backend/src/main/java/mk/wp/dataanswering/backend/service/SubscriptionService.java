@@ -1,5 +1,6 @@
 package mk.wp.dataanswering.backend.service;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -11,4 +12,5 @@ public interface SubscriptionService {
     Subscription getActiveSubscription(Long userId);
     void cancel(Long subscriptionId);
     void deleteAllByUserId(Long userId);
+    List<Subscription> getSubscriptionHistory(Long userId) throws AccessDeniedException;
 }

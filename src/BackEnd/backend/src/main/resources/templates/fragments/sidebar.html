@@ -1,19 +1,27 @@
 
-<div class="col-2 sidebar p-0 d-flex flex-column bg-dark-1" 
+<div class="col-2 sidebar p-2 d-flex flex-column bg-dark-1"
      xmlns:th="http://www.thymeleaf.org"
      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 >
     <a class="nav-link active p-2 text-light-1 fs-4" href="/">Data Answer</a>
-    <a class="nav-link link-custom text-light-1 p-1 fs-6 radius-10 ms-2 new-chat-button" href="/home">New Chat</a>
-    <hr>
+    <a class="nav-link link-custom text-light-1 p-1 fs-6 radius-10 ms-2 submit-btn text-center" href="/home">New Chat</a>
     <hr>
     <div sec:authorize="isAuthenticated()">
         <p class="p-2 text-gray-1 mb-0 fs-12px">Recent</p>
         <div class="sidebar-chats overflow-auto p-2 text-light-1 bg-active">
             <div th:each="chat : ${chats}">
-                <a th:href="@{'/chat/{chatId}' (chatId=${chat.getId()})}" 
-                class="text-truncate link-custom d-block mb-1 text-light-1 p-1 fs-12px" 
-                th:text="${chat.chatName}"></a>
+                <div class="d-flex align-items-center">
+                    <a th:href="@{'/chat/{chatId}' (chatId=${chat.getId()})}"
+                       class="text-truncate link-custom d-block mb-1 text-light-1 p-1 fs-12px flex-grow-1"
+                       th:text="${chat.chatName}"></a>
+                    <form th:action="@{/chat/unlink}" method="post" class="mb-1">
+                        <input type="hidden" name="chatId" th:value="${chat.getId()}" />
+                        <button type="submit"
+                                style="background:none; border:none; color:#666; font-size:11px; cursor:pointer; padding:0 4px;"
+                                onmouseover="this.style.color='#e05c5c'"
+                                onmouseout="this.style.color='#666'">&#x2715;</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -36,7 +44,7 @@
             </div>
             <div>
                 <a th:href="@{/plans}"
-                   class="btn gray-button btn-custom rounded-pill text-white d-inline-flex align-items-center justify-content-center"
+                   class="mb-2 btn gray-button btn-custom rounded-pill text-white d-inline-flex align-items-center justify-content-center"
                    role="button"
                 >Change Plan</a>
             </div>

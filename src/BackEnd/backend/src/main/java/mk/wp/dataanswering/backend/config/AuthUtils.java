@@ -30,13 +30,11 @@ public class AuthUtils {
     public RegisteredUser getCurrentRegisteredUser() {
         if (!isLoggedIn()) throw new InvalidUserException();
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        // return (RegisteredUser) auth.getPrincipal();
-
         try {
-            var id = ((User) auth.getPrincipal()).getUserId();
-            return userRepo.findById(id).get();
+            String username = ((RegisteredUser) auth.getPrincipal()).getUsername();
+            return userRepo.findByUsername(username)
+                    .orElseThrow(InvalidUserException::new);
         } catch (Exception e) {
-            System.out.println("[getCurrentRegisteredUser]: " + e.getMessage());
             throw new InvalidUserException();
         }
     }

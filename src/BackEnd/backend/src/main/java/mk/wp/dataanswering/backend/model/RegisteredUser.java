@@ -34,6 +34,7 @@ import mk.wp.dataanswering.backend.model.enums.Role;
 public class RegisteredUser extends User implements UserDetails {
 
     public RegisteredUser(String username,String userFirstName, String userEmail, String userLastName,String password, Role role) {
+        super();
         this.username = username;
         this.userFirstName = userFirstName;
         this.userEmail = userEmail;

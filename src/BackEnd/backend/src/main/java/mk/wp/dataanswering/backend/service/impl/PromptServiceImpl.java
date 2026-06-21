@@ -1,9 +1,13 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
+import mk.wp.dataanswering.backend.service.RequestService;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -23,17 +27,22 @@ import mk.wp.dataanswering.backend.service.PromptService;
 @Service
 @RequiredArgsConstructor
 public class PromptServiceImpl implements PromptService{
-    
+
     private final PromptRepository promptRepository;
     private final ChatRepository chatRepository;
     private final RequestRepository requestRepository;
     private final ResponseRepository responseRepository;
+    private final RequestService requestService;
 
     @Override
     @Transactional
     public Request createPrompt(Long chatId, String promptText) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + chatId));
+
+        if (!requestService.isNotRequestLimitForChatExceeded(chat)) {
+            throw new RuntimeException("RequestLimitExceeded");
+        }
 
         Prompt prompt = new Prompt(promptText, chat);
         promptRepository.save(prompt);
@@ -70,20 +79,25 @@ public class PromptServiceImpl implements PromptService{
 
     @Override
     public List<MessageDto> createHistory(List<Prompt> prompts) {
-       return new ArrayList<MessageDto>(
-        prompts.stream()
-        .sorted(
-            Comparator.comparing(Prompt::getPromptTs)
-        )
-        .map( p -> new MessageDto(
-            p.getPromptText(),
-            p.getRequests().stream()
-            .map(r -> r.getResponse())
-            .filter(r -> r != null)
-            .map(Response::getResponseText)
-            .findFirst() // TODO Mosh treba podobra logika
-            .orElse(null)
-        )).toList()
+        return new ArrayList<MessageDto>(
+                prompts.stream()
+                        .sorted(
+                                Comparator.comparing(Prompt::getPromptTs)
+                        )
+                        .map( p -> {
+                            List<Request> req = p.getRequests()  == null ?
+                                    Collections.emptyList() : p.getRequests()
+                                    ;
+                            return new MessageDto(
+                                    p.getPromptText(),
+                                    req.stream()
+                                            .map(Request::getResponse)
+                                            .filter(r -> r != null)
+                                            .map(Response::getResponseText)
+                                            .findFirst() // TODO Mosh treba podobra logika
+                                            .orElse(null)
+                            );
+                        }).toList()
         );
     }
 
@@ -94,15 +108,15 @@ public class PromptServiceImpl implements PromptService{
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + chatId));
 
         return promptRepository.findAllByChatId(chat.getId())
-        .reversed()
-        .stream()
-        .flatMap(p -> p.getRequests().stream())
-        .filter(r -> r.getResponse() == null)
-        .findFirst()
-        .orElseThrow(() -> 
-            new EntityNotFoundException("No prompt with null response")
-        )
-        ;
+                .reversed()
+                .stream()
+                .flatMap(p -> p.getRequests().stream())
+                .filter(r -> r.getResponse() == null)
+                .findFirst()
+                .orElseThrow(() ->
+                        new EntityNotFoundException("No prompt with null response")
+                )
+                ;
 
     }
 

@@ -72,17 +72,17 @@ public class ApiController {
 
         try {
             ByteArrayResource resource = new ByteArrayResource(
-                minioService.downloadFile(
-                    file.getMinioKey(), 
-                    userId,
-                    chatId
-                ).readAllBytes()
+                    minioService.downloadFile(
+                            file.getMinioKey(),
+                            userId,
+                            chatId
+                    ).readAllBytes()
             );
 
             return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
-            .contentType(MediaType.APPLICATION_OCTET_STREAM)
-            .body(resource);
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(resource);
 
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
@@ -91,12 +91,20 @@ public class ApiController {
 
     @PostMapping("/prompt")
     public ResponseEntity<StreamingResponseBody> streamResponse(
-        @RequestBody PromptRequest promptRequest
+            @RequestBody PromptRequest promptRequest
     ) {
         Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
         User user = userService.getCurrentUser();
-        
-        Request req = promptService.createPrompt(chat.getId(), promptRequest.promptText());
+
+        Request reqDummy = null;
+
+        try {
+            reqDummy = promptService.createPrompt(chat.getId(), promptRequest.promptText());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
+        }
+
+        Request req = reqDummy;
 
 
         StreamingResponseBody responseBody = (OutputStream outputStream) -> {
@@ -127,20 +135,26 @@ public class ApiController {
 
             try {
                 llmService.streamPrompt(new LlmRequest(
-                    promptRequest.chatId(),
-                    user.getUserId(), 
-                    promptRequest.promptText(),
-                    promptService.createHistory(
-                        promptService.getPromptsForChat(promptRequest.chatId())
-                    )
+                        promptRequest.chatId(),
+                        user.getUserId(),
+                        promptRequest.promptText(),
+                        promptService.createHistory(
+                                promptService.getPromptsForChat(promptRequest.chatId())
+                        )
                 ), helperStream);
-                
+
             } catch (Exception e) {
                 stopped = e.getClass().getName().contains("ClientAbortException");
                 corrupted = !stopped;
 
+                helperStream.write(
+                        ("\n[ERROR] " + e.getMessage()).getBytes(StandardCharsets.UTF_8)
+                );
+
                 Thread.currentThread().interrupt();
-                // System.out.print("ERROR: " + e.getMessage());
+                System.out.print("ERROR: " + e.getMessage());
+
+
             } finally {
                 // get set response text to response object
                 String responseText = baos.toString(StandardCharsets.UTF_8);
@@ -150,28 +164,28 @@ public class ApiController {
             }
 
             // chatServiceRegistry.getCorrectChatService().addPrompt(chat, prompt, req, response);
-            
+
         };
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
-                .header(HttpHeaders.TRANSFER_ENCODING, "chunked") 
+                .header(HttpHeaders.TRANSFER_ENCODING, "chunked")
                 .body(responseBody);
     }
-    
+
     //*
     @PostMapping("/prompt/regenarate/last")
     public ResponseEntity<StreamingResponseBody> regeneratePrompt(
-        @RequestBody PromptRequest promptRequest
+            @RequestBody PromptRequest promptRequest
     ) {
         Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
         User user = userService.getCurrentUser();
-        
-        
+
+
 
         Request req = promptService.regeneratePrompt(
-            chat.getId(), 
-            promptRequest.promptText()
+                chat.getId(),
+                promptRequest.promptText()
         );
 
 
@@ -200,26 +214,26 @@ public class ApiController {
                     // baos.flush();
                 }
             };
-            
+
             List<MessageDto> history = promptService.createHistory(
-                        promptService.getPromptsForChat(promptRequest.chatId())
-                    );
-            
-            if (!history.isEmpty()) 
-                history.removeLast(); 
+                    promptService.getPromptsForChat(promptRequest.chatId())
+            );
+
+            if (!history.isEmpty())
+                history.removeLast();
 
             try {
                 llmService.streamPrompt(new LlmRequest(
-                    promptRequest.chatId(),
-                    user.getUserId(), 
-                    promptRequest.promptText(),
-                    history
+                        promptRequest.chatId(),
+                        user.getUserId(),
+                        promptRequest.promptText(),
+                        history
                 ), helperStream);
-                
+
             } catch (Exception e) {
                 stopped = e.getClass().getName().contains("ClientAbortException");
                 corrupted = !stopped;
-                
+
                 Thread.currentThread().interrupt();
                 // System.out.print("ERROR: " + e.getMessage());
             } finally {
@@ -231,12 +245,12 @@ public class ApiController {
             }
 
             // chatServiceRegistry.getCorrectChatService().addPrompt(chat, prompt, req, response);
-            
+
         };
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE)
-                .header(HttpHeaders.TRANSFER_ENCODING, "chunked") 
+                .header(HttpHeaders.TRANSFER_ENCODING, "chunked")
                 .body(responseBody);
     }
     //*/

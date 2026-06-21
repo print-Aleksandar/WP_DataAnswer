@@ -9,7 +9,9 @@ import mk.wp.dataanswering.backend.repository.RequestRepository;
 import mk.wp.dataanswering.backend.service.RequestService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.UserService;
+import org.springframework.stereotype.Service;
 
+@Service
 @RequiredArgsConstructor
 public class RequestServiceImpl implements RequestService {
 

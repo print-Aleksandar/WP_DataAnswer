@@ -2,21 +2,17 @@ package mk.wp.dataanswering.backend.web.controler;
 
 import java.util.List;
 
+import mk.wp.dataanswering.backend.model.*;
+import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
+import mk.wp.dataanswering.backend.repository.ChatRepository;
+import mk.wp.dataanswering.backend.service.impl.SavedChatServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.config.AuthUtils;
-import mk.wp.dataanswering.backend.model.Chat;
-import mk.wp.dataanswering.backend.model.RegisteredUser;
-import mk.wp.dataanswering.backend.model.Subscription;
-import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.service.PromptService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
@@ -36,10 +32,12 @@ public class ChatController {
     private final SubscriptionService subscriptionService;
     private final UploadFileService uploadFileService;
     private final AuthUtils authUtils;
+    private final ChatRepository chatRepository;
+    private final SavedChatServiceImpl savedChatServiceImpl;
 
 
     @GetMapping("/{chatId}")
-    public String getChat(@PathVariable Long chatId, Model model) {
+    public String getChat(@PathVariable Long chatId, @RequestParam(value="error", required=false) String error, Model model) {
         model.addAttribute("bodyContent", "chat");
 
         List<MessageDto> history = promptService.createHistory(
@@ -51,6 +49,12 @@ public class ChatController {
         model.addAttribute("chat", chat);
 
         model.addAttribute("headerText", "");
+
+        if (error != null)
+        {
+            model.addAttribute("error", error);
+
+        }
 
         model.addAttribute("chats",chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
         
@@ -88,7 +92,16 @@ public class ChatController {
             return "redirect:/home?error=You must upload a document.";
         }
 
-        Chat chat = chatServiceRegistry.getCorrectChatService().startNewChat();
+        Chat chat = null;
+        try {
+            chat = chatServiceRegistry.getCorrectChatService().startNewChat();
+        } catch (ExceededDayChatLimitException e) {
+            return "redirect:/home?error=Day chat limit exceeded.";
+        }
+        if (chat == null) {
+            return "redirect:/home?error=Error occured.";
+        }
+
         User user = userService.getCurrentUser();
 
         try {
@@ -104,11 +117,27 @@ public class ChatController {
 
     @PostMapping("/message")
     public String sendMessage(@RequestParam Long chatId, @RequestParam String promptText) {
-        promptService.createPrompt(chatId, promptText);
+        try {
+            promptService.createPrompt(chatId, promptText);
+        } catch (RuntimeException e) {
+            return "redirect:/chat/" + chatId + "?error=" + e.getMessage();
+        }
         return "redirect:/chat/" + chatId;
     }
-    
-    
-    
 
+    @PostMapping("/unlink")
+    public String unlinkChat(@RequestParam Long chatId) {
+        RegisteredUser currentUser = null;
+        try {
+            currentUser = authUtils.getCurrentRegisteredUser();
+        } catch (Exception e) {
+            return "redirect:/login";
+        }
+        SavedChat chat = (SavedChat) chatServiceRegistry.getCorrectChatService().findById(chatId);
+        if (chat.getUser().getUserId() != userService.getCurrentUser().getUserId()) {
+            return "redirect:/login";
+        }
+        savedChatServiceImpl.unlinkChatFromRegisteredUser(currentUser, chat);
+        return "redirect:/home";
+    }
 }

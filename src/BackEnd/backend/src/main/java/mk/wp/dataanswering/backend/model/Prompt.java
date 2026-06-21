@@ -48,7 +48,7 @@ public class Prompt {
     private Chat chat;
 
     @OneToMany(mappedBy = "prompt", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<Request> requests;
+    private List<Request> requests = new ArrayList<>();;
 
     public void setPromptText(String promptText) {
         this.promptText = promptText;

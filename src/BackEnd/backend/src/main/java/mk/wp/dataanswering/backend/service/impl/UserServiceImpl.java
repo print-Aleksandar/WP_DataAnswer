@@ -27,4 +27,13 @@ public class UserServiceImpl implements UserService {
             return tmpUserService.getTmpUserBySession(authUtils.getCurrentSession());
         }
     }
+
+    @Override
+    public String getUsersName() {
+        if (authUtils.isLoggedIn()) {
+            return authUtils.getCurrentRegisteredUser().getUserFirstName();
+        } else {
+            return "Guest User";
+        }
+    }
 }
