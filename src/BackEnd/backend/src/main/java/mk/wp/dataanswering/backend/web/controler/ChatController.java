@@ -56,7 +56,9 @@ public class ChatController {
 
         model.addAttribute("chat", chat);
 
-        List<SavedChat> savedChats = (List<SavedChat>) chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser();
+
+
+        List<? extends Chat> savedChats = chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser();
         if (!savedChats.stream().map(c -> c.getId()).toList().contains(chatId))
         {
             return "redirect:/login";

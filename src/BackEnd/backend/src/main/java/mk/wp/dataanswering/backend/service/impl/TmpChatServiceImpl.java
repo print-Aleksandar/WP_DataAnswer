@@ -85,7 +85,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
 
     @Override
     public List<TmpChat> getChatsForCurrentUser() {
-        return List.of();
+        return tmpChatRepository.getTmpChatsByUser_UserId(userService.getCurrentUser().getUserId());
     }
 
     @Override

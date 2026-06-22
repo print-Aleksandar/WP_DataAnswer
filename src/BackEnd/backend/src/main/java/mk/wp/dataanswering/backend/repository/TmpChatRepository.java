@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -18,4 +19,6 @@ public interface TmpChatRepository extends JpaRepository<TmpChat, Long> {
     @Modifying
     @Query("DELETE FROM TmpChat t WHERE t.user.userId = :userId")
     void deleteByTmpUserId(@Param("userId") Long userId);
+
+    List<TmpChat> getTmpChatsByUser_UserId(Long userUserId);
 }
