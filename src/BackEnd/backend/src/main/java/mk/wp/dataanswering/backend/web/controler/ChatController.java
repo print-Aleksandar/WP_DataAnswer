@@ -40,13 +40,27 @@ public class ChatController {
     public String getChat(@PathVariable Long chatId, @RequestParam(value="error", required=false) String error, Model model) {
         model.addAttribute("bodyContent", "chat");
 
+
+
         List<MessageDto> history = promptService.createHistory(
             promptService.getPromptsForChat(chatId)
         ); 
         model.addAttribute("prompts", history);
-    
-        Chat chat = chatServiceRegistry.getCorrectChatService().findById(chatId);
+
+        Chat chat = null;
+        try {
+           chat = chatServiceRegistry.getCorrectChatService().findById(chatId);
+        } catch (RuntimeException e) {
+            return "redirect:/login";
+        }
+
         model.addAttribute("chat", chat);
+
+        List<SavedChat> savedChats = (List<SavedChat>) chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser();
+        if (!savedChats.stream().map(c -> c.getId()).toList().contains(chatId))
+        {
+            return "redirect:/login";
+        }
 
         model.addAttribute("headerText", "");
 

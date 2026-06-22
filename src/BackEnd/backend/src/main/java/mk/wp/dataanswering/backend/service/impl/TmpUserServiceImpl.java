@@ -1,10 +1,11 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import jakarta.servlet.http.HttpSession;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Plan;
 import mk.wp.dataanswering.backend.model.TmpUser;
-import mk.wp.dataanswering.backend.repository.TmpUserRepository;
+import mk.wp.dataanswering.backend.repository.*;
 import mk.wp.dataanswering.backend.service.PlanService;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
 import mk.wp.dataanswering.backend.service.TmpUserService;
@@ -23,7 +24,13 @@ public class TmpUserServiceImpl implements TmpUserService {
     private final TmpUserRepository tmpUserRepository;
     private final TmpUserLoggerService tmpUserLoggerService;
     private final SubscriptionService subscriptionService;
+    private final SubscriptionRepository subscriptionRepository;
     private final PlanService planService;
+    private final ResponseRepository responseRepository;
+    private final RequestRepository requestRepository;
+    private final TmpChatRepository tmpChatRepository;
+    private final UploadedFileRepository uploadedFileRepository;
+    private final PromptRepository promptRepository;
 
     @Override
     public TmpUser createTmpUser(HttpSession session) {
@@ -44,9 +51,15 @@ public class TmpUserServiceImpl implements TmpUserService {
     }
 
     @Override
+    @Transactional
     public void cleanUpBeforeUserDeletion(long userId) {
         if (tmpUserRepository.findByUserId(userId).isPresent()) {
-            subscriptionService.deleteAllByUserId(userId);
+            responseRepository.deleteResponsesByTmpUserId(userId);
+            requestRepository.deleteRequestsByTmpUserId(userId);
+            promptRepository.deletePromptsByTmpUserId(userId);
+            uploadedFileRepository.deleteByTmpUserId(userId);
+            tmpChatRepository.deleteByTmpUserId(userId);
+            subscriptionRepository.deleteAllByUserIdNative(userId);
         }
     }
 }

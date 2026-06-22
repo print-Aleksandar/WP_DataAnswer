@@ -27,7 +27,7 @@ public class SessionTracker implements HttpSessionListener {
                 .ifPresent((tmpUser) -> {
                     tmpUserLoggerService.logSessionExpired(sessionId);
                     tmpUserService.cleanUpBeforeUserDeletion(tmpUser.getUserId());
-                    tmpUserRepository.delete(tmpUser);
+                    tmpUserRepository.deleteById(tmpUser.getUserId());
                 });
     }
 }

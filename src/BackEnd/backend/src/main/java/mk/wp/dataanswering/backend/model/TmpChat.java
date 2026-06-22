@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class TmpChat extends Chat {
 
-    @OneToOne(mappedBy = "chat")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tmp_user_id")
     private TmpUser user;
 }

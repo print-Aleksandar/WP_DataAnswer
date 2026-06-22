@@ -1,9 +1,12 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import java.util.List;
+import java.util.Optional;
 
-import mk.wp.dataanswering.backend.repository.ChatRepository;
-import mk.wp.dataanswering.backend.repository.PromptRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
+import mk.wp.dataanswering.backend.repository.*;
 
 import mk.wp.dataanswering.backend.service.RequestService;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,6 @@ import mk.wp.dataanswering.backend.model.TmpChat;
 import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
-import mk.wp.dataanswering.backend.repository.RequestRepository;
-import mk.wp.dataanswering.backend.repository.ResponseRepository;
-import mk.wp.dataanswering.backend.repository.TmpChatRepository;
-import mk.wp.dataanswering.backend.repository.TmpUserRepository;
 import mk.wp.dataanswering.backend.service.ChatService;
 import mk.wp.dataanswering.backend.service.UserService;
 
@@ -36,6 +35,7 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     private final ResponseRepository responseRepository;
     private final PromptRepository promptRepository;
     private final RequestService requestService;
+    private final UploadedFileRepository uploadedFileRepository;
 
     // TmpChatServiceImpl(ChatRepository chatRepository) {
     //     this.chatRepository = chatRepository;
@@ -47,26 +47,29 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     }
 
     @Override
+    @Transactional
     public Chat startNewChat() {
         User currentUser = userService.getCurrentUser();
         if (!supports()) throw new InvalidUserException();
         TmpUser tmpUser = (TmpUser) currentUser;
+
         freeSpaceIfNeeded(tmpUser);
+
         TmpChat newChat = new TmpChat();
+        newChat.setUser(tmpUser);
         tmpChatRepository.save(newChat);
-        tmpUser.setChat(newChat);
-        tmpUserRepository.save(tmpUser);
         return newChat;
     }
 
     @Override
+    @Transactional
     public void freeSpaceIfNeeded(TmpUser tmpUser) {
-        if (tmpUser.getChat() != null) {
-            TmpChat oldChat = tmpUser.getChat();
-            tmpUser.setChat(null);
-            tmpUserRepository.save(tmpUser);
-            tmpChatRepository.delete(oldChat);
-        }
+        Long userId = tmpUser.getUserId();
+        responseRepository.deleteResponsesByTmpUserId(userId);
+        requestRepository.deleteRequestsByTmpUserId(userId);
+        promptRepository.deletePromptsByTmpUserId(userId);
+        uploadedFileRepository.deleteByTmpUserId(userId);
+        tmpChatRepository.deleteByTmpUserId(userId);
     }
 
     @Override
