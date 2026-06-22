@@ -36,7 +36,7 @@ public class WebSecurityConfig {
                         "/register", "/login", 
                         "home/start-chat", "/start-chat", 
                         "/chat/**",
-                        "/api/prompt", "/prompt/regenarate/last" )
+                        "/api/**" )
                         .permitAll() // alek: ne sakav da brisham home ili / treba da se dog
                         .anyRequest().authenticated()
                 )
