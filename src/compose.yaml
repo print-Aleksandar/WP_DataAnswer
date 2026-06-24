@@ -1,42 +1,19 @@
 version: "3.9"
 
-services:
-  vllm:
-    build:
-      context: vllm
-      dockerfile: Dockerfile.vllm-cpu
-    environment:
-      - MODEL_NAME=Qwen/Qwen2.5-0.5B-Instruct
-      - VLLM_CPU_OMP_THREADS_BIND=0-7
-      - VLLM_CPU_KVCACHE_SPACE=2
-      - HF_TOKEN=${HF_TOKEN}
-    shm_size: '8gb'
-    ports:
-      - "8000:8000"
-    volumes:
-      - huggingface_cache:/root/.cache/huggingface
-    networks:
-      - services_net
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
-      timeout: 5s
-      retries: 5
-      start_period: 3m
-    
+services:    
   llm-service:
     build:
       context: vllm
     environment:
-      - VLLM_URL=http://vllm:8000
+      - LLM_URL=https://models.github.ai/inference
+      - LLM_KEY=${GITHUB_TOKEN}
       - TOOL_SERVICE_URLS=http://rag-service:7000,http://aggregate-service:7100
+      - MODEL_NAME=openai/gpt-4o
     ports:
       - "9999:9999"
     networks:
       - services_net
     depends_on:
-      vllm:
-        condition: service_healthy
       rag-service:
         condition: service_healthy
       aggregate-service:

@@ -24,8 +24,8 @@ class AggregationRequest(BaseModel):
 
 class ColumnsRequest(BaseModel):
     user_id: int
-    json_data: List[dict]
-
+    chat_id: int
+    json_data: Optional[List[dict]] = None
 
 @app.post("/aggregate")
 async def run_aggregator(request: AggregationRequest):
@@ -55,10 +55,12 @@ async def run_aggregator(request: AggregationRequest):
 
 @app.post('/columns')
 async def get_columns_from_file(req:ColumnsRequest):
-    if isinstance(req.json_data, list):
+    if req.json_data:
         df = pd.DataFrame(req.json_data)
     else:
-        df = pd.read_json(req.json_data)
+        db = DB_Storage()
+        df = pd.DataFrame(db.get_data(req.user_id, req.chat_id))
+        db.close()
     
     return [ [col, dtype.name] for col, dtype in df.dtypes.items()]
 
@@ -115,22 +117,22 @@ def get_tools():
                 },
                 "endpoint": "/aggregate"
             },
-            # {
-            #     "name": "get_columns_from_file",
-            #     "description": "Returns an array of [column_names, dtypes] from a tablular data file.",
-            #     "parameters": {
-            #         'type': "object",
-            #         'properties': {
-            #             'json_data': {
-            #                 'type': 'array',
-            #                 'items': { 'type': 'object', 'minItems': 1},
-            #                 'description': 'A list of objects with the structure { column_name: value, ... }. This is the the file data in json form.'
-            #             },
-            #         },
-            #         'required': ["json_data"]
-            #     },
-            #     "endpoint": "/columns"
-            # },
+            {
+                "name": "get_columns",
+                "description": "Returns an array of [column_names, dtypes] from a tablular data file.",
+                "parameters": {
+                    'type': "object",
+                    'properties': {
+                        'json_data': {
+                            'type': 'array',
+                            'items': { 'type': 'object', 'minItems': 1},
+                            'description': 'A list of objects with the structure { column_name: value, ... }. If this value is provided and is valid it will be used instead of the file.'
+                        },
+                    },
+                    'required': []
+                },
+                "endpoint": "/columns"
+            },
            ]
 
 @app.get("/health")

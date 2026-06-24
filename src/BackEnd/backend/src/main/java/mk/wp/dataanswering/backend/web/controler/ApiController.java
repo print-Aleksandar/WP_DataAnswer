@@ -135,12 +135,12 @@ public class ApiController {
 
             try {
                 llmService.streamPrompt(new LlmRequest(
-                        promptRequest.chatId(),
-                        user.getUserId(),
-                        promptRequest.promptText(),
-                        promptService.createHistory(
-                                promptService.getPromptsForChat(promptRequest.chatId())
-                        )
+                    user.getUserId(), 
+                    promptRequest.chatId(),
+                    promptRequest.promptText(),
+                    promptService.createHistory(
+                        promptService.getPromptsForChat(promptRequest.chatId())
+                    )
                 ), helperStream);
 
             } catch (Exception e) {
@@ -224,10 +224,10 @@ public class ApiController {
 
             try {
                 llmService.streamPrompt(new LlmRequest(
-                        promptRequest.chatId(),
-                        user.getUserId(),
-                        promptRequest.promptText(),
-                        history
+                    user.getUserId(), 
+                    promptRequest.chatId(),
+                    promptRequest.promptText(),
+                    history
                 ), helperStream);
 
             } catch (Exception e) {

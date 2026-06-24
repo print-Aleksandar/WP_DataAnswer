@@ -100,6 +100,12 @@ async def get_tools():
                         'question': {
                             'type': 'string',
                             'description': 'The user\'s question to search for in the file'
+                        },
+                        'top_k': {
+                            'type': 'integer',
+                            'description': 'The number of 1000 character chunks to return. By default this value is 5.',
+                            "minimum": 1,
+                            "maximum": 20
                         }
                     },
                     "required": ["question"]
@@ -136,8 +142,8 @@ async def get_chunks(request: AskRequest):
         distances, indices = index.search(embedded_question, k)
         return [
             existing_chunks[i]
-            for i, d in zip(indices[0], distances[0])
-            if 0 <= i < len(existing_chunks) and d > 0.3
+            for i in indices[0]
+            if 0 <= i < k
         ]
 
     retrieved_chunks = await run_in_threadpool(search)

@@ -11,11 +11,12 @@ from tools import TOOL_MAP, TOOLS, run_tool
 from openai import AsyncOpenAI
 
 
-VLLM_URL = os.getenv("VLLM_URL", "http://localhost:8000") + '/v1'
-MODEL = ''
+LLM_URL = os.getenv("LLM_URL")
+MODEL = os.getenv("MODEL_NAME")
+API_KEY = os.getenv("LLM_KEY")
 SYSTEM_PROMPT = "You are a helpful assistant that answers questions based on files uploaded by the user. You must retreave the context of the file before answering any questions to user! Use tools that help you retriev the file context.\n\nIf the tools give you irrelavent information tell the user there is no information on based on the request. If the tool returns the same answer, do not repeatedly call the same tool (max 3 times if you must), it as irrelavent information and notify the user of this."
 
-client = AsyncOpenAI(base_url=VLLM_URL, api_key="DUMMY_KEY")
+client = AsyncOpenAI(base_url=LLM_URL, api_key=os.getenv("LLM_KEY", API_KEY))
 
 class PromptRequest(BaseModel):
     user_id: int
@@ -32,12 +33,7 @@ class PromptResponse(BaseModel):
 async def init_vllm():
     global MODEL, client
 
-    model_list = await client.models.list()
-    print(model_list)
-    MODEL = model_list.data[0].id
-
     print('[init_vllm]: fetched model', MODEL)
-
 
 
 async def get_response(req: PromptRequest):
@@ -66,6 +62,9 @@ async def get_response(req: PromptRequest):
         finish_reason = None
 
         async for chunk in stream:
+            if len(chunk.choices) == 0: 
+                print("[get_response]: SKIPPED CHUNK - empty choices")
+                continue
             delta = chunk.choices[0].delta
             finish_reason = chunk.choices[0].finish_reason or finish_reason
 
@@ -97,7 +96,7 @@ async def get_response(req: PromptRequest):
             endpoint = TOOL_MAP.get(tc["function"]["name"], "")
             arguments = json.loads(tc["function"]["arguments"])
             try:
-                result = run_tool(endpoint, arguments, file_id=req.file_id, user_id=req.user_id, chat_id=req.chat_id) \
+                result = run_tool(endpoint, arguments, user_id=req.user_id, chat_id=req.chat_id) \
                 if endpoint else \
                 f"Unknown tool: {tc['function']['name']}"
             except Exception as e:
