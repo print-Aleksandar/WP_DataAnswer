@@ -8,7 +8,7 @@ services:
       - LLM_URL=https://models.github.ai/inference
       - LLM_KEY=${GITHUB_TOKEN}
       - TOOL_SERVICE_URLS=http://rag-service:7000,http://aggregate-service:7100
-      - MODEL_NAME=openai/gpt-4o
+      - MODEL_NAME=mistral-ai/mistral-medium-2505 #openai/gpt-4o
     ports:
       - "9999:9999"
     networks:

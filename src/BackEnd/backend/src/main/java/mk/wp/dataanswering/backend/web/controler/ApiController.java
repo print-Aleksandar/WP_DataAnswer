@@ -18,6 +18,7 @@ import org.springframework.core.io.Resource;
 
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
+import mk.wp.dataanswering.backend.model.Prompt;
 import mk.wp.dataanswering.backend.model.UploadedFile;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
@@ -84,16 +85,13 @@ public class ApiController {
         Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
         User user = userService.getCurrentUser();
 
-        Request reqDummy = null;
+        Prompt req;
 
         try {
-            reqDummy = promptService.createPrompt(chat.getId(), promptRequest.promptText());
+            req = promptService.createPrompt(chat.getId(), promptRequest.promptText());
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).build();
         }
-
-        Request req = reqDummy;
-
 
         StreamingResponseBody responseBody = (OutputStream outputStream) -> {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -171,7 +169,7 @@ public class ApiController {
 
 
 
-        Request req = promptService.regeneratePrompt(
+        Prompt req = promptService.regeneratePrompt(
                 chat.getId(),
                 promptRequest.promptText()
         );

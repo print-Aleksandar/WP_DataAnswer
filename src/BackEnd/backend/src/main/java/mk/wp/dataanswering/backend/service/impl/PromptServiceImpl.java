@@ -33,35 +33,25 @@ public class PromptServiceImpl implements PromptService{
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + chatId));
 
-        if (!requestService.isNotRequestLimitForChatExceeded(chat)) {
-            throw new RuntimeException("RequestLimitExceeded");
-        }
-
         Prompt prompt = new Prompt(promptText, chat);
-        promptRepository.save(prompt);
-
-        Request req = new Request();
-        req.setPrompt(prompt);
-
-        return requestRepository.save(req);
+        return promptRepository.save(prompt);
     }
 
     @Override
     @Transactional
-    public void saveResult(Long requestId, String responseText, boolean corrupted, boolean stopped) {
-        Request request = requestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Request not found with id " + requestId));
-        request.setStopped(stopped);
+    public void saveResult(Long promptId, String responseText, boolean corrupted, boolean stopped) {
+        Prompt prompt = promptRepository.findById(promptId)
+                .orElseThrow(() -> new EntityNotFoundException("Prompt not found with id " + promptId));
+        // prompt.setStopped(stopped);
 
         Response response = new Response();
-        response.setRequest(request);
+        response.setPrompt(prompt);
         response.setResponseText(responseText);
         response.setCorrupted(corrupted);
         response.setAnswered(!corrupted);
         response.setAnswerable(true);
 
         responseRepository.save(response);
-        requestRepository.save(request);
     }
 
 
@@ -77,33 +67,26 @@ public class PromptServiceImpl implements PromptService{
                         .sorted(
                                 Comparator.comparing(Prompt::getPromptTs)
                         )
-                        .map( p -> {
-                            List<Request> req = p.getRequests()  == null ?
-                                    Collections.emptyList() : p.getRequests()
-                                    ;
-                            return new MessageDto(
+                        .map( p -> 
+                            new MessageDto(
                                     p.getPromptText(),
-                                    req.stream()
-                                            .map(Request::getResponse)
-                                            .filter(r -> r != null)
-                                            .map(Response::getResponseText)
-                                            .findFirst() // TODO Mosh treba podobra logika
-                                            .orElse(null)
-                            );
-                        }).toList()
+                                    p.getResponse() == null ? 
+                                    null : 
+                                    p.getResponse().getResponseText()
+                            )
+                        ).toList()
         );
     }
 
     @Override
     @Transactional
-    public Request regeneratePrompt(Long chatId, String promptText) {
+    public Prompt regeneratePrompt(Long chatId, String promptText) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + chatId));
 
         return promptRepository.findAllByChatId(chat.getId())
                 .reversed()
                 .stream()
-                .flatMap(p -> p.getRequests().stream())
                 .filter(r -> r.getResponse() == null)
                 .findFirst()
                 .orElseThrow(() ->

@@ -37,6 +37,9 @@ public class Prompt {
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 
+    @Column
+    private int token_count = 0;
+
     public void setPromptText(String promptText) {
         this.promptText = promptText;
     }
