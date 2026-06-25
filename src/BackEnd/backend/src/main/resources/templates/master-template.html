@@ -1,39 +1,27 @@
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
->
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
     <title>DataAnswering</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" 
-            integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" 
-            crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" 
-             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" 
-             crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
 
     <style>
         :root {
-                /* Override core theme colors */
-                --dark-1: #131313;
-                --dark-2: #2a2a2a;
-                --dark-3: #333333;
-
-                --gray-1: #444444;
-                --gray-2: #888888;
-                --gray-3: #a4a4a4;
-                --light-1: #E0E0E0;
-
-                --red-1: #ff6b6b;
-                
+            --dark-1: #131313;
+            --dark-2: #2a2a2a;
+            --dark-3: #333333;
+            --gray-1: #444444;
+            --gray-2: #888888;
+            --gray-3: #a4a4a4;
+            --light-1: #E0E0E0;
+            --red-1:   #ff6b6b;
         }
-
 
         body, html {
             margin: 0;
@@ -52,17 +40,39 @@
         }
 
         .page-heading {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 600;
             color: var(--light-1);
             margin-bottom: 4px;
+            text-align: center;
         }
 
         .page-sub {
             font-size: 13px;
             color: var(--gray-3);
             margin-bottom: 24px;
+            text-align: center;
         }
+
+        .header-title {
+            font-size: 14px;
+            padding: 10px 0;
+            color: var(--light-1);
+            font-weight: 600;
+        }
+
+        .fs-12px  { font-size: 12px !important; }
+        .fw-500   { font-weight: 500 !important; }
+
+        .bg-dark-1   { background-color: var(--dark-1) !important; }
+        .bg-dark-2   { background-color: var(--dark-2) !important; }
+        .bg-gray-1   { background-color: var(--gray-1) !important; }
+        .bg-light-1  { background-color: var(--light-1) !important; }
+        .text-light-1{ color: var(--light-1) !important; }
+        .text-light-2{ color: var(--gray-3)  !important; }
+        .text-gray-1 { color: var(--gray-1)  !important; }
+
+        .radius-10 { border-radius: 10px !important; }
 
         .start-card {
             background-color: var(--dark-2);
@@ -70,31 +80,10 @@
             border-radius: 14px;
             padding: 24px;
             width: 100%;
-            max-width: 460px;
+            max-width: 420px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-        }
-
-        .file-input {
-            background-color: var(--dark-1);
-            color: var(--gray-3);
-            border: 1.5px dashed var(--gray-1);
-            border-radius: 10px;
-            padding: 14px 16px;
-            width: 100%;
-            cursor: pointer;
-            font-size: 13px;
-            transition: border-color 0.15s, background-color 0.15s;
-        }
-
-        .file-input:hover {
-            background-color: var(--dark-3);
-            border-color: var(--gray-2);
-        }
-
-        .file-input::file-selector-button {
-            display: none;
         }
 
         .prompt-input {
@@ -111,10 +100,48 @@
 
         .prompt-input:focus {
             border-color: var(--gray-2);
+            background-color: var(--dark-1);
+            color: var(--light-1);
+            box-shadow: none;
         }
 
-        .prompt-input::placeholder {
+        .prompt-input::placeholder { color: var(--gray-2); }
+
+        .prompt-input:disabled {
+            background-color: var(--dark-3);
             color: var(--gray-2);
+            border-color: var(--dark-3);
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .upload-input {
+            background-color: var(--dark-2);
+            border: 1px solid var(--dark-3);
+            border-radius: 10px;
+            color: var(--light-1);
+            font-size: 14px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.15s, border-color 0.15s;
+        }
+
+        .upload-input:hover,
+        .upload-input:focus { background-color: var(--dark-3); border-color: var(--gray-2); }
+
+        input[type="file"]::-webkit-file-upload-button {
+            background-color: var(--gray-1);
+            color: var(--light-1);
+            border: none;
+            border-radius: 8px;
+            padding: 5px 10px;
+            margin-right: 8px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        input[type="file"]::-webkit-file-upload-button:hover {
+            background-color: var(--gray-2);
         }
 
         .submit-btn {
@@ -130,8 +157,23 @@
             transition: background-color 0.15s;
         }
 
-        .submit-btn:hover {
-            background-color: var(--gray-2);
+        .submit-btn:hover { background-color: var(--gray-2); }
+
+        .gray-button {
+            background-color: var(--gray-1) !important;
+            border-color:     var(--gray-1) !important;
+            height: 35px;
+        }
+
+        .btn-custom:hover        { background-color: var(--gray-2) !important; }
+        .link-custom:hover       { background-color: var(--gray-2) !important; border-radius: 10px; text-decoration: none; }
+
+        button[type='submit']:disabled {
+            background-color: var(--dark-3) !important;
+            border-color:     var(--dark-3) !important;
+            color: var(--gray-2);
+            cursor: not-allowed;
+            opacity: 0.6;
         }
 
         .inline-error {
@@ -142,183 +184,52 @@
             margin: 0;
         }
 
+        .error-text { color: var(--red-1); font-size: 13px; }
+
+        .loader {
+            --size: 1.5rem;
+            width:  var(--size);
+            height: var(--size);
+            background: var(--light-1);
+            display: block;
+            animation: rotate 1s linear infinite;
+            animation-play-state: paused;
+            flex-shrink: 0;
+        }
+
+        .loader.running   { animation-play-state: running; }
+        .loader.invisible { visibility: hidden; }
+
+        @keyframes rotate {
+            0%   { transform: rotate(0deg)   scale(0.2); border-radius: 10%; }
+            50%  { transform: rotate(180deg) scale(1.5); border-radius: 50%; }
+            100% { transform: rotate(360deg) scale(0.2); border-radius: 10%; }
+        }
+
+        ::-webkit-scrollbar       { width: 4px; }
+        ::-webkit-scrollbar-track { background: var(--dark-1); }
+        ::-webkit-scrollbar-thumb { background-color: var(--gray-1); border-radius: 10px; }
+
+        .new-chat-button { margin-right: 10px; }
+
         .btn-cancel-sub {
             background-color: var(--red-1);
             color: var(--dark-1);
             border: none;
-            /* Adds a smooth animated transition when hovering */
-            transition: all 0.2s ease-in-out;
+            transition: filter 0.2s ease-in-out;
         }
 
-        .btn-cancel-sub:hover {
-            /* Automatically darkens the button by 15% on hover */
-            filter: brightness(0.85);
+        .btn-cancel-sub:hover { filter: brightness(0.85); color: var(--dark-1); }
 
-            /* Ensures the text color stays consistent */
-            color: var(--dark-1);
-        }
-
-        .btn-custom:hover{
-                background-color: var(--gray-2) !important;   
-        }
-        .link-custom:hover{
-                background-color: var(--gray-2) !important;
-                border-radius: 10px;
-                text-decoration: none;
-        }
-        input[type="file"]::-webkit-file-upload-button {
-          background-color: var(--gray-1);
-          color: var(--light-1);
-          border: none;
-          border-radius: 8px;
-          padding: 5px 10px;
-          margin-left: 1px;
-          cursor: pointer;
-        }
-
-        #prompt-input:disabled {
-            background-color: var(--dark-3);
-            color: var(--gray-2);
-            border-color: var(--dark-3);
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        button[type='submit']:disabled {
-            background-color: var(--dark-3) !important;
-            border-color: var(--dark-3) !important;
-            color: var(--gray-2);
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .placehodlerCustom::placeholder {
-                color: var(--light-1);
-        }
-        .sidebar-chats::-webkit-scrollbar, 
-        ::-webkit-scrollbar  {
-                width: 4px;
-        }
-        .sidebar-chats::-webkit-scrollbar-track, 
-        ::-webkit-scrollbar-track {
-                background: var(--dark-1);
-        }
-        .sidebar-chats::-webkit-scrollbar-thumb,
-        ::-webkit-scrollbar-thumb  {
-                background-color: var(--gray-1);
-                border-radius: 10px;
-        }
-
-        .bg-dark-1 {
-                background-color: var(--dark-1) !important;
-        }
-        .text-light-1 {
-                color: var(--light-1) !important;
-        }
-
-        .text-light-2 {
-            color: var(--gray-3) !important;
-        }
-
-        .text-gray-1 {
-                color: var(--gray-1) !important;
-        }
-        .bg-gray-1 {
-                background-color: var(--gray-1) !important;
-        }
-        .bg-light-1 {
-                background-color: var(--light-1) !important;
-        }
-        .radius-10 {
-                border-radius: 10px !important;
-        }
-
-        .fs-12px {
-                font-size: 12px !important;
-        }
-
-        .header-title {
-                font-size: 14px; 
-                padding: 10px; 
-                color: var(--light-1) !important;
-        }
-
-        .gray-button {
-                background-color: var(--gray-1) !important; 
-                height: 35px; 
-                border-color: var(--gray-1) !important; 
-        }
-
-        .upload-input {
-                background-color: var(--dark-2);    
-
-                border-color: var(--dark-3);  
-                color: var(--light-1); 
-        }
-        .upload-input:focus, .upload-input:hover {
-                background-color: var(--dark-3) !important;
-                color: var(--light-1); 
-        }
-
-        .upload-input:focus::-webkit-file-upload-button, 
-        .upload-input:hover::-webkit-file-upload-button {
-                background-color: var(--gray-2) !important;
-                color: var(--light-1);
-        }
-
-        .error-text {
-                color: var(--red-1); 
-                font-size: 13px;
-        }
-
-        .new-chat-button {
-                margin-right: 10px; 
-        }
-
-        .loader {
-                --size: 1.5rem;
-                --bg: #fff;
-                --duration: 1s;
-
-                width: var(--size);
-                height: var(--size);
-                background: var(--bg);
-
-                animation: rotate var(--duration) linear infinite;
-                display: block;
-                animation-play-state: paused; /* optional default */
-        }
-
-        .loader.running {
-                animation-play-state: running;
-        }
-
-        @keyframes rotate {
-                0% {
-                transform: rotate(0deg) scale(0.2);
-                border-radius: 10%;
-                }
-                50% {
-                transform: rotate(180deg) scale(1.5);
-                border-radius: 50%;
-                }
-                100% {
-                transform: rotate(360deg) scale(0.2);
-                border-radius: 10%;
-                }
-        }
-        
-  </style>  
+        .placehodlerCustom::placeholder { color: var(--light-1); }
+    </style>
 </head>
 <body>
 <div class="container-fluid">
-   <div class="row" style="height: 100vh;">
-      <div class="sidebar" th:replace="~{fragments/sidebar}"></div>
-
-      <section class="main" th:replace="~{${bodyContent}}"></section>
-
-   </div>
+    <div class="row" style="height: 100vh; overflow: hidden;">
+        <div class="sidebar" th:replace="~{fragments/sidebar}"></div>
+        <section class="main" th:replace="~{${bodyContent}}"></section>
+    </div>
 </div>
-
 </body>
 </html>

@@ -1,19 +1,19 @@
 <header xmlns:th="http://www.thymeleaf.org"
         xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-    <div
-    class="d-flex align-items-center justify-content-between bg-dark-1" 
-    style="height: 50px;"
-    >
+    <div class="d-flex align-items-center justify-content-between bg-dark-1"
+         style="height: 50px;">
         <div></div>
-      <div class="p-4" sec:authorize="isAnonymous()">
-        <a class="btn btn-secondary mb-0 btn-custom text-center gray-button" href="/login">Login</a>
-        <a class="btn btn-secondary btn-custom text-center gray-button" href="/register">Register</a>
-      </div>
 
-      <div class="p-4" sec:authorize="isAuthenticated()">
-        <a class="btn btn-secondary mb-0 btn-custom text-center gray-button d-inline-flex align-items-center justify-content-center" href="/logout">Logout</a>
-      </div>
+        <div class="p-4" sec:authorize="isAnonymous()">
+            <a class="btn gray-button btn-custom text-light-1 mb-0" href="/login">Login</a>
+            <a class="btn gray-button btn-custom text-light-1" href="/register">Register</a>
+        </div>
+
+        <div class="p-4" sec:authorize="isAuthenticated()">
+            <a class="btn gray-button btn-custom text-light-1 d-inline-flex align-items-center justify-content-center"
+               href="/logout">Logout</a>
+        </div>
     </div>
 
 </header>

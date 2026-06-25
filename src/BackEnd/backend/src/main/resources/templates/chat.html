@@ -1,242 +1,202 @@
-<div xmlns:th="http://www.thymeleaf.org" class="col-10 p-0 d-flex flex-column" style="height:100vh;">
-    
+<div class="col-10 p-0 d-flex flex-column bg-dark-1"
+     xmlns:th="http://www.thymeleaf.org"
+     style="height: 100vh;">
+
     <header th:replace="~{fragments/header}"></header>
-    
-    <div class="d-flex flex-column align-items-stretch justify-content-center mt-auto flex-grow-1 bg-dark-1 overflow-hidden">
-        
-        <div class="p-3 border-bottom fw-bold fs-5 text-light-1" th:text="${chat.chatName}"></div>
-        
-            <div id="history-container" 
-                    class="flex-grow-1 m-4 my-6 overflow-y-auto">            
-                            
-                        
-        
-                        <div th:if="${#lists.isEmpty(prompts)}" 
-                            class="text-center mt-5 text-gray-1">
-                            <p>No messages yet.</p>
-                        </div>
-                        
-                        <div class="mb-4 mx-auto col-8">
-                            <div class="d-flex justify-content-end mb-2">
-                                <div role="button" class="p-3 rounded text-white d-flex flex-column align-items-center bg-gray-1 cursor-pointer" 
-                                style="max-width: 80%;">
-                                <svg xmlns="http://www.w3.org/2000/svg" 
-                                height="64px" viewBox="0 -960 960 960" 
-                                width="64px" fill="#e3e3e3">
-                                <!-- https://fonts.google.com/icons?selected=Material+Symbols+Sharp:docs:FILL@1;wght@400;GRAD@0;opsz@24&icon.query=doc&icon.style=Sharp&icon.size=24&icon.color=%23e3e3e3 -->
-                                <path d="M480-880v280h280v520H200v-800h280Zm80 0 200 200H560v-200ZM360-200h160v-80H360v80Zm0-160h240v-80H360v80Z"/>
-                                </svg>
-                                <a 
-                                th:href="@{ /api/download/file/{userId}/{chatId}(userId=${userId}, chatId=${chat.id}) }" 
-                                class="text-decoration-none text-light-1"
-                                th:text="${chat.file.fileName}"
-                                >File name</a>
-                                </div>
-                            </div>
-                        </div>
-        
-                    <div th:each="msg : ${prompts}" 
-                        class="mb-4 mx-auto col-8">
-        
-                        <div class="d-flex justify-content-end mb-2">
-                            <div class="p-3 rounded text-white" 
-                                style="background-color: #0b1f3a; max-width: 80%;">
-                                <span th:text="${msg.question}"></span>
-                            </div>
-                        </div>
-        
-                        <div 
-                        th:if="${msg.response != null}"
-                        class="d-flex justify-content-start"> 
-                            <div class="m-4">
-                                <span class="loader invisible"></span>
-                            </div>                  
-                            <div class="p-3 rounded bg-white shadow-sm">
 
-                                <span th:text="${msg.response}"></span>
-        
-                            </div>
-                        </div>
-        
+    <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+
+        <div class="px-4 py-3 text-light-1 fw-500 fs-6"
+             style="background-color: var(--dark-1);"
+             th:text="${chat.chatName}"></div>
+
+        <div id="history-container" class="flex-grow-1 overflow-y-auto px-4 py-4">
+
+            <div th:if="${#lists.isEmpty(prompts)}"
+                 class="text-center mt-5 text-gray-1">
+                <p>No messages yet.</p>
+            </div>
+
+            <div class="mb-4 mx-auto col-8">
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="p-3 radius-10 d-flex flex-column align-items-center cursor-pointer"
+                         style="background-color: var(--dark-2); border: 1px solid var(--dark-3); max-width: 80%;">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             height="48px" viewBox="0 -960 960 960"
+                             width="48px" fill="var(--gray-3)">
+                            <path d="M480-880v280h280v520H200v-800h280Zm80 0 200 200H560v-200ZM360-200h160v-80H360v80Zm0-160h240v-80H360v80Z"/>
+                        </svg>
+                        <a th:href="@{/api/download/file/{userId}/{chatId}(userId=${userId}, chatId=${chat.id})}"
+                           class="text-decoration-none text-light-2 fs-12px mt-1"
+                           th:text="${chat.file.fileName}">File name</a>
                     </div>
-        
-        </div>
+                </div>
+            </div>
 
+            <div th:each="msg : ${prompts}" class="mb-4 mx-auto col-8">
 
-        <div class="p-3 border-top">
-            <form action="/chat/message"
-                method="post"
-                enctype="multipart/form-data"
-                id="prompt-box"
-                class="d-flex flex-column gap-2 align-items-center">
-
-                <div class="d-flex gap-2 col-7">
-                    <input type="text" name="promptText"
-                        class="form-control"
-                        id="prompt-input"
-                        placeholder="Type your question..." required>
-                    <input type="hidden" name="chatId" th:value="${chat.id}">
-                    <button type="submit" class="btn btn-primary px-4 btn-custom gray-button">Send</button>
+                <div class="d-flex justify-content-end mb-2">
+                    <div class="p-3 radius-10 text-light-1 fs-6"
+                         style="background-color: var(--dark-3); max-width: 80%;">
+                        <span th:text="${msg.question}"></span>
+                    </div>
                 </div>
 
+                <div th:if="${msg.response != null}" class="d-flex justify-content-start align-items-start gap-3">
+                    <div class="mt-3">
+                        <span class="loader invisible"></span>
+                    </div>
+                    <div class="p-3 radius-10 text-light-1"
+                         style="background-color: var(--dark-2); border: 1px solid var(--dark-3); max-width: 80%;">
+                        <span th:text="${msg.response}"></span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+            <form action="/chat/message"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="prompt-box"
+                  class="d-flex gap-2 justify-content-center">
+
+                <input type="text"
+                       name="promptText"
+                       class="prompt-input"
+                       id="prompt-input"
+                       style="max-width: 640px; flex: 1;"
+                       placeholder="Type your question..."
+                       required>
+                <input type="hidden" name="chatId" th:value="${chat.id}">
+                <button type="submit"
+                        class="btn gray-button btn-custom text-light-1 px-4">Send</button>
             </form>
 
-            <script th:inline="javascript">
-                let streaming = false;
-                document.addEventListener('DOMContentLoaded', () => {
-                    document.querySelector("#prompt-box")
-                    .addEventListener("submit", (e) => {
-                        e.preventDefault();
-                        const input = document.querySelector("#prompt-input");
+            <p class="inline-error text-center mt-2" th:text="${error} ?: ' '"></p>
+        </div>
 
-                        let prompt = input.value;
-                        input.value = '';
+    </div>
 
-                        addRow(prompt, true);
-                        if(prompt){
-                            sendPrompt(prompt);
-                        }
+    <script th:inline="javascript">
+        let streaming = false;
 
-                        
-                    });
-
-                    init();
-                    
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector("#prompt-box")
+                .addEventListener("submit", (e) => {
+                    e.preventDefault();
+                    const input = document.querySelector("#prompt-input");
+                    let prompt = input.value;
+                    input.value = '';
+                    addRow(prompt, true);
+                    if (prompt) { sendPrompt(prompt); }
                 });
 
-                async function sendPrompt(prompt, endpointUpdate) {
-                    streaming = true;
-                    console.log(new Date())
-                    const bubble = addRow('', false);
+            init();
+        });
 
-                    const body = {
-                        "chatId": [[${chat.id}]],
-                        "promptText": prompt,
-                    }
-                    endpoint = endpointUpdate ? endpointUpdate : '/api/prompt';
+        async function sendPrompt(prompt, endpointUpdate) {
+            streaming = true;
+            const bubble = addRow('', false);
 
-                    const response = await fetch(endpoint, {
-                        method:  'POST', // Specify the HTTP method
-                        headers: {
-                            'Content-Type': 'application/json' // Tell the server you are sending JSON
-                        },
-                        body: JSON.stringify(body)
+            const body = {
+                "chatId": [[${chat.id}]],
+                "promptText": prompt,
+            };
+            const endpoint = endpointUpdate ? endpointUpdate : '/api/prompt';
 
-                    });
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
 
-                    if (response.status === 429) {
-                        bubble.querySelector('span:not(.loader)').innerText = 'Message limit reached, please start a new chat.';
-                        document.querySelector("#prompt-input").disabled = true;
-                        document.querySelector("button[type='submit']").disabled = true;
-                        streaming = false;
-                        return;
-                    }
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let res = '';
-                    try {
-                        while (true) {
-                        const { done, value } = await reader.read();
+            if (response.status === 429) {
+                bubble.querySelector('span:not(.loader)').innerText = 'Message limit reached, please start a new chat.';
+                document.querySelector("#prompt-input").disabled = true;
+                document.querySelector("button[type='submit']").disabled = true;
+                streaming = false;
+                return;
+            }
 
-                        if (done) {
-                            break;
-                        }
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let res = '';
+            try {
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    const chunkText = decoder.decode(value, { stream: true });
+                    res += chunkText;
+                    updateResponseBubble(res, bubble);
+                }
+            } catch (error) {
+                console.error("Streaming error:", error);
+                res += '... <span class="error-text">An error has occurred</span>';
+            } finally {
+                reader.releaseLock();
+                streaming = false;
+                return res;
+            }
+        }
 
-                        // Decode and log each chunk as it arrives
-                        const chunkText = decoder.decode(value, { stream: true });
-                        res += chunkText;
-                        updateResponseBubble(res, bubble)
-                        }
-                    } catch (error) {
-                        console.error("Streaming error:", error);
-                        res += '... <span class="error-text">An error has occured</span>'
-                    } finally {
-                        reader.releaseLock();
-                        streaming = false;
-                        return res;
-                    }
-                } 
-            
-                function addRow(text, isPrompt){
-                    const container = document.querySelector("#history-container");
-                    
-                    if(isPrompt){
-                      const row = document.createElement('div')
-                      row.classList.add("mb-4","mx-auto","col-8")  
+        function addRow(text, isPrompt) {
+            const container = document.querySelector("#history-container");
 
-                      row.innerHTML = 
-                      `<div class="d-flex justify-content-end mb-2">
-                        <div class="response-area p-3 rounded text-white" style="background-color: #0b1f3a; max-width: 80%;">
+            if (isPrompt) {
+                const row = document.createElement('div');
+                row.classList.add("mb-4", "mx-auto", "col-8");
+                row.innerHTML =
+                    `<div class="d-flex justify-content-end mb-2">
+                        <div class="p-3 radius-10 text-light-1 fs-6"
+                             style="background-color: var(--dark-3); max-width: 80%;">
                             <span>${text}</span>
                         </div>
-                      </div>`;  
+                    </div>`;
+                container.appendChild(row);
+                container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+                return null;
+            }
 
-                      container.appendChild(row);
+            const row = container.lastElementChild;
+            row.innerHTML +=
+                `<div class="d-flex justify-content-start align-items-start gap-3">
+                    <div class="mt-3">
+                        <span class="loader running"></span>
+                    </div>
+                    <div class="p-3 radius-10 text-light-1"
+                         style="background-color: var(--dark-2); border: 1px solid var(--dark-3); max-width: 80%;">
+                        <span>${text}</span>
+                    </div>
+                </div>`;
 
-                      container.scrollTo({
-                        top: container.scrollHeight,
-                        behavior: "smooth"
-                      })
-
-
-                      return null;
-                    }  
-                    // Response od LLM
-                    row = container.lastElementChild;
-
-                    row.innerHTML += 
-                    `<div class="d-flex justify-content-start">
-                        <div class="m-4">
-                            <span class="loader running"></span>
-                        </div>
-                        <div class="p-3 rounded bg-white shadow-sm">
-                            <span>${text}</span>
-                        </div>
-                    </div>`
-
-                    console.log(row.querySelector(".loader.running"))
-                    row.querySelector(".loader.running")
-                    .addEventListener("animationiteration", (e) => {
-                        if(!streaming) {
-                            e.target.classList.remove('running')
-                            e.target.classList.add("invisible")
-                        }
-                    });
-
-                    container.scrollTo({
-                        top: container.scrollHeight,
-                        behavior: "smooth"
-                      })
-
-                    return row.lastElementChild;
-                }
-            
-                function updateResponseBubble(res, bubble) {
-                    bubble.querySelector('span:not(.loader)').innerText = res;
-
-                    const container = document.querySelector("#history-container")
-                    
-                    container.scrollTo({
-                        top: container.scrollHeight,
-                        behavior: "smooth"
-                      });
-                }
-            
-                function init(){
-                    const container = document.querySelector("#history-container")
-                    
-                    if([[${prompts[0] != null && prompts[0].response == null}]]) {
-                        let prompt = [[${prompts[0].question}]];
-                        sendPrompt(prompt, '/api/prompt/regenarate/last');
+            row.querySelector(".loader.running")
+                .addEventListener("animationiteration", (e) => {
+                    if (!streaming) {
+                        e.target.classList.remove('running');
+                        e.target.classList.add("invisible");
                     }
+                });
 
-                    container.scrollTo({
-                        top: container.scrollHeight,
-                        behavior: "smooth"
-                      });
-                }
-            </script>
-        </div>
-        <p class="inline-error" th:text="${error} ?: ' '"></p>
-    </div>
+            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+            return row.lastElementChild;
+        }
+
+        function updateResponseBubble(res, bubble) {
+            bubble.querySelector('span:not(.loader)').innerText = res;
+            const container = document.querySelector("#history-container");
+            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        }
+
+        function init() {
+            const container = document.querySelector("#history-container");
+            if ([[${prompts[0] != null && prompts[0].response == null}]]) {
+                let prompt = [[${prompts[0].question}]];
+                sendPrompt(prompt, '/api/prompt/regenarate/last');
+            }
+            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        }
+    </script>
+
 </div>

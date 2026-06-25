@@ -11,4 +11,6 @@ public interface PromptService {
     void saveResult(Long promptId, String responseText, boolean isStopped);
     List<Prompt> getPromptsForChat(Long chatId);
     List<MessageDto> createHistory(List<Prompt> prompts);
+    int getUsedTokens(Long userId);
+    boolean isTokenLimitNotExceeded(Long userId);
 }

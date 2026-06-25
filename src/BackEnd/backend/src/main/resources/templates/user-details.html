@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8"/>
+    <title>DataAnswering – Settings</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+            crossorigin="anonymous"></script>
+
+    <style>
+        :root {
+            --dark-1: #131313;
+            --dark-2: #2a2a2a;
+            --dark-3: #333333;
+            --gray-1: #444444;
+            --gray-2: #888888;
+            --gray-3: #a4a4a4;
+            --light-1: #E0E0E0;
+            --light-2: #a4a4a4;
+            --red-1: #ff6b6b;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--dark-1);
+        }
+
+        .radius-10 { border-radius: 10px; }
+        .fs-12px { font-size: 12px; }
+        .text-light-1 { color: var(--light-1); }
+        .text-light-2 { color: var(--light-2); }
+        .text-gray-1 { color: var(--gray-1); }
+
+        .sidebar {
+            background-color: var(--dark-1);
+            min-height: 100vh;
+        }
+
+        .link-custom {
+            text-decoration: none;
+            transition: background-color 0.15s;
+        }
+
+        .link-custom:hover {
+            background-color: var(--dark-3);
+            color: var(--light-1);
+        }
+
+        .submit-btn {
+            background-color: var(--gray-1);
+            color: var(--light-1);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--gray-2);
+        }
+
+        .danger-btn {
+            background-color: var(--red-1);
+            color: var(--light-1);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: opacity 0.15s;
+        }
+
+        .danger-btn:hover {
+            opacity: 0.9;
+        }
+
+        .page-heading {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--light-1);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--dark-2);
+            border: 1px solid var(--dark-3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            max-width: 380px;
+            width: 90%;
+            color: var(--light-1);
+        }
+
+        .stat-card {
+            background-color: var(--dark-2);
+            border: 1px solid var(--dark-3);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .subscription-row {
+            background-color: var(--dark-2);
+            border: 1px solid var(--dark-3);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 8px;
+        }
+
+        .subscription-row.active {
+            border-color: var(--gray-2);
+        }
+
+        .badge-active {
+            background-color: var(--gray-1);
+            color: var(--light-1);
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 11px;
+        }
+
+        .gray-button {
+            background-color: var(--gray-1);
+            color: var(--light-1);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 16px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background-color 0.15s;
+            text-decoration: none;
+        }
+
+        .gray-button:hover {
+            background-color: var(--gray-2);
+            color: var(--light-1);
+        }
+
+        .divider {
+            border-top: 1px solid var(--dark-3);
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row" style="height: 100vh;">
+
+        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+        <div class="col-10 p-4" style="overflow-y: auto; height: 100vh; background-color: var(--dark-1);">
+
+            <div class="mb-4">
+                <a class="gray-button rounded-pill d-inline-flex align-items-center justify-content-center"
+                   href="/home">← Home</a>
+            </div>
+
+            <p class="page-heading mb-4">Settings</p>
+
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="stat-card">
+                        <p class="text-light-2 fs-12px mb-1">Chats Used</p>
+                        <p class="text-light-1 mb-0" style="font-size: 2rem; font-weight: 600;">
+                            <span th:text="${numberOfChats}"></span>
+                            <span style="font-size: 1rem; color: var(--light-2);">
+                                / <span th:text="${maxNumberOfChats}"></span>
+                            </span>
+                        </p>
+                        <div style="height: 6px; background: var(--dark-3); border-radius: 3px; margin-top: 12px;">
+                            <div th:style="'width: ' + (${numberOfChats * 100 / maxNumberOfChats}) + '%; height: 100%; background: var(--gray-1); border-radius: 3px;'"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="stat-card">
+                        <p class="text-light-2 fs-12px mb-1">Tokens Used Today</p>
+                        <p class="text-light-1 mb-0" style="font-size: 2rem; font-weight: 600;" th:text="${usedTokens}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-light-1 mb-3" style="font-size: 1.1rem; font-weight: 500;">Subscription History</p>
+
+            <div th:if="${active != null}" class="subscription-row active">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-light-1 mb-1 fw-500" th:text="${active.plan.planName}"></p>
+                        <span class="badge-active">Active</span>
+                    </div>
+                    <div class="text-end">
+                        <p class="text-light-1 mb-0 fs-12px" th:text="${active.plan.planMonthlyCost == 0 ? 'Free' : #numbers.formatDecimal(active.plan.planMonthlyCost, 1, 2) + ' $/month'}"></p>
+                        <p class="text-light-2 fs-12px mb-0" th:text="'Expires ' + #temporals.format(active.endTs, 'dd MMM yyyy')"></p>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <span class="text-light-2 fs-12px" th:text="${active.plan.tokens + ' tokens daily'}"></span>
+                </div>
+            </div>
+
+            <div th:each="sub : ${history}" class="subscription-row">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-light-1 mb-1 fw-500" th:text="${sub.plan.planName}"></p>
+                        <span class="text-light-2 fs-12px" th:text="${#temporals.format(sub.startTs, 'dd MMM yyyy') + ' – ' + #temporals.format(sub.endTs, 'dd MMM yyyy')}"></span>
+                    </div>
+                    <div class="text-end">
+                        <p class="text-light-1 mb-0 fs-12px" th:text="${sub.plan.planMonthlyCost == 0 ? 'Free' : #numbers.formatDecimal(sub.plan.planMonthlyCost, 1, 2) + ' $/month'}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3">
+                <a th:href="@{/plans}" class="gray-button rounded-pill d-inline-flex align-items-center justify-content-center">
+                    Change Plan
+                </a>
+            </div>
+
+            <div class="divider"></div>
+
+            <p class="text-light-1 mb-3" style="font-size: 1.1rem; font-weight: 500;">Danger Zone</p>
+
+            <div class="d-flex gap-2">
+                <button type="button" class="submit-btn" onclick="openDeleteChatsModal()">
+                    Delete All Chats
+                </button>
+                <button type="button" class="danger-btn" style="width: auto; padding: 10px 20px;" onclick="openDeleteAccountModal()">
+                    Delete Account
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="deleteChatsModal" class="modal-overlay">
+    <div class="modal-content">
+        <p class="text-light-1 m-0 mb-1" style="font-size: 16px; font-weight: 500;">Delete all chats?</p>
+        <p class="text-light-2 m-0 mb-4 fs-12px">
+            This will permanently delete all your chats. This action cannot be undone.
+        </p>
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn" style="border: 1px solid var(--gray-1); color: var(--light-1); background: none;"
+                    onclick="closeDeleteChatsModal()">
+                Cancel
+            </button>
+            <form th:action="@{/chat/delete-all}" method="post" class="m-0">
+                <button type="submit" class="btn" style="background-color: var(--red-1); color: var(--light-1); border: none;">
+                    Delete All Chats
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="deleteAccountModal" class="modal-overlay">
+    <div class="modal-content">
+        <p class="text-light-1 m-0 mb-1" style="font-size: 16px; font-weight: 500;">Delete account?</p>
+        <p class="text-light-2 m-0 mb-4 fs-12px">
+            This will permanently delete your account and all associated data. This action cannot be undone.
+        </p>
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button" class="btn" style="border: 1px solid var(--gray-1); color: var(--light-1); background: none;"
+                    onclick="closeDeleteAccountModal()">
+                Cancel
+            </button>
+            <form th:action="@{/user/delete}" method="post" class="m-0">
+                <button type="submit" class="btn" style="background-color: var(--red-1); color: var(--light-1); border: none;">
+                    Delete Account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeleteChatsModal() {
+        document.getElementById('deleteChatsModal').style.display = 'flex';
+    }
+
+    function closeDeleteChatsModal() {
+        document.getElementById('deleteChatsModal').style.display = 'none';
+    }
+
+    function openDeleteAccountModal() {
+        document.getElementById('deleteAccountModal').style.display = 'flex';
+    }
+
+    function closeDeleteAccountModal() {
+        document.getElementById('deleteAccountModal').style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.style.display = 'none';
+        }
+    }
+</script>
+
+</body>
+</html>

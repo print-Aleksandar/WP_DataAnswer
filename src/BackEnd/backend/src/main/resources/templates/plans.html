@@ -1,60 +1,74 @@
 <div class="col p-4 bg-dark-1 text-light-1"
-     style="overflow-y: auto; height: 100vh;"
      xmlns:th="http://www.thymeleaf.org"
->
+     style="overflow-y: auto; height: 100vh;">
 
-    <div th:if="${error}" class="alert error-text bg-dark-2 radius-10" th:text="${error}"
+    <div th:if="${error}"
+         class="mb-3 p-3 radius-10 inline-error"
          style="background-color: var(--dark-2); border: 1px solid var(--red-1);"
-    >
-    </div>
+         th:text="${error}"></div>
 
-    <div>
-        <a class="btn gray-button btn-custom rounded-pill text-white d-inline-flex align-items-center justify-content-center" href="/home">Home</a>
+    <div class="mb-4">
+        <a class="btn gray-button btn-custom rounded-pill text-light-1
+                  d-inline-flex align-items-center justify-content-center"
+           href="/home">Home</a>
     </div>
 
     <p class="header-title px-0 mb-2">Your Plan</p>
 
-    <div class="p-3 mb-4 radius-10" style="background-color: var(--dark-2); max-width: 480px;">
-        <div class="d-flex justify-content-between align-items-start mb-2">
+    <div class="p-4 mb-4 radius-10"
+         style="background-color: var(--dark-2);
+                border: 1px solid var(--dark-3);
+                max-width: 480px;">
+
+        <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-                <h5 class="mb-0" th:text="${activeSub.plan.planName}"></h5>
+                <h5 class="mb-0 text-light-1" th:text="${activeSub.plan.planName}"></h5>
                 <span class="text-light-2 fs-12px">Active subscription</span>
             </div>
             <span class="badge fs-12px align-self-center"
-                  style="background-color: var(--light-1); color: var(--dark-1);"
-                  th:text="${activeSub.plan.planMonthlyCost == 0} ? 'Free' : ${#numbers.formatDecimal(activeSub.plan.planMonthlyCost, 1, 2)} + ' $/month'"></span>
-        </div>
-
-        <hr style="border-color: var(--gray-1); opacity: 1;">
-
-        <div class="row gx-3 fs-12px text-gray-1">
-            <div class="col-6 mb-2">
-                <div class="text-light-1 fs-5" th:text="${activeSub.plan.tokens}"></div>
-                <div class="text-light-2">tokens daily</div>
+                  style="background-color: var(--gray-1); color: var(--light-1); border-radius: 20px; padding: 5px 12px;"
+                  th:text="${activeSub.plan.planMonthlyCost == 0}
+                           ? 'Free'
+                           : ${#numbers.formatDecimal(activeSub.plan.planMonthlyCost, 1, 2)} + ' $/month'">
+            </span>
+        </div><div class="d-flex flex-column gap-2 fs-12px mt-2">
+            <div>
+                <div class="text-light-1 fs-5 fw-500" th:text="${activeSub.plan.tokens}"></div> <div class="text-light-2">tokens daily</div>
             </div>
-            <div class="col-12 text-light-2">
+            <div class="text-light-2">
                 Renews / expires
-                <span class="text-light-1" th:text="${#temporals.format(activeSub.endTs, 'dd MMM yyyy')}"></span>
+                <span class="text-light-1"
+                      th:text="${#temporals.format(activeSub.endTs, 'dd MMM yyyy')}"></span>
             </div>
         </div>
-    </div>
-
-    <hr class="bg-light-1" style="opacity: 1; height: 1px;">
-
-    <p class="header-title px-0 mt-3 mb-2">Available Plans</p>
+    </div><p class="header-title px-0 mt-3 mb-3">Available Plans</p>
 
     <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
         <div class="col" th:each="plan : ${plans}">
-            <div class="p-3 h-100 d-flex flex-column radius-10" style="background-color: var(--dark-2);">
-                <h6 class="mb-1" th:text="${plan.planName}"></h6>
-                <p class="fs-12px text-light-2 mb-1"
-                   th:text="${plan.planMonthlyCost == 0} ? 'Free' : ${#numbers.formatDecimal(plan.planMonthlyCost, 1, 2)} + ' $/month'"></p>
-                <p class="fs-12px text-light-2 mb-1" th:text="${plan.tokens} + ' tokens daily'"></p>
+            <div class="p-4 h-100 d-flex flex-column radius-10"
+                 style="background-color: var(--dark-2); border: 1px solid var(--dark-3);">
 
-                <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}" method="post" class="mt-auto">
-                    <button type="submit" class="btn btn-sm w-100 gray-button text-light-1 border-0 btn-custom"
+                <h6 class="mb-1 text-light-1" th:text="${plan.planName}"></h6>
+
+                <p class="fs-12px text-light-2 mb-1"
+                   th:text="${plan.planMonthlyCost == 0}
+                            ? 'Free'
+                            : ${#numbers.formatDecimal(plan.planMonthlyCost, 1, 2)} + ' $/month'"></p>
+
+                <p class="fs-12px text-light-2 mb-3"
+                   th:text="${plan.tokens} + ' tokens daily'"></p>
+
+                <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}"
+                      method="post"
+                      class="mt-auto">
+                    <button type="submit"
+                            class="btn btn-sm w-100 text-light-1 border-0"
+                            style="background-color: var(--gray-1); border-radius: 8px; padding: 8px 0;
+                                   transition: background-color 0.15s;"
+                            onmouseover="this.style.backgroundColor='var(--gray-2)'"
+                            onmouseout="this.style.backgroundColor='var(--gray-1)'"
                             th:text="${activeSub.plan.id == plan.id ? 'Current Plan' : 'Subscribe'}"
-                            th:disabled="${activeSub.plan.id == plan.id || plan.id == 3}" >
+                            th:disabled="${activeSub.plan.id == plan.id || plan.id == 3}">
                     </button>
                 </form>
             </div>

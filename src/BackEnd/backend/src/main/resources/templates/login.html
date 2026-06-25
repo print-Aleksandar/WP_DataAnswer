@@ -1,52 +1,167 @@
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
->
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>DataAnswering</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-            integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    <title>DataAnswering – Login</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-            crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-            crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
 
     <style>
-        .btn-custom:hover{
-                background-color: #888888 !important;   
+        :root {
+            --dark-1: #131313;
+            --dark-2: #2a2a2a;
+            --dark-3: #333333;
+            --gray-1: #444444;
+            --gray-2: #888888;
+            --gray-3: #a4a4a4;
+            --light-1: #E0E0E0;
+            --red-1: #ff6b6b;
         }
-        .link-custom:hover{
-                background-color: #888888 !important;
-                border-radius: 10px;
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--dark-1);
         }
-  </style>  
+
+        .page-center {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--dark-1);
+        }
+
+        .page-heading {
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: var(--light-1);
+            margin-bottom: 4px;
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: var(--gray-3);
+            margin-bottom: 24px;
+        }
+
+        .start-card {
+            background-color: var(--dark-2);
+            border: 1px solid var(--dark-3);
+            border-radius: 14px;
+            padding: 24px;
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .prompt-input {
+            background-color: var(--dark-1);
+            color: var(--light-1);
+            border: 1px solid var(--dark-3);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+            width: 100%;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .prompt-input:focus {
+            border-color: var(--gray-2);
+            background-color: var(--dark-1);
+            color: var(--light-1);
+            box-shadow: none;
+        }
+
+        .prompt-input::placeholder {
+            color: var(--gray-2);
+        }
+
+        .submit-btn {
+            background-color: var(--gray-1);
+            color: var(--light-1);
+            border: none;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.15s;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--gray-2);
+        }
+
+        .inline-error {
+            font-size: 12px;
+            color: var(--red-1);
+            text-align: center;
+            min-height: 18px;
+            margin: 0;
+        }
+
+        .link-muted {
+            font-size: 13px;
+            color: var(--gray-3);
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .link-muted:hover {
+            color: var(--light-1);
+        }
+
+        .brand-link {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--light-1);
+            text-decoration: none;
+            margin-bottom: 32px;
+        }
+
+        .brand-link:hover {
+            color: var(--gray-3);
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid" style="background-color: #121212; height: 100vh;">
-    <div class="row d-flex justify-content-center align-items-center vh-100">
-      <div class="col-auto" style="background-color: #2a2a2a; height: 400px; width: 300px; border-radius: 20px">
-        <p class="display-6" style="font-size: 20px; font-weight: bold; color: #E0E0E0; text-align: center; margin-top: 20px">Log In or sign up</p>
-        <form class="form-signin mt-xl-5 d-flex flex-column" method="post" action="/login">
-          <p>
-            <input type="text" style="background-color: #B0B0B0;border-color: #B0B0B0; border-radius: 30px; padding: 10px 15px" id="username" name="username" class="form-control" placeholder="Username"
-                   autofocus="">
-          </p>
-          <p>
-            <input type="password" style="background-color: #B0B0B0 ; border-color: #B0B0B0; border-radius: 30px; padding: 10px 15px" id="password" name="password" class="form-control" placeholder="Password"
-            >
-          </p>
-          <div th:if="${param.error}" th:text="${param.error}" class="text-danger"></div>
-          <button id="submit" style="margin-bottom: 20px; background-color: #B0B0B0; border-color: #B0B0B0; height: 45px; width: 120px" class="btn btn-lg btn-primary mx-auto btn-custom" type="submit">Sign in</button>
-          <a href="/register" class="btn" style="color: #B0B0B0;">Don't have an account? Register here!</a>
-        </form>
-      </div>
-    </div>
-  </div>
+<div class="page-center">
+    <a href="/" class="brand-link">Data Answer</a>
 
+    <p class="page-heading">Welcome back</p>
+    <p class="page-sub">Sign in to continue</p>
+
+    <form class="start-card" method="post" action="/login">
+        <input type="text"
+               name="username"
+               class="prompt-input"
+               placeholder="Username"
+               autofocus>
+
+        <input type="password"
+               name="password"
+               class="prompt-input"
+               placeholder="Password">
+
+        <p class="inline-error" th:if="${param.error}" th:text="${param.error}"></p>
+        <p class="inline-error" th:unless="${param.error}">&nbsp;</p>
+
+        <button class="submit-btn" type="submit">Sign in</button>
+
+        <a href="/register" class="link-muted">Don't have an account? Register here</a>
+    </form>
+</div>
 </body>
 </html>

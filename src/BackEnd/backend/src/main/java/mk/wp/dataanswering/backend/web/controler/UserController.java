@@ -1,13 +1,18 @@
 package mk.wp.dataanswering.backend.web.controler;
 
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.RegisteredUser;
-import mk.wp.dataanswering.backend.service.RegisteredUserService;
+import mk.wp.dataanswering.backend.model.Subscription;
+import mk.wp.dataanswering.backend.service.*;
+import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+
+import java.nio.file.AccessDeniedException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/user")
@@ -16,11 +21,43 @@ public class UserController {
 
     private final RegisteredUserService registeredUserService;
     private final AuthUtils authUtils;
+    private final SubscriptionService subscriptionService;
+    private final UserService userService;
+    private final PromptService promptService;
+    private final ChatServiceRegistry chatServiceRegistry;
+    @Value("${saved.chats.limit}")
+    private int savedChatsLimit;
 
     @PostMapping("/delete")
     public String deleteAccount() {
         RegisteredUser user = authUtils.getCurrentRegisteredUser();
         registeredUserService.softDelete(user.getUserId());
         return "redirect:/logout";
+    }
+
+    @GetMapping("/{userId}")
+    public String getUser(@PathVariable Long userId, Model model) throws AccessDeniedException {
+
+        // handle if unathorized
+
+        long currentId = userService.getCurrentUser().getUserId();
+
+        // handle if not equals!
+
+        Subscription active = subscriptionService.getActiveSubscription(userId);
+        model.addAttribute("active", active);
+
+        List<Subscription> history = subscriptionService.getSubscriptionHistory(userId).stream()
+                .filter(s -> s.getId() != active.getId()).toList();
+        model.addAttribute("history", history);
+
+        int usedTokens = promptService.getUsedTokens(userId);
+        model.addAttribute("usedTokens", usedTokens);
+
+        int numberOfChats = chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser().size();
+        model.addAttribute("numberOfChats", numberOfChats);
+        model.addAttribute("maxNumberOfChats", savedChatsLimit);
+
+        return "user-details";
     }
 }

@@ -1,10 +1,13 @@
 package mk.wp.dataanswering.backend.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import mk.wp.dataanswering.backend.service.SubscriptionService;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -26,6 +29,7 @@ public class PromptServiceImpl implements PromptService{
     private final PromptRepository promptRepository;
     private final ChatRepository chatRepository;
     private final ResponseRepository responseRepository;
+    private final SubscriptionService subscriptionService;
 
     @Override
     @Transactional
@@ -78,6 +82,19 @@ public class PromptServiceImpl implements PromptService{
     }
 
     @Override
+    public int getUsedTokens(Long userId) {
+        return responseRepository.findAllByUserId(userId).stream()
+                .filter(p -> p.getPrompt().getPromptTs().isAfter(LocalDateTime.now().minusDays(1)))
+                .mapToInt(Response::getTokenUsage).
+                sum();
+    }
+
+    @Override
+    public boolean isTokenLimitNotExceeded(Long userId) {
+        return getUsedTokens(userId) < subscriptionService.getActiveSubscription(userId).getPlan().getTokens();
+    }
+
+    @Override
     @Transactional
     public Prompt regeneratePrompt(Long chatId, String promptText) {
         Chat chat = chatRepository.findById(chatId)
@@ -94,5 +111,7 @@ public class PromptServiceImpl implements PromptService{
                 ;
 
     }
+
+
 
 }

@@ -1,27 +1,23 @@
-
 <div class="col-2 sidebar p-2 d-flex flex-column bg-dark-1"
      xmlns:th="http://www.thymeleaf.org"
-     xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
->
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
     <a class="nav-link active p-2 text-light-1 fs-4" href="/">Data Answer</a>
     <a class="nav-link link-custom text-light-1 p-1 fs-6 radius-10 ms-2 submit-btn text-center" href="/home">New Chat</a>
-    <hr>
+
     <div sec:authorize="isAuthenticated()">
         <p class="p-2 text-gray-1 mb-0 fs-12px">Recent</p>
-        <div class="sidebar-chats overflow-auto p-2 text-light-1 bg-active">
+        <div class="sidebar-chats overflow-auto p-2 text-light-1">
             <div th:each="chat : ${chats}">
                 <div class="d-flex align-items-center">
                     <a th:href="@{'/chat/{chatId}' (chatId=${chat.getId()})}"
                        class="text-truncate link-custom d-block mb-1 text-light-1 p-1 fs-12px flex-grow-1"
                        th:text="${chat.chatName}"></a>
-                    <form th:action="@{/chat/unlink}" method="post" class="mb-1">
-                        <input type="hidden" name="chatId" th:value="${chat.getId()}" />
-                        <button type="submit"
-                                style="background:none; border:none; color:#666; font-size:11px; cursor:pointer; padding:0 4px;"
-                                onmouseover="this.style.color='#e05c5c'"
-                                onmouseout="this.style.color='#666'">&#x2715;</button>
-                    </form>
-                </div>
+                    <button type="button"
+                            style="background: none; border: none; cursor: pointer; padding: 0 4px; color: #a4a4a4; font-size: 12px;"
+                            onmouseover="this.style.color='#ff6b6b'"
+                            onmouseout="this.style.color='#a4a4a4'"
+                            th:onclick="|openDeleteChatModal(${chat.getId()})|">&#x2715;</button></div>
             </div>
         </div>
     </div>
@@ -31,59 +27,63 @@
     </div>
 
     <div sec:authorize="isAuthenticated()" class="mt-auto">
-        <hr class="bg-gray-1">
-        <div class="d-flex flex-row justify-content-between align-items-center ps-2">
-            <div class="d-flex align-items-center ps-2">
-                <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1"
-                   style="width: 40px; cursor:pointer;"
+        <div class="d-flex flex-row justify-content-between align-items-center">
+            <div class="d-flex justify-content-start align-items-center ps-2">
+                <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1 mb-0"
+                   style="width: 40px; cursor: pointer; color: var(--dark-1); font-weight: 600;"
                    th:text="${#strings.substring(username, 0, 1).toUpperCase()}"
-                   onclick="document.getElementById('deleteAccountModal').style.display='flex'">
-                </p>
+                   onclick="document.getElementById('deleteAccountModal').style.display='flex'"></p>
                 <div class="d-flex flex-column ps-2">
-                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}"></p>
-                    <p class="fs-12px text-gray-1 d-inline-block" th:text="${plan}"></p>
+                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}"></p><p class="fs-12px text-gray-1 d-inline-block m-0" th:text="${plan}"></p>
                 </div>
             </div>
-            <div>
+            <div class="pe-2">
                 <a th:href="@{/plans}"
-                   class="mb-2 btn gray-button btn-custom rounded-pill text-white d-inline-flex align-items-center justify-content-center"
+                   class="btn gray-button btn-custom rounded-pill text-light-1 d-inline-flex align-items-center justify-content-center"
                    role="button">Change Plan</a>
             </div>
         </div>
-    </div>
-
-    <div id="deleteAccountModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.65);
-     align-items:center; justify-content:center; z-index:300;">
-        <div style="background:#1e1e1e; border:1px solid #333; border-radius:10px; padding:1.5rem; max-width:340px; width:90%;">
-            <p class="text-light-1 m-0 mb-1" style="font-size:15px; font-weight:500;">Delete account?</p>
-            <p class="text-gray-1 m-0 mb-4 fs-12px">
-                This will permanently delete your account and all associated data. This cannot be undone.
-            </p>
-            <div class="d-flex justify-content-end gap-2">
-                <button type="button"
-                        class="btn btn-outline-secondary"
-                        onclick="document.getElementById('deleteAccountModal').style.display='none'">
-                    Cancel
-                </button>
-
-                <form action="/user/delete" method="post" class="m-0">
-                    <button type="submit" class="btn btn-danger">
-                        Delete my account
-                    </button>
-                </form>
+    </div> <div sec:authorize="isAnonymous()" class="mt-auto">
+        <div class="d-flex justify-content-start align-items-center ps-2">
+            <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1 mb-0"
+               style="width: 40px; color: var(--dark-1); font-weight: 600;">A</p>
+            <div class="d-flex flex-column ps-2">
+                <p class="fs-12px text-light-1 d-inline-block m-0">Anonymous</p> <p class="fs-12px text-gray-1 d-inline-block m-0">Guest</p>
             </div>
         </div>
     </div>
-
-    <div sec:authorize="isAnonymous()" class="mt-auto">
-        <hr class="bg-gray-1">
-        <div class="d-flex align-items-center p-2">
-        <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1" 
-        style="width: 40px;">A</p>
-        <div class="d-flex flex-column" style="padding-left: 10px; ">
-            <p class="fs-12px text-light-1 d-inline-block m-0">Anonymous</p>
-            <p class="fs-12px text-gray-1 d-inline-block">Guest</p>
-        </div>
+</div>
+<div id="deleteChatModal"
+     style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65);
+            align-items: center; justify-content: center; z-index: 300;">
+    <div style="background: var(--dark-2); border: 1px solid var(--dark-3);
+            border-radius: 10px; padding: 1.5rem; max-width: 340px; width: 90%;
+            color: var(--light-1);">
+        <p class="text-light-1 m-0 mb-1" style="font-size: 15px; font-weight: 500;">Delete chat?</p>
+        <p class="text-light-2 m-0 mb-4 fs-12px">
+            This will permanently delete this chat. This cannot be undone.
+        </p>
+        <div class="d-flex justify-content-end gap-2">
+            <button type="button"
+                    class="btn"
+                    style="border: 1px solid var(--gray-1); color: var(--light-1); background: none;"
+                    onclick="document.getElementById('deleteChatModal').style.display='none'">
+                Cancel
+            </button>
+            <form id="deleteChatForm" action="/chat/unlink" method="post" class="m-0">
+                <input type="hidden" id="deleteChatId" name="chatId" value="">
+                <button type="submit" class="btn"
+                        style="background-color: var(--red-1); color: var(--light-1); border: none;">
+                    Delete chat
+                </button>
+            </form>
         </div>
     </div>
 </div>
+
+<script>
+    function openDeleteChatModal(chatId) {
+        document.getElementById('deleteChatId').value = chatId;
+        document.getElementById('deleteChatModal').style.display = 'flex';
+    }
+</script>

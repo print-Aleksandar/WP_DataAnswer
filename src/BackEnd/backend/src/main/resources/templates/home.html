@@ -1,36 +1,35 @@
 <body xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
-<style>
-    .row {
-        height: 100vh;
-        overflow: hidden;
-    }
-</style>
+<div class="col-10 p-0 d-flex flex-column" style="height: 100vh;">
 
-<div class="col-10 p-0 d-flex flex-column">
     <header th:replace="~{fragments/header}"></header>
 
-    <div class="page-center">
-        <p class="page-heading">Hello <span th:text="${usersName}"> </span>! Ready for my answers?</p>
+    <div class="d-flex flex-column align-items-center justify-content-center flex-grow-1 bg-dark-1">
+
+        <p class="page-heading" style="font-size: 1.4rem;">
+            Hello <span th:text="${usersName}"></span>! Ready for my answers?
+        </p>
         <p class="page-sub">Upload a file and ask your question</p>
 
         <form class="start-card" action="/chat/start" method="post" enctype="multipart/form-data">
-            <input
-                    name="fileDocument"
-                    class="file-input"
-                    type="file"
-                    th:accept="${supportedFileTypes}">
 
             <input
-                    name="prompt"
-                    class="prompt-input"
-                    type="text"
-                    placeholder="Your question?">
+                name="fileDocument"
+                type="file"
+                th:accept="${supportedFileTypes}"
+                class="upload-input form-control">
+
+            <input
+                name="prompt"
+                type="text"
+                class="prompt-input"
+                placeholder="Your question?">
 
             <button class="submit-btn" type="submit">Start</button>
         </form>
-        <p class="inline-error" th:text="${error} ?: ' '"></p>
+
+        <p class="inline-error mt-2" th:text="${error} ?: ' '"></p>
 
     </div>
 
