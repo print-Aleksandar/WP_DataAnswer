@@ -4,11 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
@@ -20,9 +20,15 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
+import mk.wp.dataanswering.backend.model.dto.ToolCallDto;
 import mk.wp.dataanswering.backend.service.LlmService;
 
 @Service
@@ -37,10 +43,13 @@ public class LlmServiceImpl implements LlmService {
     }
 
     @Override
-    public void streamPrompt(LlmRequest request, OutputStream outputStream) throws IOException, JsonParseException {
+    public List<ToolCallDto> streamPrompt(LlmRequest request, OutputStream outputStream) throws IOException, JsonParseException {
         String body = this.objectMapper.writeValueAsString(request);
 
         URI endpoint = URI.create(baseUrl + "/ask");
+
+        List<ToolCallDto> toolCalls = new ArrayList<>();
+        Map<String, String> idToNameMap = new HashMap<>(); 
 
         RequestCallback requestCallback = clientRequest -> {
             clientRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -49,25 +58,73 @@ public class LlmServiceImpl implements LlmService {
 
         ResponseExtractor<Void> responseExtractor = res -> {
             if (res.getStatusCode() != HttpStatus.OK) {
-                outputStream.flush();
+                // outputStream.flush();
                 throw new IOException("LLM Service returned status " + res.getStatusCode());
             }
             
             try (InputStream bodyStream = res.getBody()) {
-                byte[] buffer = new byte[512];
-                int read;
-                while( (read = bodyStream.read(buffer)) != -1 ){
-                    outputStream.write(buffer, 0, read);
-                    outputStream.flush(); // send chunks to client
+                JsonParser parser = objectMapper.getFactory().createParser(bodyStream);
+                MappingIterator<JsonNode> chunks = objectMapper.readValues(parser, JsonNode.class);
+
+                while (chunks.hasNext()) {
+                    handleChunk(chunks.next(), outputStream, idToNameMap, toolCalls);
                 }
+            } catch (IOException e) {
+                throw e;
             } catch (Exception e) {
                 outputStream.flush();
                 throw new IOException("Streaming failed with reason: " + e.getMessage());
+            } finally {
+                outputStream.flush();
             }
 
             return null;
         };
 
         restTemplate.execute(endpoint, HttpMethod.POST, requestCallback, responseExtractor);
+
+        return toolCalls;
+    }
+
+    private void handleChunk(JsonNode node, OutputStream out, Map<String, String> pending, List<ToolCallDto> done) throws IOException {
+
+        if (node.has("token")) {
+            // Send to frontend
+            out.write((node.toString()+ "\n").getBytes(StandardCharsets.UTF_8));
+            out.flush();
+
+        } else if (node.has("tool_call")){
+            // Add pending tool call
+            String toolId = node.get("tool_id").asText();
+            String toolName = node.get("tool_call").asText();
+            pending.put(toolId, toolName);
+
+            // send update to frontend
+            out.write((node.toString()+ "\n").getBytes(StandardCharsets.UTF_8));
+            out.flush();
+
+        } else if (node.has("tool_response")) {
+            // Convert to Dto
+            String toolId = node.get("tool_id").asText();
+            String tool_name = pending.remove(toolId);
+            done.add(new ToolCallDto(
+                toolId,
+                tool_name,
+                node.get("tool_response").asText()
+                )
+            );
+
+            ObjectNode response = JsonNodeFactory.instance.objectNode();
+            response.put("tool_response", tool_name);
+            response.put("tool_id", toolId);
+
+            out.write((response.toString() + '\n').getBytes(StandardCharsets.UTF_8));
+            out.flush();
+
+
+        } else if (node.has("token_usage")) {
+            int usage = node.get("token_usage").asInt();
+            // TODO
+        }
     }
 }

@@ -80,123 +80,210 @@
     </div>
 
     <script th:inline="javascript">
-        let streaming = false;
+    let streaming = false;
+    let toolCall = null;
+    let hideToolCallTimeout = null;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector("#prompt-box")
-                .addEventListener("submit", (e) => {
-                    e.preventDefault();
-                    const input = document.querySelector("#prompt-input");
-                    let prompt = input.value;
-                    input.value = '';
-                    addRow(prompt, true);
-                    if (prompt) { sendPrompt(prompt); }
-                });
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelector("#prompt-box")
+        .addEventListener("submit", (e) => {
+            e.preventDefault();
+            const input = document.querySelector("#prompt-input");
 
-            init();
+            let prompt = input.value;
+            input.value = '';
+
+            addRow(prompt, true);
+            if(prompt){
+                sendPrompt(prompt);
+            }
+        });
+
+        init();
         });
 
         async function sendPrompt(prompt, endpointUpdate) {
-            streaming = true;
-            const bubble = addRow('', false);
+        streaming = true;
+        console.log(new Date())
+        const bubble = addRow('', false);
 
-            const body = {
-                "chatId": [[${chat.id}]],
-                "promptText": prompt,
-            };
-            const endpoint = endpointUpdate ? endpointUpdate : '/api/prompt';
+        const body = {
+            "chatId": [[${chat.id}]],
+            "promptText": prompt,
+        }
+        endpoint = endpointUpdate ? endpointUpdate : '/api/prompt';
 
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-            });
+        const response = await fetch(endpoint, {
+            method:  'POST', // Specify the HTTP method
+            headers: {
+                'Content-Type': 'application/json' // Tell the server you are sending JSON
+            },
+            body: JSON.stringify(body)
 
-            if (response.status === 429) {
-                bubble.querySelector('span:not(.loader)').innerText = 'Message limit reached, please start a new chat.';
-                document.querySelector("#prompt-input").disabled = true;
-                document.querySelector("button[type='submit']").disabled = true;
-                streaming = false;
-                return;
+        });
+
+        if (response.status === 429) {
+            bubble.querySelector('span:not(.loader)').innerText = 'Message limit reached, please start a new chat.';
+            document.querySelector("#prompt-input").disabled = true;
+            document.querySelector("button[type='submit']").disabled = true;
+            streaming = false;
+            return;
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        let res = '';
+        let buffer = '';
+
+        try {
+            while (true) {
+            const { done, value } = await reader.read();
+
+            if (done) {
+                break;
             }
 
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let res = '';
-            try {
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    const chunkText = decoder.decode(value, { stream: true });
-                    res += chunkText;
-                    updateResponseBubble(res, bubble);
+            // Decode and log each chunk as it arrives
+            buffer += decoder.decode(value, { stream: true });
+            const lines = buffer.split('\n');
+
+            buffer = lines.pop();
+
+            for (const line of lines) {
+                if (!line.trim()) continue;
+
+                const msg = JSON.parse(line);
+
+                if (msg.token) {
+                    res += msg.token;
                 }
-            } catch (error) {
-                console.error("Streaming error:", error);
-                res += '... <span class="error-text">An error has occurred</span>';
-            } finally {
-                reader.releaseLock();
-                streaming = false;
-                return res;
-            }
-        }
-
-        function addRow(text, isPrompt) {
-            const container = document.querySelector("#history-container");
-
-            if (isPrompt) {
-                const row = document.createElement('div');
-                row.classList.add("mb-4", "mx-auto", "col-8");
-                row.innerHTML =
-                    `<div class="d-flex justify-content-end mb-2">
-                        <div class="p-3 radius-10 text-light-1 fs-6"
-                             style="background-color: var(--dark-3); max-width: 80%;">
-                            <span>${text}</span>
-                        </div>
-                    </div>`;
-                container.appendChild(row);
-                container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-                return null;
-            }
-
-            const row = container.lastElementChild;
-            row.innerHTML +=
-                `<div class="d-flex justify-content-start align-items-start gap-3">
-                    <div class="mt-3">
-                        <span class="loader running"></span>
-                    </div>
-                    <div class="p-3 radius-10 text-light-1"
-                         style="background-color: var(--dark-2); border: 1px solid var(--dark-3); max-width: 80%;">
-                        <span>${text}</span>
-                    </div>
-                </div>`;
-
-            row.querySelector(".loader.running")
-                .addEventListener("animationiteration", (e) => {
-                    if (!streaming) {
-                        e.target.classList.remove('running');
-                        e.target.classList.add("invisible");
+                else if (msg.tool_call) {
+                    toolCall = {
+                        id: msg.tool_id,
+                        name: msg.tool_call,
+                        toolCallStartedAt: Date.now()
+                    };
+                    // Cancel any pending hide
+                    if (hideToolCallTimeout) {
+                        clearTimeout(hideToolCallTimeout);
+                        hideToolCallTimeout = null;
                     }
-                });
+                }
+                else if (msg.tool_response && toolCall != null) {
+                    const elapsed = Date.now() - toolCall.toolCallStartedAt;
+                    const remaining = Math.max(0, 1500 - elapsed);
 
-            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-            return row.lastElementChild;
+                    hideToolCallTimeout = setTimeout(() => {
+                        toolCall = null;
+                        updateResponseBubble(res, bubble);
+                        hideToolCallTimeout = null;
+                    }, remaining);
+                }
+
+                updateResponseBubble(res, bubble);
+            }                        
         }
-
-        function updateResponseBubble(res, bubble) {
-            bubble.querySelector('span:not(.loader)').innerText = res;
-            const container = document.querySelector("#history-container");
-            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        } catch (error) {
+            console.error("Streaming error:", error);
+            res += '... <span class="error-text">An error has occured</span>'
+        } finally {
+            reader.releaseLock();
+            streaming = false;
+            return res;
         }
+    } 
 
-        function init() {
-            const container = document.querySelector("#history-container");
-            if ([[${prompts[0] != null && prompts[0].response == null}]]) {
-                let prompt = [[${prompts[0].question}]];
-                sendPrompt(prompt, '/api/prompt/regenarate/last');
+    function addRow(text, isPrompt){
+        const container = document.querySelector("#history-container");
+        
+        if(isPrompt){
+            const row = document.createElement('div')
+            row.classList.add("mb-4","mx-auto","col-8")  
+
+            row.innerHTML = 
+            `<div class="d-flex justify-content-end mb-2">
+            <div class="response-area p-3 rounded text-white" style="background-color: #0b1f3a; max-width: 80%;">
+                <span>${text}</span>
+            </div>
+            </div>`;  
+                container.appendChild(row);
+
+            container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+            })
+
+
+            return null;
+        }  
+        // Response od LLM
+        row = container.lastElementChild;
+
+        row.innerHTML += 
+        `<div class="d-flex flex-column">
+
+            <div class="ms-5 ps-4 invisible tool-display"></div>
+
+            <div class="d-flex justify-content-start">
+                <div class="m-4">
+                    <span class="loader running"></span>
+                </div>
+                <div class="p-3 rounded bg-white shadow-sm">
+                    <span>${text}</span>
+                </div>
+            </div>
+        </div>`
+
+                console.log(row.querySelector(".loader.running"))
+        row.querySelector(".loader.running")
+        .addEventListener("animationiteration", (e) => {
+            if(!streaming) {
+                e.target.classList.remove('running')
+                e.target.classList.add("invisible")
             }
-            container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
+        });
+
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+            })
+
+        return row.lastElementChild;
+    }
+
+function updateResponseBubble(res, bubble) {
+        if(toolCall != null) {
+            const toolDisplay = bubble.querySelector(':nth-last-child(1 of .tool-display)')
+            toolDisplay.classList.remove('invisible')
+            toolDisplay.innerText = 'Calliing ' + toolCall.name + '...'
+        } else {
+            bubble.querySelector('.tool-display').classList.add('invisible')
         }
+        
+
+        bubble.querySelector('span:not(.loader)').innerText = res;
+
+        const container = document.querySelector("#history-container")
+        
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+            });
+    }
+
+    function init(){
+        const container = document.querySelector("#history-container")
+        
+        if([[${prompts[0] != null && prompts[0].response == null}]]) {
+            let prompt = [[${prompts[0].question}]];
+            sendPrompt(prompt, '/api/prompt/regenarate/last');
+        }
+
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: "smooth"
+            });
+    }
     </script>
 
 </div>
