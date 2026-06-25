@@ -12,6 +12,14 @@ import mk.wp.dataanswering.backend.model.Response;
 public interface ResponseRepository extends JpaRepository<Response, Long> {
 
     @Modifying
-    @Query(value = "DELETE FROM responses WHERE request_id IN (SELECT r.request_id FROM requests r JOIN prompts p ON r.prompt_id = p.prompt_id JOIN tmp_chats tc ON p.chat_id = tc.chat_id WHERE tc.tmp_user_id = :userId)", nativeQuery = true)
-    void deleteResponsesByTmpUserId(@Param("userId") Long userId);
+    @Query(value = """
+    DELETE FROM responses
+    WHERE prompt_id IN (
+        SELECT p.prompt_id
+        FROM prompts p
+        JOIN tmp_chats tc ON p.chat_id = tc.chat_id
+        WHERE tc.tmp_user_id = :tmpUserId
+    )
+    """, nativeQuery = true)
+    void deleteResponsesByTmpUserId(@Param("tmpUserId") Long tmpUserId);
 }

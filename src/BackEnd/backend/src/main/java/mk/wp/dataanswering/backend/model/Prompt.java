@@ -37,9 +37,6 @@ public class Prompt {
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat;
 
-    @Column
-    private int token_count = 0;
-
     public void setPromptText(String promptText) {
         this.promptText = promptText;
     }
@@ -48,8 +45,7 @@ public class Prompt {
         this.chat = chat;
     }
 
-    @OneToOne
-    @JoinColumn(name = "response_id", nullable = true)
+    @OneToOne(mappedBy = "prompt")
     private Response response;
 
 

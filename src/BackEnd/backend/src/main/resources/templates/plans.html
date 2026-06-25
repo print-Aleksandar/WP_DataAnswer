@@ -22,19 +22,15 @@
             </div>
             <span class="badge fs-12px align-self-center"
                   style="background-color: var(--light-1); color: var(--dark-1);"
-                  th:text="${activeSub.plan.planMonthlyCost == 0 ? 'Free' : activeSub.plan.planMonthlyCost + ' $/month'}"></span>
+                  th:text="${activeSub.plan.planMonthlyCost == 0} ? 'Free' : ${#numbers.formatDecimal(activeSub.plan.planMonthlyCost, 1, 2)} + ' $/month'"></span>
         </div>
 
         <hr style="border-color: var(--gray-1); opacity: 1;">
 
         <div class="row gx-3 fs-12px text-gray-1">
             <div class="col-6 mb-2">
-                <div class="text-light-1 fs-5" th:text="${activeSub.plan.dayChatLimit}"></div>
-                <div class="text-light-2">chats / day</div>
-            </div>
-            <div class="col-6 mb-2">
-                <div class="text-light-1 fs-5" th:text="${activeSub.plan.requestPerChatLimit}"></div>
-                <div class="text-light-2">prompts / chat</div>
+                <div class="text-light-1 fs-5" th:text="${activeSub.plan.tokens}"></div>
+                <div class="text-light-2">tokens daily</div>
             </div>
             <div class="col-12 text-light-2">
                 Renews / expires
@@ -52,9 +48,8 @@
             <div class="p-3 h-100 d-flex flex-column radius-10" style="background-color: var(--dark-2);">
                 <h6 class="mb-1" th:text="${plan.planName}"></h6>
                 <p class="fs-12px text-light-2 mb-1"
-                   th:text="${plan.planMonthlyCost == 0 ? 'Free' : plan.planMonthlyCost + ' $/month'}"></p>
-                <p class="fs-12px text-light-2 mb-1" th:text="${plan.dayChatLimit} + ' chats/day'"></p>
-                <p class="fs-12px text-light-2 mb-3" th:text="${plan.requestPerChatLimit} + ' prompts/chat'"></p>
+                   th:text="${plan.planMonthlyCost == 0} ? 'Free' : ${#numbers.formatDecimal(plan.planMonthlyCost, 1, 2)} + ' $/month'"></p>
+                <p class="fs-12px text-light-2 mb-1" th:text="${plan.tokens} + ' tokens daily'"></p>
 
                 <form th:action="@{/plans/subscribe/{id}(id=${plan.id})}" method="post" class="mt-auto">
                     <button type="submit" class="btn btn-sm w-100 gray-button text-light-1 border-0 btn-custom"

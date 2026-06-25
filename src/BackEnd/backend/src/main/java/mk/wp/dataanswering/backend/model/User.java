@@ -20,6 +20,6 @@ public abstract class User {
     @Column(name="user_id")
     private Long userId;
 
-    @OneToMany(mappedBy="user", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy="user", fetch=FetchType.LAZY)
     private List<Subscription> subscriptions;
 }

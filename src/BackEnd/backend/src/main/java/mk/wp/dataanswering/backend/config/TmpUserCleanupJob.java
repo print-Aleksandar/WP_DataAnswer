@@ -6,6 +6,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.TmpUser;
 import mk.wp.dataanswering.backend.repository.*;
+import mk.wp.dataanswering.backend.service.OrphanCleanupService;
+import mk.wp.dataanswering.backend.service.TmpUserService;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -15,16 +17,21 @@ import org.springframework.stereotype.Component;
 public class TmpUserCleanupJob implements ApplicationRunner {
 
     private final TmpUserRepository tmpUserRepository;
-    private final UserRepository userRepository;
-    private final ChatRepository chatRepository;
-    private final TmpChatRepository tmpChatRepository;
+    private final TmpUserService tmpUserService;
+    private final OrphanCleanupService orphanCleanupService;
+
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        tmpChatRepository.deleteAll();
-        tmpUserRepository.deleteAll();
-        userRepository.deleteOrphanedUsers();
-        chatRepository.deleteOrphanedChats();
+        tmpUserRepository.findAll()
+                .forEach(u -> tmpUserService.cleanUpBeforeUserDeletion(u.getUserId()));
+
+        em.flush();
+        em.clear();
+
+        orphanCleanupService.cleanupOrphans();
     }
 }

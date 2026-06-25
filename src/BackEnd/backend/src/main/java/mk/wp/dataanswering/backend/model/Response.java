@@ -29,4 +29,7 @@ public class Response {
     @OneToOne
     @JoinColumn(name = "prompt_id", nullable = false)
     private Prompt prompt;
+
+    @Column
+    private int tokenUsage = 0;
 }
