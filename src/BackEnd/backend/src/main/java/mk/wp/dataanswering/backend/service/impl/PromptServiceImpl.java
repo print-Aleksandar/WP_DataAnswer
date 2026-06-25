@@ -39,7 +39,7 @@ public class PromptServiceImpl implements PromptService{
 
     @Override
     @Transactional
-    public void saveResult(Long promptId, String responseText, boolean corrupted, boolean stopped) {
+    public void saveResult(Long promptId, String responseText, boolean isStopped) {
         Prompt prompt = promptRepository.findById(promptId)
                 .orElseThrow(() -> new EntityNotFoundException("Prompt not found with id " + promptId));
         // prompt.setStopped(stopped);
@@ -47,9 +47,7 @@ public class PromptServiceImpl implements PromptService{
         Response response = new Response();
         response.setPrompt(prompt);
         response.setResponseText(responseText);
-        response.setCorrupted(corrupted);
-        response.setAnswered(!corrupted);
-        response.setAnswerable(true);
+        response.setStopped(isStopped);
 
         responseRepository.save(response);
     }

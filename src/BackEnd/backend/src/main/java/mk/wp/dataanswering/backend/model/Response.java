@@ -21,13 +21,7 @@ public class Response {
     private Long id;
 
     @Column(nullable = false)
-    private boolean isAnswerable = false;
-
-    @Column(nullable = false)
-    private boolean isAnswered = false;
-
-    @Column(nullable = false)
-    private boolean isCorrupted = false;
+    private boolean isStopped = false;
 
     @Column(columnDefinition = "TEXT")
     private String responseText;
