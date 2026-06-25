@@ -27,16 +27,12 @@ public class Plan {
     private double planMonthlyCost;
 
     @Column(nullable = false)
-    private int dayChatLimit;
-    
-    @Column(nullable = false)
-    private int requestPerChatLimit;
+    private int tokens;
 
-    public Plan(String planName, double planMonthlyCost, int dayChatLimit, int requestPerChatLimit) {
+    public Plan(String planName, double planMonthlyCost, int tokens) {
         this.planName = planName;
         this.planMonthlyCost = planMonthlyCost;
-        this.dayChatLimit = dayChatLimit;
-        this.requestPerChatLimit = requestPerChatLimit;
+        this.tokens = tokens;
     }
 
     @OneToMany(mappedBy="plan")

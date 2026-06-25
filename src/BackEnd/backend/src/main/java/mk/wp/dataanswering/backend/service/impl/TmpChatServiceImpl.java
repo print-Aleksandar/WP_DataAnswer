@@ -1,20 +1,15 @@
 package mk.wp.dataanswering.backend.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import mk.wp.dataanswering.backend.repository.*;
 
-import mk.wp.dataanswering.backend.service.RequestService;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.Prompt;
-import mk.wp.dataanswering.backend.model.Request;
 import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.TmpChat;
 import mk.wp.dataanswering.backend.model.TmpUser;
@@ -30,11 +25,8 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     private final ChatRepository chatRepository;
     private final UserService userService;
     private final TmpChatRepository tmpChatRepository;
-    private final TmpUserRepository tmpUserRepository;
-    private final RequestRepository requestRepository;
     private final ResponseRepository responseRepository;
     private final PromptRepository promptRepository;
-    private final RequestService requestService;
     private final UploadedFileRepository uploadedFileRepository;
 
     // TmpChatServiceImpl(ChatRepository chatRepository) {
@@ -66,15 +58,9 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     public void freeSpaceIfNeeded(TmpUser tmpUser) {
         Long userId = tmpUser.getUserId();
         responseRepository.deleteResponsesByTmpUserId(userId);
-        requestRepository.deleteRequestsByTmpUserId(userId);
         promptRepository.deletePromptsByTmpUserId(userId);
         uploadedFileRepository.deleteByTmpUserId(userId);
         tmpChatRepository.deleteByTmpUserId(userId);
-    }
-
-    @Override
-    public boolean isChatLimitNotExceeded(TmpUser user) {
-        return true;
     }
 
     @Override   
@@ -89,12 +75,9 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     }
 
     @Override
-    public void addPrompt(Chat chat, Prompt prompt, Request request, Response response) throws RuntimeException {
-
-        prompt.getRequests().add(request);
+    public void addPrompt(Chat chat, Prompt prompt, Response response) throws RuntimeException {
         prompt.setChat(chat);
 
-        requestRepository.save(request);
         responseRepository.save(response);
         promptRepository.save(prompt);
         chatRepository.save(chat);

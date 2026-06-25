@@ -27,7 +27,6 @@ public class TmpUserServiceImpl implements TmpUserService {
     private final SubscriptionRepository subscriptionRepository;
     private final PlanService planService;
     private final ResponseRepository responseRepository;
-    private final RequestRepository requestRepository;
     private final TmpChatRepository tmpChatRepository;
     private final UploadedFileRepository uploadedFileRepository;
     private final PromptRepository promptRepository;
@@ -55,7 +54,6 @@ public class TmpUserServiceImpl implements TmpUserService {
     public void cleanUpBeforeUserDeletion(long userId) {
         if (tmpUserRepository.findByUserId(userId).isPresent()) {
             responseRepository.deleteResponsesByTmpUserId(userId);
-            requestRepository.deleteRequestsByTmpUserId(userId);
             promptRepository.deletePromptsByTmpUserId(userId);
             uploadedFileRepository.deleteByTmpUserId(userId);
             tmpChatRepository.deleteByTmpUserId(userId);

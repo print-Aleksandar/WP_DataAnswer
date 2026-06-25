@@ -4,10 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
-import mk.wp.dataanswering.backend.service.RequestService;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -15,12 +12,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.Prompt;
-import mk.wp.dataanswering.backend.model.Request;
 import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.repository.ChatRepository;
 import mk.wp.dataanswering.backend.repository.PromptRepository;
-import mk.wp.dataanswering.backend.repository.RequestRepository;
 import mk.wp.dataanswering.backend.repository.ResponseRepository;
 import mk.wp.dataanswering.backend.service.PromptService;
 
@@ -30,13 +25,11 @@ public class PromptServiceImpl implements PromptService{
 
     private final PromptRepository promptRepository;
     private final ChatRepository chatRepository;
-    private final RequestRepository requestRepository;
     private final ResponseRepository responseRepository;
-    private final RequestService requestService;
 
     @Override
     @Transactional
-    public Request createPrompt(Long chatId, String promptText) {
+    public Prompt createPrompt(Long chatId, String promptText) {
         Chat chat = chatRepository.findById(chatId)
                 .orElseThrow(() -> new EntityNotFoundException("Chat not found with id " + chatId));
 

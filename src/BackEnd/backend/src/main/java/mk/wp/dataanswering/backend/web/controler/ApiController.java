@@ -1,33 +1,23 @@
 package mk.wp.dataanswering.backend.web.controler;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.MalformedURLException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import org.springframework.core.io.Resource;
 
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
-import mk.wp.dataanswering.backend.model.Prompt;
-import mk.wp.dataanswering.backend.model.Request;
-import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.UploadedFile;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
@@ -41,10 +31,8 @@ import mk.wp.dataanswering.backend.service.MinioService;
 import mk.wp.dataanswering.backend.service.PromptService;
 
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 
 @RestController

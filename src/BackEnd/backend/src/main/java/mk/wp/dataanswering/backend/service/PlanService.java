@@ -8,6 +8,8 @@ public interface PlanService {
     
     List<Plan> listAll();
     Plan findById(Long planId);
-    Plan create(String planName, Double planCost, Integer dayChatLimit, Integer dayPromptLimit);
+
+    Plan create(String planName, Double planMonthlyCost, Integer dailyTokens);
+
     Plan findByPlanName(String planName);
 }

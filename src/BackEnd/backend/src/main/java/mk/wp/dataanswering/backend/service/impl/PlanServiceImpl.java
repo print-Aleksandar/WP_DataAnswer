@@ -26,12 +26,11 @@ public class PlanServiceImpl implements PlanService {
     }
 
     @Override
-    public Plan create(String planName, Double planMonthlyCost, Integer dayChatLimit, Integer requestPerChatLimit) {
+    public Plan create(String planName, Double planMonthlyCost, Integer dailyTokens) {
         Plan plan = new Plan();
         plan.setPlanName(planName);
         plan.setPlanMonthlyCost(planMonthlyCost);
-        plan.setDayChatLimit(dayChatLimit);
-        plan.setRequestPerChatLimit(requestPerChatLimit);
+        plan.setTokens(dailyTokens);
         return planRepository.save(plan);
     }
 

@@ -27,20 +27,17 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DataHolder {
 
-    @Value("${free.plan.day.chat.limit}")
-    private int freePlanDayChatLimit;
-    @Value("${free.plan.request.limit-per-chat}")
-    private int freePlanRequestLimitPerChat;
+    @Value("${free.plan.tokens")
+    private int freePlanTokens;
 
-    @Value("${pro.plan.day.chat.limit}")
-    private int proPlanDayChatLimit;
-    @Value("${pro.plan.request.limit-per-chat}")
-    private int proPlanRequestLimitPerChat;
-    @Value("${pro.plan.monthly.price}")
-    private double proPlanMonthlyPrice;
+    @Value("${guest.plan.tokens")
+    private int guestPlanTokens;
 
-    @Value("${guest.plan.request.limit-per-chat}")
-    private int guestPlanRequestLimitPerChat;
+    @Value("${pro.plan.tokens")
+    private int proPlanTokens;
+
+    @Value("${pro.plan.monthly.price")
+    private float proPlanMonthlyPrice;
 
     public static List<RegisteredUser> users = null;
 
@@ -53,11 +50,11 @@ public class DataHolder {
     @PostConstruct
     public void init() {
         if (planRepository.findAll().isEmpty()) {
-            Plan free = new Plan("FREE", 0.0, freePlanDayChatLimit, freePlanRequestLimitPerChat);
+            Plan free = new Plan("FREE", 0.0, freePlanTokens);
 
-            Plan pro = new Plan("PRO", proPlanMonthlyPrice, proPlanDayChatLimit, proPlanRequestLimitPerChat);
+            Plan pro = new Plan("PRO", proPlanMonthlyPrice, proPlanTokens);
 
-            Plan guest = new Plan("GUEST", 0.0, Integer.MAX_VALUE, guestPlanRequestLimitPerChat);
+            Plan guest = new Plan("GUEST", 0.0, guestPlanTokens);
 
             planRepository.saveAll(List.of(free, pro, guest));
         }

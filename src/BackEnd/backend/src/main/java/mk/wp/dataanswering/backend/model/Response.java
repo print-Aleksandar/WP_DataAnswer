@@ -33,6 +33,6 @@ public class Response {
     private String responseText;
 
     @OneToOne
-    @JoinColumn(name = "request_id", nullable = false, unique = true)
-    private Request request;
+    @JoinColumn(name = "prompt_id", nullable = true)
+    private Prompt prompt;
 }

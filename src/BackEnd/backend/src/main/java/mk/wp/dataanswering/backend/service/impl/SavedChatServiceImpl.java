@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.Prompt;
 import mk.wp.dataanswering.backend.model.RegisteredUser;
-import mk.wp.dataanswering.backend.model.Request;
 import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.SavedChat;
 import mk.wp.dataanswering.backend.model.Subscription;
@@ -33,8 +32,6 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
 
     private final UserService userService;
     private final SavedChatRepository savedChatRepository;
-    private final SubscriptionService subscriptionService;
-    private final RequestRepository requestRepository;
     private final ResponseRepository responseRepository;
     private final PromptRepository promptRepository;
 
@@ -50,9 +47,7 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
             throw new InvalidUserException();
         }
         RegisteredUser registeredUser = (RegisteredUser) currentUser;
-        if (!isChatLimitNotExceeded(registeredUser)) {
-            throw new ExceededDayChatLimitException();
-        }
+        // TODO: da ne mozhe da pochne ako nema tokeni
         freeSpaceIfNeeded(registeredUser);
         SavedChat newChat = new SavedChat(registeredUser);
         savedChatRepository.save(newChat);
@@ -80,15 +75,6 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         savedChatRepository.save(savedChat);
     }
 
-    // tmpChatService must implement this which will be true everytime
-    @Override
-    public boolean isChatLimitNotExceeded(RegisteredUser registeredUser) {
-        Subscription current = subscriptionService.getActiveSubscription(registeredUser.getUserId());
-        // search by createdBy because user is relational and can be unlinked
-        return savedChatRepository.findSavedChatsByCreatedBy_UserIdAndStartTsAfter(registeredUser.getUserId(),
-                LocalDateTime.now().minusDays(1)).size() < current.getPlan().getDayChatLimit();
-    }
-
     @Override
     public Chat findById(Long chatId){
         return savedChatRepository.findById(chatId).orElseThrow(() -> new RuntimeException("Chat not found"));
@@ -101,12 +87,9 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
     }
 
     @Override
-    public void addPrompt(Chat chat, Prompt prompt, Request request, Response response) {
-
-        prompt.getRequests().add(request);
+    public void addPrompt(Chat chat, Prompt prompt, Response response) {
         prompt.setChat(chat);
 
-        requestRepository.save(request);
         responseRepository.save(response);
         promptRepository.save(prompt);
         savedChatRepository.save((SavedChat) chat);
