@@ -48,6 +48,7 @@ public class PromptServiceImpl implements PromptService{
         response.setPrompt(prompt);
         response.setResponseText(responseText);
         response.setStopped(isStopped);
+        prompt.setResponse(response);
 
         responseRepository.save(response);
     }

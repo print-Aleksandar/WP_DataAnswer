@@ -27,6 +27,6 @@ public class Response {
     private String responseText;
 
     @OneToOne
-    @JoinColumn(name = "prompt_id", nullable = true)
+    @JoinColumn(name = "prompt_id", nullable = false)
     private Prompt prompt;
 }

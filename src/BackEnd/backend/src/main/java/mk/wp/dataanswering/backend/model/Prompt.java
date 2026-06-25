@@ -49,7 +49,7 @@ public class Prompt {
     }
 
     @OneToOne
-    @JoinColumn(name = "response_id", nullable = false)
+    @JoinColumn(name = "response_id", nullable = true)
     private Response response;
 
 

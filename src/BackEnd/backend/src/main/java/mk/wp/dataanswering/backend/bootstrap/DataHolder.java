@@ -27,16 +27,16 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class DataHolder {
 
-    @Value("${free.plan.tokens")
+    @Value("${free.plan.tokens}")
     private int freePlanTokens;
 
-    @Value("${guest.plan.tokens")
+    @Value("${guest.plan.tokens}")
     private int guestPlanTokens;
 
-    @Value("${pro.plan.tokens")
+    @Value("${pro.plan.tokens}")
     private int proPlanTokens;
 
-    @Value("${pro.plan.monthly.price")
+    @Value("${pro.plan.monthly.price}")
     private float proPlanMonthlyPrice;
 
     public static List<RegisteredUser> users = null;

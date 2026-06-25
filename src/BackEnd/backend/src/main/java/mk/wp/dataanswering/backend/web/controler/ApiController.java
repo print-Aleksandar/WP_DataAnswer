@@ -146,7 +146,7 @@ public class ApiController {
                 String responseText = baos.toString(StandardCharsets.UTF_8);
                 // response.setResponseText(responseText);
                 // response.setAnswered(true);
-                promptService.saveResult(req.getId(), responseText, corrupted, stopped);
+                promptService.saveResult(req.getId(), responseText, stopped);
             }
 
             // chatServiceRegistry.getCorrectChatService().addPrompt(chat, prompt, req, response);
@@ -225,13 +225,8 @@ public class ApiController {
             } finally {
                 // get set response text to response object
                 String responseText = baos.toString(StandardCharsets.UTF_8);
-                // response.setResponseText(responseText);
-                // response.setAnswered(true);
-                promptService.saveResult(req.getId(), responseText, corrupted, stopped);
+                promptService.saveResult(req.getId(), responseText, stopped);
             }
-
-            // chatServiceRegistry.getCorrectChatService().addPrompt(chat, prompt, req, response);
-
         };
 
         return ResponseEntity.ok()
