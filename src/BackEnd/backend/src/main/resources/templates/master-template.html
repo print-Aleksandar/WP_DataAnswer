@@ -10,6 +10,7 @@
             integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
             crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/e59232f0a1.js" crossorigin="anonymous"></script>
+    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
 
     <style>
         :root {
@@ -66,6 +67,7 @@
 
         .bg-dark-1   { background-color: var(--dark-1) !important; }
         .bg-dark-2   { background-color: var(--dark-2) !important; }
+        .bg-dark-3   { background-color: var(--dark-3) !important; }
         .bg-gray-1   { background-color: var(--gray-1) !important; }
         .bg-light-1  { background-color: var(--light-1) !important; }
         .text-light-1{ color: var(--light-1) !important; }
@@ -222,6 +224,23 @@
         .btn-cancel-sub:hover { filter: brightness(0.85); color: var(--dark-1); }
 
         .placehodlerCustom::placeholder { color: var(--light-1); }
+        
+        .tool-display {
+            overflow: hidden;
+            /*max-height: 0;*/
+            opacity: 0;
+            transform: translateY(8px);
+            transition: 
+                /*max-height 250ms ease,*/
+                opacity 200ms ease,
+                transform 200ms ease;
+        }
+        .tool-display.visible {
+            /*max-height: 60px;*/
+            opacity: 1;
+            transform: translateY(0);
+        }
+
     </style>
 </head>
 <body>

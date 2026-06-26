@@ -1,6 +1,8 @@
 <div class="col-10 p-0 d-flex flex-column bg-dark-1"
      xmlns:th="http://www.thymeleaf.org"
      style="height: 100vh;">
+    
+
 
     <header th:replace="~{fragments/header}"></header>
 
@@ -19,26 +21,30 @@
 
             <div class="mb-4 mx-auto col-8">
                 <div class="d-flex justify-content-end mb-2">
-                    <div class="p-3 radius-10 d-flex flex-column align-items-center cursor-pointer"
-                         style="background-color: var(--dark-2); border: 1px solid var(--dark-3); max-width: 80%;">
-                        <svg xmlns="http://www.w3.org/2000/svg"
-                             height="48px" viewBox="0 -960 960 960"
-                             width="48px" fill="var(--gray-3)">
-                            <path d="M480-880v280h280v520H200v-800h280Zm80 0 200 200H560v-200ZM360-200h160v-80H360v80Zm0-160h240v-80H360v80Z"/>
-                        </svg>
-                        <a th:href="@{/api/download/file/{userId}/{chatId}(userId=${userId}, chatId=${chat.id})}"
-                           class="text-decoration-none text-light-2 fs-12px mt-1"
-                           th:text="${chat.file.fileName}">File name</a>
-                    </div>
+                    
+                    <a th:href="@{/api/download/file/{userId}/{chatId}(userId=${userId}, chatId=${chat.id})}"
+                    class="text-decoration-none text-light-2 fs-12px mt-1">
+
+                        <div class="p-3 radius-10 ms-auto d-flex flex-column align-items-center cursor-pointer bg-dark-2"
+                            style="border: 1px solid var(--dark-3); /*max-width: 80%;*/">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                height="56px" viewBox="0 -960 960 960"
+                                width="56px" fill="var(--gray-3)">
+                                <path d="M480-880v280h280v520H200v-800h280Zm80 0 200 200H560v-200ZM360-200h160v-80H360v80Zm0-160h240v-80H360v80Z"/>
+                            </svg>
+                            
+                            <span class="text-nowrap" th:title="${chat.file.fileName}" th:text="${#strings.abbreviate(chat.file.fileName, 20)}"></span>
+                        </div>
+                    </a>
                 </div>
             </div>
 
             <div th:each="msg : ${prompts}" class="mb-4 mx-auto col-8">
 
                 <div class="d-flex justify-content-end mb-2">
-                    <div class="p-3 radius-10 text-light-1 fs-6"
-                         style="background-color: var(--dark-3); max-width: 80%;">
-                        <span th:text="${msg.question}"></span>
+                    <div class="p-3 radius-10 text-light-1 fs-6  bg-dark-3"
+                         style="max-width: 80%;">
+                        <span th:text="${msg.question}"></span> 
                     </div>
                 </div>
 
@@ -48,12 +54,13 @@
                     </div>
                     <div class="p-3 radius-10 text-light-1"
                          style="background-color: var(--dark-2); border: 1px solid var(--dark-3); max-width: 80%;">
-                        <span th:text="${msg.response}"></span>
+                        <md-block>
+                            [[${msg.response}]]
+                        </md-block>
                     </div>
                 </div>
 
             </div>
-
         </div>
 
             <form action="/chat/message"
@@ -64,13 +71,13 @@
 
                 <input type="text"
                        name="promptText"
-                       class="prompt-input"
+                       class="prompt-input flex-grow-1"
                        id="prompt-input"
-                       style="max-width: 640px; flex: 1;"
+                       style="max-width: 640px;"
                        placeholder="Type your question..."
                        required>
                 <input type="hidden" name="chatId" th:value="${chat.id}">
-                <button type="submit"
+                <button id="prompt-submit-btn" type="submit"
                         class="btn gray-button btn-custom text-light-1 px-4">Send</button>
             </form>
 
@@ -78,7 +85,6 @@
         </div>
 
     </div>
-
     <script th:inline="javascript">
     let streaming = false;
     let toolCall = null;
@@ -88,6 +94,9 @@
         document.querySelector("#prompt-box")
         .addEventListener("submit", (e) => {
             e.preventDefault();
+            
+            if(streaming) return; // prevent double submit
+
             const input = document.querySelector("#prompt-input");
 
             let prompt = input.value;
@@ -123,7 +132,7 @@
         });
 
         if (response.status === 429) {
-            bubble.querySelector('span:not(.loader)').innerText = 'Message limit reached, please start a new chat.';
+            bubble.row.querySelector('span:not(.loader)').innerText = 'Token limit reached, please try again later.';
             document.querySelector("#prompt-input").disabled = true;
             document.querySelector("button[type='submit']").disabled = true;
             streaming = false;
@@ -222,14 +231,16 @@
         row.innerHTML += 
         `<div class="d-flex flex-column">
 
-            <div class="ms-5 ps-4 invisible tool-display"></div>
+            <div class="ms-5 ps-4 tool-display"></div>
 
-            <div class="d-flex justify-content-start">
-                <div class="m-4">
+            <div class="d-flex justify-content-start align-items-start gap-3">
+                <div class="mt-3">
                     <span class="loader running"></span>
                 </div>
-                <div class="p-3 rounded bg-white shadow-sm">
-                    <span>${text}</span>
+                <div class="p-3 radius-10 text-light-1 bg-dark-2" style="border: 1px solid var(--dark-3); max-width: 80%;">
+                    <md-block class="md-content">
+                            ${text}
+                        </md-block>
                 </div>
             </div>
         </div>`
@@ -248,20 +259,25 @@
             behavior: "smooth"
             })
 
-        return row.lastElementChild;
+
+         return {
+            row,
+            md: row.querySelector(".md-content"),
+            loader: row.querySelector(".loader.running")
+        };
     }
 
+    let lastRender = 0;
 function updateResponseBubble(res, bubble) {
         if(toolCall != null) {
-            const toolDisplay = bubble.querySelector(':nth-last-child(1 of .tool-display)')
-            toolDisplay.classList.remove('invisible')
+            const toolDisplay = bubble.row.querySelector(':nth-last-child(1 of .tool-display)')
+            toolDisplay.classList.add('visible')
             toolDisplay.innerText = 'Calliing ' + toolCall.name + '...'
         } else {
-            bubble.querySelector('.tool-display').classList.add('invisible')
+            bubble.row.querySelector('.tool-display').classList.remove('visible')
         }
         
-
-        bubble.querySelector('span:not(.loader)').innerText = res;
+        bubble.md.mdContent = res;
 
         const container = document.querySelector("#history-container")
         
