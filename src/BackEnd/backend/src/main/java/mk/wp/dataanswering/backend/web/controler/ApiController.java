@@ -4,10 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,30 +26,28 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.springframework.core.io.Resource;
-
 import lombok.RequiredArgsConstructor;
+import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.Chat;
 import mk.wp.dataanswering.backend.model.Prompt;
+import mk.wp.dataanswering.backend.model.RegisteredUser;
 import mk.wp.dataanswering.backend.model.Response;
+import mk.wp.dataanswering.backend.model.SavedChat;
+import mk.wp.dataanswering.backend.model.TmpChat;
 import mk.wp.dataanswering.backend.model.UploadedFile;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.model.dto.PromptRequest;
 import mk.wp.dataanswering.backend.model.dto.ToolCallDto;
+import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import mk.wp.dataanswering.backend.service.LlmService;
-import mk.wp.dataanswering.backend.service.UploadFileService;
-import mk.wp.dataanswering.backend.service.UserService;
-import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 import mk.wp.dataanswering.backend.service.MinioService;
 import mk.wp.dataanswering.backend.service.PromptService;
 import mk.wp.dataanswering.backend.service.ToolCallService;
-
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import mk.wp.dataanswering.backend.service.UploadFileService;
+import mk.wp.dataanswering.backend.service.UserService;
+import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
 
 @RestController
 @RequestMapping("/api")
@@ -59,10 +61,25 @@ public class ApiController {
     private final UploadFileService fileService;
     private final PromptService promptService;
     private final ToolCallService toolCallService;
+    private final AuthUtils authUtils;
     private ObjectMapper objectMapper= new ObjectMapper();
 
     @GetMapping("/download/file/{userId}/{chatId}")
     public ResponseEntity<Resource> downloadFileFromChat(@PathVariable Long userId, @PathVariable Long chatId) {
+        
+        RegisteredUser currentUser;
+        try{
+            currentUser=authUtils.getCurrentRegisteredUser();
+        } catch(InvalidUserException e){
+            System.out.println("not logged in -> 401");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if(!currentUser.getUserId().equals(userId)){
+            System.out.println("blocked: userId mismatch -> 403");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Chat chat;
         UploadedFile file;
         try{
@@ -70,6 +87,17 @@ public class ApiController {
             file = fileService.findByChat(chat);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
+        }
+
+        Long ownerUserId = switch (chat){
+            case SavedChat sc -> sc.getOwnerUserId();
+            case TmpChat tc -> null;
+            default -> null;
+        };
+
+        if (ownerUserId == null || !ownerUserId.equals(currentUser.getUserId())){
+            System.out.println("this user dont't have that chat -> 403");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         try {
@@ -80,9 +108,11 @@ public class ApiController {
                             chatId
                     ).readAllBytes()
             );
+            String encodedFileName = java.net.URLEncoder.encode(file.getFileName(), java.nio.charset.StandardCharsets.UTF_8)
+                .replace("+", "%20");
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getFileName() + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
                     .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
 
