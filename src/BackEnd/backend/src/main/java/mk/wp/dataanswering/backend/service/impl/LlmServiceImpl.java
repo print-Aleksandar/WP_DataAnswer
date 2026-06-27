@@ -28,6 +28,7 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
+import mk.wp.dataanswering.backend.model.dto.LlmStreamDto;
 import mk.wp.dataanswering.backend.model.dto.ToolCallDto;
 import mk.wp.dataanswering.backend.service.LlmService;
 
@@ -43,13 +44,14 @@ public class LlmServiceImpl implements LlmService {
     }
 
     @Override
-    public List<ToolCallDto> streamPrompt(LlmRequest request, OutputStream outputStream) throws IOException, JsonParseException {
+    public LlmStreamDto streamPrompt(LlmRequest request, OutputStream outputStream) throws IOException, JsonParseException {
         String body = this.objectMapper.writeValueAsString(request);
 
         URI endpoint = URI.create(baseUrl + "/ask");
 
-        List<ToolCallDto> toolCalls = new ArrayList<>();
         Map<String, String> idToNameMap = new HashMap<>(); 
+
+        LlmStreamDto result = new LlmStreamDto();
 
         RequestCallback requestCallback = clientRequest -> {
             clientRequest.getHeaders().setContentType(MediaType.APPLICATION_JSON);
@@ -67,7 +69,7 @@ public class LlmServiceImpl implements LlmService {
                 MappingIterator<JsonNode> chunks = objectMapper.readValues(parser, JsonNode.class);
 
                 while (chunks.hasNext()) {
-                    handleChunk(chunks.next(), outputStream, idToNameMap, toolCalls);
+                    handleChunk(chunks.next(), outputStream, idToNameMap, result);
                 }
             } catch (IOException e) {
                 throw e;
@@ -83,10 +85,10 @@ public class LlmServiceImpl implements LlmService {
 
         restTemplate.execute(endpoint, HttpMethod.POST, requestCallback, responseExtractor);
 
-        return toolCalls;
+        return result;
     }
 
-    private void handleChunk(JsonNode node, OutputStream out, Map<String, String> pending, List<ToolCallDto> done) throws IOException {
+    private void handleChunk(JsonNode node, OutputStream out, Map<String, String> pending, LlmStreamDto result) throws IOException {
 
         if (node.has("token")) {
             // Send to frontend
@@ -107,7 +109,8 @@ public class LlmServiceImpl implements LlmService {
             // Convert to Dto
             String toolId = node.get("tool_id").asText();
             String tool_name = pending.remove(toolId);
-            done.add(new ToolCallDto(
+            result.getToolCalls()
+            .add(new ToolCallDto(
                 toolId,
                 tool_name,
                 node.get("tool_response").asText()
@@ -123,8 +126,8 @@ public class LlmServiceImpl implements LlmService {
 
 
         } else if (node.has("token_usage")) {
-            int usage = node.get("token_usage").asInt();
-            // TODO
+            Long usage = node.get("token_usage").asLong();
+            result.setTokenUsage(usage);
         }
     }
 }

@@ -8,9 +8,10 @@
 
     <div class="d-flex flex-column flex-grow-1 overflow-hidden">
 
-        <div class="px-4 py-3 text-light-1 fw-500 fs-6"
-             style="background-color: var(--dark-1);"
-             th:text="${chat.chatName}"></div>
+        <div class="px-4 py-3 text-light-1 fw-500 fs-6 bg-dark-1 chat-title"
+             style="max-width: 30%"
+             th:classappend="${chat.chatName == null} ? 'chat-title-loading' : ''"
+            th:text="${(chat.chatName == null) ? '-' : chat.chatName}"></div>
 
         <div id="history-container" class="flex-grow-1 overflow-y-auto px-4 py-4">
 
@@ -287,6 +288,18 @@ function updateResponseBubble(res, bubble) {
             });
     }
 
+    function renameChat(chatName) {
+        [...document.querySelectorAll('.chat-title')]
+        .filter(e => 
+            e['href'] == undefined || 
+            e.href.indexOf(window.location.pathname) != -1
+        )
+        .forEach(e => {
+            e.innerText = chatName;
+            e.classList.remove('chat-title-loading');
+        })
+    }
+
     function init(){
         const container = document.querySelector("#history-container")
         
@@ -299,6 +312,12 @@ function updateResponseBubble(res, bubble) {
             top: container.scrollHeight,
             behavior: "smooth"
             });
+        
+        // if thymleaf chat.chatName == null call function renameChat("unnamed Chat")
+
+        if([[${chat.chatName == null}]]) {
+            renameChat("Init change")
+        }
     }
     </script>
 

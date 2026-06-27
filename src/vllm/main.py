@@ -5,7 +5,7 @@ from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
-from vllmUtils import get_response, PromptRequest, PromptResponse, init_vllm
+from vllmUtils import ChatGenerationRequest, generate_chat_title, get_response, PromptRequest, PromptResponse, init_vllm
 from tools import TOOLS, init_tools
 
 app = FastAPI()
@@ -34,3 +34,7 @@ async def ask_model(req:PromptRequest):
         get_response(req), 
         media_type="text/event-stream"
     )
+
+@app.post('/generate/title')
+async def generate_title(req:ChatGenerationRequest):
+    return await generate_chat_title(req.user_message, req.assistant_response)

@@ -253,6 +253,34 @@
             transform: translateY(0);
         }
 
+        .chat-title-loading {
+            --_default-color: var(--dark-2);
+            --_shimmer-color: var(--gray-1);
+
+
+            opacity: 0.8;
+            background: linear-gradient(
+                100deg,
+                var(--_default-color),
+                var(--_default-color) 45%,
+                var(--_shimmer-color) 60%,
+                var(--_default-color) 75%
+            );
+            background-size: 200% 100%;
+
+            animation: skeleton-shimmer 2s ease-out infinite;
+
+            color: transparent !important;
+            
+            border-radius: 1em;
+        }
+
+        @keyframes skeleton-shimmer {
+            0% { background-position-x: 200%; }
+            100% { background-position-x: 0%; }
+        }
+
+
     </style>
 </head>
 <body>

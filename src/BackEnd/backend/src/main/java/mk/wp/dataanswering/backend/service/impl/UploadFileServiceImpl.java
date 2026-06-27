@@ -34,8 +34,8 @@ public class UploadFileServiceImpl implements UploadFileService {
         uploadedFile.setMinioKey(minioKey);
         uploadedFile.setChat(chat);
 
-        chat.setChatName("Answering " + file.getOriginalFilename()); // IME MOZE DA SE SMENI -> STAVENO E DA E ANSWERING DOCUMENT-NAME
-        chatRepository.save(chat);
+        //chat.setChatName("Answering " + file.getOriginalFilename()); // IME MOZE DA SE SMENI -> STAVENO E DA E ANSWERING DOCUMENT-NAME
+        // chatRepository.save(chat);
 
         externalToolService.tryUploadToAll(
             user.getUserId(), 

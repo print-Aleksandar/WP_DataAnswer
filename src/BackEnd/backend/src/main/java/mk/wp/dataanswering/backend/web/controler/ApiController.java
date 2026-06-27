@@ -31,6 +31,7 @@ import mk.wp.dataanswering.backend.model.Response;
 import mk.wp.dataanswering.backend.model.UploadedFile;
 import mk.wp.dataanswering.backend.model.User;
 import mk.wp.dataanswering.backend.model.dto.LlmRequest;
+import mk.wp.dataanswering.backend.model.dto.LlmStreamDto;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.model.dto.PromptRequest;
 import mk.wp.dataanswering.backend.model.dto.ToolCallDto;
@@ -166,10 +167,10 @@ public class ApiController {
             if (!history.isEmpty())
                 history.removeLast();
 
-            List<ToolCallDto> toolCalls = Collections.emptyList();
+            LlmStreamDto streamDto = null;
 
             try {
-                toolCalls = llmService.streamPrompt(
+                streamDto = llmService.streamPrompt(
                     new LlmRequest(
                         user.getUserId(), 
                         promptRequest.chatId(),
@@ -200,9 +201,8 @@ public class ApiController {
                             responseText.append(node.get("token").asText());
                     }
 
-                    Response res = promptService.saveResult(req.getId(), responseText.toString(), stopped);
-
-                    toolCallService.saveAllToResponse(toolCalls, res);    
+                    Response res = promptService.saveResult(req.getId(), responseText.toString(), stopped, streamDto.getTokenUsage());
+                    toolCallService.saveAllToResponse(streamDto.getToolCalls(), res);    
                 } catch ( Exception e) {
                     System.out.println("[TOOL_CALLING_SAVE]: " + e.getMessage());
                 }
