@@ -115,6 +115,9 @@ services:
       - AGGREGATE_URL=http://aggregate-service:7100
       - RAG_URL=http://rag-service:7000
       - LLM_SERVICE_URL=http://llm-service:9999
+      - FREE_PLAN_TOKENS=${FREE_PLAN_TOKENS}
+      - GUEST_PLAN_TOKENS=${GUEST_PLAN_TOKENS}
+      - PRO_PLAN_TOKENS=${PRO_PLAN_TOKENS}
     ports:
       - "9090:9090"
     networks:
