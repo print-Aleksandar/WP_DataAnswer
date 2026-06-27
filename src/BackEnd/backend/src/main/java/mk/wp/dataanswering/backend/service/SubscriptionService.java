@@ -13,4 +13,5 @@ public interface SubscriptionService {
     void cancel(Long subscriptionId);
     void deleteAllByUserId(Long userId);
     List<Subscription> getSubscriptionHistory(Long userId) throws AccessDeniedException;
+    void subscribeToGuest(Long userId);
 }

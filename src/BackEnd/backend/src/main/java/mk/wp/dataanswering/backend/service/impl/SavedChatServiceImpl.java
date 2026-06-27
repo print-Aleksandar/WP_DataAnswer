@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import mk.wp.dataanswering.backend.repository.*;
+import mk.wp.dataanswering.backend.service.PromptService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,7 @@ import mk.wp.dataanswering.backend.service.UserService;
 public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUser> {
 
     private final RegisteredUserRepository registeredUserRepository;
+    private final PromptService promptService;
     @Value("${saved.chats.limit}")
     private int savedChatsLimit;
 
@@ -47,7 +49,11 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
             throw new InvalidUserException();
         }
         RegisteredUser registeredUser = (RegisteredUser) currentUser;
-        // TODO: da ne mozhe da pochne ako nema tokeni
+
+        if (!promptService.isTokenLimitNotExceeded(currentUser.getUserId())) {
+            throw new RuntimeException("TokenLimitExceeded");
+        }
+
         freeSpaceIfNeeded(registeredUser);
         SavedChat newChat = new SavedChat(registeredUser);
         savedChatRepository.save(newChat);

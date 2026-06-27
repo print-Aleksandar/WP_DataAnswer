@@ -7,7 +7,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import mk.wp.dataanswering.backend.model.User;
+import mk.wp.dataanswering.backend.model.exceptions.InChatTokenExceededException;
+import mk.wp.dataanswering.backend.repository.UserRepository;
 import mk.wp.dataanswering.backend.service.SubscriptionService;
+import mk.wp.dataanswering.backend.service.UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -30,6 +35,10 @@ public class PromptServiceImpl implements PromptService{
     private final ChatRepository chatRepository;
     private final ResponseRepository responseRepository;
     private final SubscriptionService subscriptionService;
+    private final UserService userService;
+    private final UserRepository userRepository;
+    @Value("${token.session.seconds}")
+    private int tokenSessionSeconds;
 
     @Override
     @Transactional
@@ -85,14 +94,31 @@ public class PromptServiceImpl implements PromptService{
     @Override
     public int getUsedTokens(Long userId) {
         return responseRepository.findAllByUserId(userId).stream()
-                .filter(p -> p.getPrompt().getPromptTs().isAfter(LocalDateTime.now().minusDays(1)))
+                .filter(p -> p.getPrompt().getPromptTs().isAfter(LocalDateTime.now().minusSeconds(tokenSessionSeconds)))
                 .mapToInt(Response::getTokenUsage).
                 sum();
     }
 
     @Override
+    @Transactional(Transactional.TxType.REQUIRES_NEW)
     public boolean isTokenLimitNotExceeded(Long userId) {
-        return getUsedTokens(userId) < subscriptionService.getActiveSubscription(userId).getPlan().getTokens();
+
+        User current = userService.getCurrentUser();
+        if (current.getLimitTill() != null && LocalDateTime.now().isBefore(current.getLimitTill())) {
+            return false;
+        }
+
+        if (getUsedTokens(userId) < subscriptionService.getActiveSubscription(userId).getPlan().getTokens()) {
+            current.setLimitTill(null);
+            userRepository.save(current);
+
+            return true;
+        } else {
+
+            current.setLimitTill(LocalDateTime.now().plusSeconds(tokenSessionSeconds));
+            userRepository.save(current);
+            return false;
+        }
     }
 
     @Override

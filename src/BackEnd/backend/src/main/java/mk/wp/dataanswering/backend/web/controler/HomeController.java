@@ -2,6 +2,7 @@ package mk.wp.dataanswering.backend.web.controler;
 
 import java.util.ArrayList;
 
+import mk.wp.dataanswering.backend.service.PromptService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +33,7 @@ public class HomeController {
     private final ExternalToolService externalToolService;
     private final ChatServiceRegistry chatServiceRegistry;
     private final AuthUtils authUtils;
+    private final PromptService promptService;
 
 
 
@@ -43,12 +45,14 @@ public class HomeController {
             String.join(",", externalToolService.getSupportedFileTypes())
         );
 
-        model.addAttribute("usersName", userService.getUsersName());
-
         if(error!=null){
             model.addAttribute("error", error);
         }
 
+        model.addAttribute("disabled", false);
+        model.addAttribute("limitTill", null);
+
+        model.addAttribute("usersName", "Guest");
         try{
             if (authUtils.isLoggedIn()){
                 RegisteredUser registeredUser = authUtils.getCurrentRegisteredUser();
@@ -58,7 +62,16 @@ public class HomeController {
 
                 Subscription sub = subscriptionService.getActiveSubscription(registeredUser.getUserId());
                 model.addAttribute("plan", sub.getPlan().getPlanName());
-                model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());   
+                model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
+
+                model.addAttribute("usersName", registeredUser.getUserFirstName());
+
+                promptService.isTokenLimitNotExceeded(userService.getCurrentUser().getUserId());
+
+                if (userService.getCurrentUser().getLimitTill() != null) {
+                    model.addAttribute("disabled", true);
+                    model.addAttribute("limitTill", userService.getCurrentUser().getLimitTill());
+                }
             }
         } catch (Exception e) {
             return "redirect:/logout";

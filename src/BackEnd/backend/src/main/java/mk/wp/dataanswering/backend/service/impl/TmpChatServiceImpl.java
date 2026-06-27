@@ -6,6 +6,7 @@ import jakarta.transaction.Transactional;
 import mk.wp.dataanswering.backend.model.*;
 import mk.wp.dataanswering.backend.repository.*;
 
+import mk.wp.dataanswering.backend.service.TmpUserService;
 import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,8 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     private final ResponseRepository responseRepository;
     private final PromptRepository promptRepository;
     private final UploadedFileRepository uploadedFileRepository;
+    private final TmpUserRepository tmpUserRepository;
+    private final TmpUserService tmpUserService;
 
     // TmpChatServiceImpl(ChatRepository chatRepository) {
     //     this.chatRepository = chatRepository;
@@ -51,14 +54,12 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     @Override
     @Transactional
     public void freeSpaceIfNeeded(TmpUser tmpUser) {
-        Long userId = tmpUser.getUserId();
-        responseRepository.deleteResponsesByTmpUserId(userId);
-        promptRepository.deletePromptsByTmpUserId(userId);
-        uploadedFileRepository.deleteByTmpUserId(userId);
-        tmpChatRepository.deleteByTmpUserId(userId);
+        tmpUser.setLimitTill(null);
+        tmpUserRepository.save(tmpUser);
+        tmpUserService.cleanUpBeforeUserDeletion(tmpUser.getUserId());
     }
 
-    @Override   
+    @Override
     public Chat findById(Long chatId){
         return tmpChatRepository.findById(chatId)
             .orElseThrow(() -> new RuntimeException("Chat not found"));

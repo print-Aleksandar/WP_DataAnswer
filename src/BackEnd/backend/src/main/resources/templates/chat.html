@@ -1,7 +1,7 @@
 <div class="col-10 p-0 d-flex flex-column bg-dark-1"
      xmlns:th="http://www.thymeleaf.org"
      style="height: 100vh;">
-    
+
 
 
     <header th:replace="~{fragments/header}"></header>
@@ -22,7 +22,7 @@
 
             <div class="mb-4 mx-auto col-8">
                 <div class="d-flex justify-content-end mb-2">
-                    
+
                     <a th:href="@{/api/download/file/{userId}/{chatId}(userId=${userId}, chatId=${chat.id})}"
                     class="text-decoration-none text-light-2 fs-12px mt-1">
 
@@ -33,7 +33,7 @@
                                 width="56px" fill="var(--gray-3)">
                                 <path d="M480-880v280h280v520H200v-800h280Zm80 0 200 200H560v-200ZM360-200h160v-80H360v80Zm0-160h240v-80H360v80Z"/>
                             </svg>
-                            
+
                             <span class="text-nowrap" th:title="${chat.file.fileName}" th:text="${#strings.abbreviate(chat.file.fileName, 20)}"></span>
                         </div>
                     </a>
@@ -45,7 +45,7 @@
                 <div class="d-flex justify-content-end mb-2">
                     <div class="p-3 radius-10 text-light-1 fs-6  bg-dark-3"
                          style="max-width: 80%;">
-                        <span th:text="${msg.question}"></span> 
+                        <span th:text="${msg.question}"></span>
                     </div>
                 </div>
 
@@ -76,13 +76,27 @@
                        id="prompt-input"
                        style="max-width: 640px;"
                        placeholder="Type your question..."
+                       th:disabled="${disabled}"
+                       th:placeholder="${disabled} ? 'Daily limit reached' : 'Type your question...'"
                        required>
                 <input type="hidden" name="chatId" th:value="${chat.id}">
-                <button id="prompt-submit-btn" type="submit"
-                        class="btn gray-button btn-custom text-light-1 px-4">Send</button>
+                <button id="prompt-submit-btn"
+                        type="submit"
+                        class="btn gray-button btn-custom text-light-1 px-4"
+                        th:disabled="${disabled}">
+                    Send
+                </button>
             </form>
 
-            <p class="inline-error text-center mt-2" th:text="${error} ?: ' '"></p>
+        <p class="inline-error text-center mt-2"
+           th:if="${disabled}">
+            Token limit reached, it will reset after:
+            <span th:text="${#temporals.format(limitTill, 'dd.MM.yyyy HH:mm')}"></span>
+        </p>
+
+        <p class="inline-error text-center mt-2"
+           th:if="${!disabled}"
+           th:text="${error} ?: ' '"></p>
         </div>
 
     </div>
@@ -95,8 +109,15 @@
         document.querySelector("#prompt-box")
         .addEventListener("submit", (e) => {
             e.preventDefault();
-            
-            if(streaming) return; // prevent double submit
+
+            if(document.querySelector("#prompt-input").disabled){
+                e.preventDefault();
+                return;
+            }
+
+            e.preventDefault();
+
+            if(streaming) return;
 
             const input = document.querySelector("#prompt-input");
 
@@ -123,14 +144,15 @@
         }
         endpoint = endpointUpdate ? endpointUpdate : '/api/prompt';
 
-        const response = await fetch(endpoint, {
-            method:  'POST', // Specify the HTTP method
-            headers: {
-                'Content-Type': 'application/json' // Tell the server you are sending JSON
-            },
-            body: JSON.stringify(body)
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(body)
+            });
 
-        });
+            window.location.href = "/chat/" + [[${chat.id}]];
 
         if (response.status === 429) {
             bubble.row.querySelector('span:not(.loader)').innerText = 'Token limit reached, please try again later.';

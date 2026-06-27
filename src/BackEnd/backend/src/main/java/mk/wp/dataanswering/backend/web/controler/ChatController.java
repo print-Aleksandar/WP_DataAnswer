@@ -3,8 +3,10 @@ package mk.wp.dataanswering.backend.web.controler;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import mk.wp.dataanswering.backend.model.*;
 import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
+import mk.wp.dataanswering.backend.model.exceptions.InChatTokenExceededException;
 import mk.wp.dataanswering.backend.repository.ChatRepository;
 import mk.wp.dataanswering.backend.service.*;
 import mk.wp.dataanswering.backend.service.impl.SavedChatServiceImpl;
@@ -70,7 +72,25 @@ public class ChatController {
         }
 
         model.addAttribute("chats",chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
-        
+
+        model.addAttribute("disabled", false);
+        model.addAttribute("limitTill", null);
+
+        User current = userService.getCurrentUser();
+        long currentId = current.getUserId();
+        try {
+            if (subscriptionService.getActiveSubscription(currentId) != null) {
+                promptService.isTokenLimitNotExceeded(userService.getCurrentUser().getUserId());
+                if ((error != null && error.contains("Token Exceeded")) ||
+                        userService.getCurrentUser().getLimitTill() != null) {
+                    model.addAttribute("disabled", true);
+                    model.addAttribute("limitTill", userService.getCurrentUser().getLimitTill());
+                }
+            }
+        } catch (Exception e) {
+            subscriptionService.subscribeToGuest(currentId);
+        }
+
         try{
             if (authUtils.isLoggedIn()){
                 RegisteredUser registeredUser = authUtils.getCurrentRegisteredUser();
@@ -80,7 +100,7 @@ public class ChatController {
 
                 Subscription sub = subscriptionService.getActiveSubscription(registeredUser.getUserId());
                 model.addAttribute("plan", sub.getPlan().getPlanName());
-                model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());   
+                model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
             }
         } catch (Exception e) {
             return "redirect:/logout";
@@ -108,8 +128,8 @@ public class ChatController {
         Chat chat = null;
         try {
             chat = chatServiceRegistry.getCorrectChatService().startNewChat();
-        } catch (ExceededDayChatLimitException e) {
-            return "redirect:/home?error=Day chat limit exceeded.";
+        } catch (RuntimeException e) {
+            return "redirect:/home?error=Token limit exceeded.";
         }
         if (chat == null) {
             return "redirect:/home?error=Error occured.";
@@ -129,7 +149,16 @@ public class ChatController {
     }
 
     @PostMapping("/message")
-    public String sendMessage(@RequestParam Long chatId, @RequestParam String promptText) {
+    public String sendMessage(
+            @RequestParam Long chatId,
+            @RequestParam String promptText,
+            HttpServletResponse response) {
+
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
+
+
         try {
             promptService.createPrompt(chatId, promptText);
         } catch (RuntimeException e) {

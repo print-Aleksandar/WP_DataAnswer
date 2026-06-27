@@ -199,8 +199,16 @@
                         <p class="text-light-2 fs-12px mb-1">Tokens Used Today</p>
                         <p class="text-light-1 mb-0"
                            style="font-size: 2rem; font-weight: 600;"
-                           th:text="${usedTokens}">
+                           >
+                            <span th:text="${usedTokens}"></span>
+                            <span style="font-size: 1rem; color: var(--light-2);">
+                    / <span th:text="${active.getPlan().getTokens()}"></span>
+                </span>
                         </p>
+
+                        <div style="height: 6px; background: var(--dark-3); border-radius: 3px; margin-top: 12px;">
+                            <div th:style="'width: ' + (${usedTokens * 100 / active.getPlan().getTokens()}) + '%; height: 100%; background: var(--gray-1); border-radius: 3px;'"></div>
+                        </div>
                     </div>
                 </div>
             </div>

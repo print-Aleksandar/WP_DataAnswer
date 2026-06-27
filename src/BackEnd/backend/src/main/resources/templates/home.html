@@ -1,6 +1,33 @@
 <body xmlns:th="http://www.thymeleaf.org"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
+
+<style>
+    /* Add to master template's <style> section */
+    .prompt-input:disabled {
+        background-color: var(--dark-3);
+        color: var(--gray-2);
+        border-color: var(--dark-3);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    button[type='submit']:disabled {
+        background-color: var(--dark-3) !important;
+        border-color: var(--dark-3) !important;
+        color: var(--gray-2);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+
+    .upload-input:disabled {
+        background-color: var(--dark-3);
+        color: var(--gray-2);
+        border-color: var(--dark-3);
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+</style>
 <div class="col-10 p-0 d-flex flex-column" style="height: 100vh;">
 
     <header th:replace="~{fragments/header}"></header>
@@ -15,18 +42,26 @@
         <form class="start-card" action="/chat/start" method="post" enctype="multipart/form-data">
 
             <input
-                name="fileDocument"
-                type="file"
-                th:accept="${supportedFileTypes}"
-                class="upload-input form-control">
+                    name="fileDocument"
+                    type="file"
+                    th:accept="${supportedFileTypes}"
+                    class="upload-input form-control"
+                    th:disabled="${disabled}">
 
             <input
-                name="prompt"
-                type="text"
-                class="prompt-input"
-                placeholder="Your question?">
+                    name="prompt"
+                    type="text"
+                    class="prompt-input"
+                    placeholder="Your question?"
+                    th:disabled="${disabled}">
 
-            <button class="submit-btn" type="submit">Start</button>
+            <button class="submit-btn" type="submit" th:disabled="${disabled}">Start</button>
+
+            <p th:if="${disabled}" class="inline-error text-center mt-1 mb-0">
+                Token limit reached, it will reset after:
+                <span th:text="${#temporals.format(limitTill, 'dd MMM yyyy HH:mm')}"></span>
+            </p>
+
         </form>
 
         <p class="inline-error mt-2" th:text="${error} ?: ' '"></p>

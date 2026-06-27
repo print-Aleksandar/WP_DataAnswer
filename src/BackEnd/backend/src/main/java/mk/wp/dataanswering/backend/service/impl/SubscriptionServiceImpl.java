@@ -78,4 +78,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         return subscriptionRepository.findAllByUser_UserId(userId);
     }
+
+    @Override
+    public void subscribeToGuest(Long userId) {
+        subscribe(userId, planService.findByPlanName("GUEST").getId());
+    }
 }
