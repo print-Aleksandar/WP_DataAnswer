@@ -9,6 +9,7 @@ from fastapi import HTTPException
 from tools import TOOL_MAP, TOOLS, run_tool
 
 from openai import AsyncOpenAI
+import tiktoken
 
 
 LLM_URL = os.getenv("LLM_URL")
@@ -31,6 +32,10 @@ class PromptRequest(BaseModel):
 class PromptResponse(BaseModel):
     model: str
     response: str
+
+class ChatGenerationRequest(BaseModel):
+    user_message: str
+    assistant_response: str
 
 async def init_vllm():
     global MODEL, client
@@ -70,9 +75,6 @@ async def get_response(req: PromptRequest):
             delta = chunk.choices[0].delta
             finish_reason = chunk.choices[0].finish_reason or finish_reason
 
-            if chunk.usage is not None:
-                yield json.dumps({"token_usage": chunk.usage.prompt_tokens})
-
 
             if delta.content:
                 assistant_content += delta.content
@@ -91,7 +93,10 @@ async def get_response(req: PromptRequest):
 
                     if tc.function.arguments:
                         acc["arguments"] += tc.function.arguments
-        
+
+        messages.append({"role": "assistant", "content": assistant_content or None})
+
+
         if finish_reason != "tool_calls":
             break
 
@@ -101,7 +106,8 @@ async def get_response(req: PromptRequest):
             for tc in tool_calls_acc.values()
         ]
 
-        messages.append({"role": "assistant", "content": assistant_content or None, "tool_calls": tool_calls_list})
+        messages[-1]["tool_calls"] = tool_calls_list
+
 
         for tc in tool_calls_list:
             endpoint = TOOL_MAP.get(tc["function"]["name"], "")
@@ -126,3 +132,53 @@ async def get_response(req: PromptRequest):
 
             # notify tool response
             yield json.dumps({"tool_response": str(result), "tool_id": tc["id"]})
+
+    print(messages[len(req.history)+1:])
+    prompt_tokens_est = sum( count_tokens(m["content"], MODEL) for m in messages[len(req.history)+1:] )
+
+    yield json.dumps({"token_usage": prompt_tokens_est})
+
+
+def count_tokens(text: str, model_hint: str = "gpt-4o") -> int:
+    if not text:
+        return 0
+    
+    try:
+        enc = tiktoken.encoding_for_model(model_hint)
+    except KeyError:
+        enc = tiktoken.get_encoding("o200k_base")  # reasonable fallback
+
+    return len(enc.encode(text))
+
+
+async def generate_chat_title(user_message: str, assistant_response: str) -> str:
+    response = await client.chat.completions.create(
+        model=MODEL,
+        temperature=0.2,
+        max_tokens=20,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "You are a title generator for chat conversations."
+                    "Rules:"
+                    "- 3 to 6 words"
+                    "- no punctuation"
+                    "- no quotes"
+                    "- title case or natural case"
+                    "- return only the title"
+                ),
+            },
+            {
+                "role": "user",
+                "content": f"""
+                User:
+                {user_message}
+
+                Assistant:
+                {assistant_response}"""
+            }
+        ]
+    )
+
+    return response.choices[0].message.content.strip()

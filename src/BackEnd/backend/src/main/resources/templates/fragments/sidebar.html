@@ -15,8 +15,9 @@
             <div th:each="chat : ${chats}">
                 <div class="d-flex align-items-center">
                     <a th:href="@{'/chat/{chatId}' (chatId=${chat.getId()})}"
-                       class="text-truncate link-custom d-block mb-1 text-light-1 p-1 fs-12px flex-grow-1"
-                       th:text="${chat.chatName}"></a>
+                       class="text-truncate link-custom d-block mb-1 text-light-1 p-1 fs-12px flex-grow-1 chat-title"
+                       th:classappend="${chat.chatName == null} ? 'chat-title-loading' : ''"
+                       th:text="${(chat.chatName == null) ? '-' : chat.chatName}"></a>
                     <button type="button"
                             style="background: none; border: none; cursor: pointer; padding: 0 4px; color: #a4a4a4; font-size: 12px;"
                             onmouseover="this.style.color='#ff6b6b'"
