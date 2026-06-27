@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.AccessDeniedException;
+import java.util.Comparator;
 import java.util.List;
 
 @Controller
@@ -40,7 +41,8 @@ public class UserController {
 
         // handle if unathorized
 
-        long currentId = userService.getCurrentUser().getUserId();
+        RegisteredUser current = (RegisteredUser) userService.getCurrentUser();
+        long currentId = current.getUserId();
 
         // handle if not equals!
 
@@ -48,7 +50,9 @@ public class UserController {
         model.addAttribute("active", active);
 
         List<Subscription> history = subscriptionService.getSubscriptionHistory(userId).stream()
-                .filter(s -> s.getId() != active.getId()).toList();
+                .filter(s -> s.getId() != active.getId())
+                .sorted(Comparator.comparing(Subscription::getStartTs).reversed())
+                .toList();
         model.addAttribute("history", history);
 
         int usedTokens = promptService.getUsedTokens(userId);
@@ -57,6 +61,14 @@ public class UserController {
         int numberOfChats = chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser().size();
         model.addAttribute("numberOfChats", numberOfChats);
         model.addAttribute("maxNumberOfChats", savedChatsLimit);
+
+        ///  SIDEBAR
+        model.addAttribute("userId", currentId);
+
+        model.addAttribute("username", current.getUserFirstName());
+
+        model.addAttribute("plan", active.getPlan().getPlanName());
+        model.addAttribute("chats", chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser());
 
         return "user-details";
     }

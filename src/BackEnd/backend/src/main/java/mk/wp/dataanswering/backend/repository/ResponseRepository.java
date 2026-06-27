@@ -36,8 +36,8 @@ public interface ResponseRepository extends JpaRepository<Response, Long> {
         SELECT p.prompt_id
         FROM prompts p
         JOIN saved_chats sc ON p.chat_id = sc.chat_id
-        WHERE sc.tmp_user_id = :userId
+        WHERE sc.created_by_user_id = :userId
     )
     """, nativeQuery = true)
-    List<Response> findAllByUserId(@Param("userId") Long userId);;
+    List<Response> findAllByUserId(@Param("userId") Long userId);
 }

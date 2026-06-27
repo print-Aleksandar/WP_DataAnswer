@@ -1,3 +1,7 @@
+<style>
+    .text-light-10 { color: #A4A4A4FF; }
+</style>
+
 <div class="col-2 sidebar p-2 d-flex flex-column bg-dark-1"
      xmlns:th="http://www.thymeleaf.org"
      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
@@ -6,7 +10,7 @@
     <a class="nav-link link-custom text-light-1 p-1 fs-6 radius-10 ms-2 submit-btn text-center" href="/home">New Chat</a>
 
     <div sec:authorize="isAuthenticated()">
-        <p class="p-2 text-gray-1 mb-0 fs-12px">Recent</p>
+        <p class="p-2 mb-0 fs-12px text-light-10">Recent</p>
         <div class="sidebar-chats overflow-auto p-2 text-light-1">
             <div th:each="chat : ${chats}">
                 <div class="d-flex align-items-center">
@@ -23,18 +27,26 @@
     </div>
 
     <div sec:authorize="isAnonymous()" class="d-flex justify-content-center align-items-center mx-auto mt-auto">
-        <p class="text-gray-1 fs-12px">Login to see your chat history</p>
+        <p class="text-light-10 fs-12px">Login to see your chat history</p>
     </div>
 
     <div sec:authorize="isAuthenticated()" class="mt-auto">
         <div class="d-flex flex-row justify-content-between align-items-center">
             <div class="d-flex justify-content-start align-items-center ps-2">
-                <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1 mb-0"
-                   style="width: 40px; cursor: pointer; color: var(--dark-1); font-weight: 600;"
-                   th:text="${#strings.substring(username, 0, 1).toUpperCase()}"
-                   onclick="document.getElementById('deleteAccountModal').style.display='flex'"></p>
+                <a class="d-flex justify-content-center align-items-center mb-0"
+                   style="
+                          width:40px;
+                          height:40px;
+                          border-radius:50%;
+                          background:var(--light-1);
+                          color:var(--dark-1);
+                          font-weight:600;
+                          text-decoration: none"
+                   th:href="@{/user/{id}(id=${userId})}"
+                   th:text="${username.charAt(0).toString().toUpperCase()}">
+                </a>
                 <div class="d-flex flex-column ps-2">
-                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}"></p><p class="fs-12px text-gray-1 d-inline-block m-0" th:text="${plan}"></p>
+                    <p class="fs-12px text-light-1 d-inline-block m-0" th:text="${username}"></p><p class="fs-12px text-light-10 d-inline-block m-0" th:text="${plan}"></p>
                 </div>
             </div>
             <div class="pe-2">
@@ -45,10 +57,10 @@
         </div>
     </div> <div sec:authorize="isAnonymous()" class="mt-auto">
         <div class="d-flex justify-content-start align-items-center ps-2">
-            <p class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1 mb-0"
-               style="width: 40px; color: var(--dark-1); font-weight: 600;">A</p>
+            <a class="d-flex justify-content-center align-items-center bg-light-1 rounded-circle ratio ratio-1x1 mb-0"
+               style="width: 40px; color: var(--dark-1); font-weight: 600; text-decoration: none;" th:href="@{/login}">A</a>
             <div class="d-flex flex-column ps-2">
-                <p class="fs-12px text-light-1 d-inline-block m-0">Anonymous</p> <p class="fs-12px text-gray-1 d-inline-block m-0">Guest</p>
+                <p class="fs-12px text-light-1 d-inline-block m-0">Anonymous</p> <p class="fs-12px text-light-10 d-inline-block m-0">Guest</p>
             </div>
         </div>
     </div>

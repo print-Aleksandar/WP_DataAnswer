@@ -71,7 +71,8 @@
         .bg-gray-1   { background-color: var(--gray-1) !important; }
         .bg-light-1  { background-color: var(--light-1) !important; }
         .text-light-1{ color: var(--light-1) !important; }
-        .text-light-2{ color: var(--gray-3)  !important; }
+        .text-light-2 { color: var(--light-2) !important; }
+
         .text-gray-1 { color: var(--gray-1)  !important; }
 
         .radius-10 { border-radius: 10px !important; }
@@ -146,26 +147,37 @@
             background-color: var(--gray-2);
         }
 
+
+
         .submit-btn {
             background-color: var(--gray-1);
             color: var(--light-1);
             border: none;
             border-radius: 10px;
-            padding: 10px;
+            padding: 8px 16px;
             font-size: 14px;
             font-weight: 500;
             cursor: pointer;
-            width: 100%;
             transition: background-color 0.15s;
         }
 
-        .submit-btn:hover { background-color: var(--gray-2); }
+        .submit-btn:hover {
+            background-color: var(--gray-2);
+        }
 
         .gray-button {
             background-color: var(--gray-1) !important;
-            border-color:     var(--gray-1) !important;
-            height: 35px;
+            color: var(--light-1) !important;
+            border: none !important;
+            border-radius: 10px;
+            padding: 8px 16px !important;
+            font-size: 13px !important;
+            line-height: 1.2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
+        
 
         .btn-custom:hover        { background-color: var(--gray-2) !important; }
         .link-custom:hover       { background-color: var(--gray-2) !important; border-radius: 10px; text-decoration: none; }

@@ -2,9 +2,11 @@ package mk.wp.dataanswering.backend.web.controler;
 
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletRequest;
 import mk.wp.dataanswering.backend.model.*;
 import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
 import mk.wp.dataanswering.backend.repository.ChatRepository;
+import mk.wp.dataanswering.backend.service.*;
 import mk.wp.dataanswering.backend.service.impl.SavedChatServiceImpl;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,12 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
-import mk.wp.dataanswering.backend.service.PromptService;
-import mk.wp.dataanswering.backend.service.SubscriptionService;
-import mk.wp.dataanswering.backend.service.UploadFileService;
-import mk.wp.dataanswering.backend.service.UserService;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
-import mk.wp.dataanswering.backend.service.ExternalToolService;
 
 @Controller
 @RequestMapping("/chat")
@@ -32,7 +29,7 @@ public class ChatController {
     private final SubscriptionService subscriptionService;
     private final UploadFileService uploadFileService;
     private final AuthUtils authUtils;
-    private final ChatRepository chatRepository;
+    private final ChatService<SavedChat, RegisteredUser> savedChatService;
     private final SavedChatServiceImpl savedChatServiceImpl;
 
 
@@ -142,18 +139,38 @@ public class ChatController {
     }
 
     @PostMapping("/unlink")
-    public String unlinkChat(@RequestParam Long chatId) {
-        RegisteredUser currentUser = null;
+    public String unlinkChat(@RequestParam Long chatId,
+                             HttpServletRequest request) {
+
+        RegisteredUser currentUser;
         try {
             currentUser = authUtils.getCurrentRegisteredUser();
         } catch (Exception e) {
             return "redirect:/login";
         }
-        SavedChat chat = (SavedChat) chatServiceRegistry.getCorrectChatService().findById(chatId);
-        if (chat.getUser().getUserId() != userService.getCurrentUser().getUserId()) {
+
+        SavedChat chat = (SavedChat) chatServiceRegistry
+                .getCorrectChatService()
+                .findById(chatId);
+
+        if (!chat.getUser().getUserId()
+                .equals(userService.getCurrentUser().getUserId())) {
             return "redirect:/login";
         }
+
         savedChatServiceImpl.unlinkChatFromRegisteredUser(currentUser, chat);
-        return "redirect:/home";
+
+        String referer = request.getHeader("Referer");
+
+        return "redirect:" + (referer != null ? referer : "/home");
+    }
+
+    @PostMapping("/delete-all")
+    public String deleteForUser() {
+        RegisteredUser current = (RegisteredUser) userService.getCurrentUser();
+        chatServiceRegistry.getCorrectChatService().getChatsForCurrentUser().stream()
+                .forEach(c -> savedChatService.unlinkChatFromRegisteredUser(current, (SavedChat) c));
+
+        return "redirect:/user/" + current.getUserId();
     }
 }

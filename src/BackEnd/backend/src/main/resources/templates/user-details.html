@@ -34,7 +34,7 @@
 
         .radius-10 { border-radius: 10px; }
         .fs-12px { font-size: 12px; }
-        .text-light-1 { color: var(--light-1); }
+        .text-light-1 { color: var(--light-1) ; }
         .text-light-2 { color: var(--light-2); }
         .text-gray-1 { color: var(--gray-1); }
 
@@ -51,6 +51,11 @@
         .link-custom:hover {
             background-color: var(--dark-3);
             color: var(--light-1);
+        }
+
+        .sidebar > a:first-child:hover {
+            color: var(--light-1) !important;
+            background: transparent !important;
         }
 
         .submit-btn {
@@ -140,15 +145,16 @@
         }
 
         .gray-button {
-            background-color: var(--gray-1);
-            color: var(--light-1);
-            border: none;
+            background-color: var(--gray-1) !important;
+            color: var(--light-1) !important;
+            border: none !important;
             border-radius: 10px;
-            padding: 8px 16px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: background-color 0.15s;
-            text-decoration: none;
+            padding: 8px 16px !important;
+            font-size: 13px !important;
+            line-height: 1.2;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .gray-button:hover {
@@ -166,79 +172,39 @@
 <div class="container-fluid">
     <div class="row" style="height: 100vh;">
 
-        <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+        <div class="sidebar" th:replace="~{fragments/sidebar}"></div>
 
         <div class="col-10 p-4" style="overflow-y: auto; height: 100vh; background-color: var(--dark-1);">
 
-            <div class="mb-4">
-                <a class="gray-button rounded-pill d-inline-flex align-items-center justify-content-center"
-                   href="/home">← Home</a>
-            </div>
-
             <p class="page-heading mb-4">Settings</p>
 
-            <div class="row mb-4">
-                <div class="col-md-6 mb-3">
-                    <div class="stat-card">
+            <div class="row">
+                <div class="col-md-6 mb-3 d-flex">
+                    <div class="stat-card w-100">
                         <p class="text-light-2 fs-12px mb-1">Chats Used</p>
                         <p class="text-light-1 mb-0" style="font-size: 2rem; font-weight: 600;">
                             <span th:text="${numberOfChats}"></span>
                             <span style="font-size: 1rem; color: var(--light-2);">
-                                / <span th:text="${maxNumberOfChats}"></span>
-                            </span>
+                    / <span th:text="${maxNumberOfChats}"></span>
+                </span>
                         </p>
                         <div style="height: 6px; background: var(--dark-3); border-radius: 3px; margin-top: 12px;">
                             <div th:style="'width: ' + (${numberOfChats * 100 / maxNumberOfChats}) + '%; height: 100%; background: var(--gray-1); border-radius: 3px;'"></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <div class="stat-card">
+
+                <div class="col-md-6 mb-3 d-flex">
+                    <div class="stat-card w-100">
                         <p class="text-light-2 fs-12px mb-1">Tokens Used Today</p>
-                        <p class="text-light-1 mb-0" style="font-size: 2rem; font-weight: 600;" th:text="${usedTokens}"></p>
+                        <p class="text-light-1 mb-0"
+                           style="font-size: 2rem; font-weight: 600;"
+                           th:text="${usedTokens}">
+                        </p>
                     </div>
                 </div>
             </div>
-
-            <p class="text-light-1 mb-3" style="font-size: 1.1rem; font-weight: 500;">Subscription History</p>
-
-            <div th:if="${active != null}" class="subscription-row active">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <p class="text-light-1 mb-1 fw-500" th:text="${active.plan.planName}"></p>
-                        <span class="badge-active">Active</span>
-                    </div>
-                    <div class="text-end">
-                        <p class="text-light-1 mb-0 fs-12px" th:text="${active.plan.planMonthlyCost == 0 ? 'Free' : #numbers.formatDecimal(active.plan.planMonthlyCost, 1, 2) + ' $/month'}"></p>
-                        <p class="text-light-2 fs-12px mb-0" th:text="'Expires ' + #temporals.format(active.endTs, 'dd MMM yyyy')"></p>
-                    </div>
-                </div>
-                <div class="mt-2">
-                    <span class="text-light-2 fs-12px" th:text="${active.plan.tokens + ' tokens daily'}"></span>
-                </div>
-            </div>
-
-            <div th:each="sub : ${history}" class="subscription-row">
-                <div class="d-flex justify-content-between align-items-start">
-                    <div>
-                        <p class="text-light-1 mb-1 fw-500" th:text="${sub.plan.planName}"></p>
-                        <span class="text-light-2 fs-12px" th:text="${#temporals.format(sub.startTs, 'dd MMM yyyy') + ' – ' + #temporals.format(sub.endTs, 'dd MMM yyyy')}"></span>
-                    </div>
-                    <div class="text-end">
-                        <p class="text-light-1 mb-0 fs-12px" th:text="${sub.plan.planMonthlyCost == 0 ? 'Free' : #numbers.formatDecimal(sub.plan.planMonthlyCost, 1, 2) + ' $/month'}"></p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-3">
-                <a th:href="@{/plans}" class="gray-button rounded-pill d-inline-flex align-items-center justify-content-center">
-                    Change Plan
-                </a>
-            </div>
-
-            <div class="divider"></div>
-
-            <p class="text-light-1 mb-3" style="font-size: 1.1rem; font-weight: 500;">Danger Zone</p>
+            <p class="text-light-1 mb-3 mt-2" style="font-size: 1.1rem; font-weight: 500;">Danger Zone</p>
 
             <div class="d-flex gap-2">
                 <button type="button" class="submit-btn" onclick="openDeleteChatsModal()">
@@ -248,6 +214,35 @@
                     Delete Account
                 </button>
             </div>
+
+            <p class="text-light-1 mb-3 mt-4" style="font-size: 1.1rem; font-weight: 500;">Subscription History</p>
+
+            <div th:if="${active != null}" class="subscription-row active">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-light-1 mb-1 fw-500" th:text="${active.plan.planName}"></p>
+                        <span class="badge-active">Active</span>
+                    </div>
+                    <div class="text-end">
+                        <p class="text-light-1 mb-0 fs-12px" th:text="${active.plan.planMonthlyCost == 0 ? 'Free' : #numbers.formatDecimal(active.plan.planMonthlyCost, 1, 2) + ' $/month'}"></p>
+                        <p class="text-light-2 fs-12px mb-0">
+                            Expires <span th:text="${#temporals.format(active.endTs, 'dd MMM yyyy')}"></span>
+                        </p>                    </div>
+                </div>
+            </div>
+
+            <div th:each="sub : ${history}" class="subscription-row">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-light-1 mb-1 fw-500" th:text="${sub.plan.planName}"></p>
+                        <span class="text-light-2 fs-12px" th:text="${'Subscription start: ' + #temporals.format(sub.startTs, 'dd MMM yyyy')}"></span>
+                    </div>
+                    <div class="text-end">
+                        <p class="text-light-1 mb-0 fs-12px" th:text="${sub.plan.planMonthlyCost == 0 ? 'Free' : #numbers.formatDecimal(sub.plan.planMonthlyCost, 1, 2) + ' $/month'}"></p>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
@@ -276,15 +271,19 @@
     <div class="modal-content">
         <p class="text-light-1 m-0 mb-1" style="font-size: 16px; font-weight: 500;">Delete account?</p>
         <p class="text-light-2 m-0 mb-4 fs-12px">
-            This will permanently delete your account and all associated data. This action cannot be undone.
+            This will permanently delete your account. This action cannot be undone.
         </p>
+        <div class="mb-3">
+            <label class="text-light-2 fs-12px mb-1">Type <strong>DELETE</strong> to confirm:</label>
+            <input type="text" id="deleteConfirmInput" class="form-control" style="background: var(--dark-3); border: 1px solid var(--gray-1); color: var(--light-1); border-radius: 8px;" placeholder="DELETE">
+        </div>
         <div class="d-flex justify-content-end gap-2">
             <button type="button" class="btn" style="border: 1px solid var(--gray-1); color: var(--light-1); background: none;"
                     onclick="closeDeleteAccountModal()">
                 Cancel
             </button>
-            <form th:action="@{/user/delete}" method="post" class="m-0">
-                <button type="submit" class="btn" style="background-color: var(--red-1); color: var(--light-1); border: none;">
+            <form th:action="@{/user/delete}" method="post" class="m-0" id="deleteAccountForm">
+                <button type="submit" class="btn" id="deleteAccountBtn" disabled style="background-color: var(--red-1); color: var(--light-1); border: none; opacity: 0.5;">
                     Delete Account
                 </button>
             </form>
@@ -307,7 +306,23 @@
 
     function closeDeleteAccountModal() {
         document.getElementById('deleteAccountModal').style.display = 'none';
+        document.getElementById('deleteConfirmInput').value = '';
+        document.getElementById('deleteAccountBtn').disabled = true;
+        document.getElementById('deleteAccountBtn').style.opacity = '0.5';
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('deleteConfirmInput').addEventListener('input', function() {
+            const deleteBtn = document.getElementById('deleteAccountBtn');
+            if (this.value === 'DELETE') {
+                deleteBtn.disabled = false;
+                deleteBtn.style.opacity = '1';
+            } else {
+                deleteBtn.disabled = true;
+                deleteBtn.style.opacity = '0.5';
+            }
+        });
+    });
 
     window.onclick = function(event) {
         if (event.target.classList.contains('modal-overlay')) {

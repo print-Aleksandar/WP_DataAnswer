@@ -54,6 +54,7 @@ public class HomeController {
                 RegisteredUser registeredUser = authUtils.getCurrentRegisteredUser();
 
                 model.addAttribute("username", registeredUser.getUserFirstName());
+                model.addAttribute("userId", registeredUser.getUserId());
 
                 Subscription sub = subscriptionService.getActiveSubscription(registeredUser.getUserId());
                 model.addAttribute("plan", sub.getPlan().getPlanName());

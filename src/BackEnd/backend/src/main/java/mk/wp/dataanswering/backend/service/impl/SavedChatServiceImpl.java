@@ -66,7 +66,7 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         }
     }
 
-    // will be used intern (in this class) and on registered user delete chat (we will delete from their side only)
+    @Override
     public void unlinkChatFromRegisteredUser(RegisteredUser registeredUser, SavedChat savedChat) {
         if (!savedChatRepository.existsByIdAndCreatedByUserId(savedChat.getId(), registeredUser.getUserId())) {
             throw new RuntimeException();

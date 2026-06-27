@@ -18,6 +18,7 @@ import java.util.Optional;
 @Service
 public class TmpUserServiceImpl implements TmpUserService {
 
+    private final ToolCallRepository toolCallRepository;
     @Value("${app.session.timeout-seconds}")
     private int sessionTimeout;
 
@@ -53,6 +54,7 @@ public class TmpUserServiceImpl implements TmpUserService {
     @Transactional
     public void cleanUpBeforeUserDeletion(long userId) {
         if (tmpUserRepository.findByUserId(userId).isPresent()) {
+            toolCallRepository.deleteToolCallsByTmpUserId(userId);
             responseRepository.deleteResponsesByTmpUserId(userId);
             promptRepository.deletePromptsByTmpUserId(userId);
             uploadedFileRepository.deleteByTmpUserId(userId);
