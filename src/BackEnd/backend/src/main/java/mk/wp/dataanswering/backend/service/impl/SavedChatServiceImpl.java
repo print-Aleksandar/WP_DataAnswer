@@ -27,6 +27,7 @@ import mk.wp.dataanswering.backend.service.UserService;
 @Service
 public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUser> {
 
+    private final ChatRepository chatRepository;
     private final RegisteredUserRepository registeredUserRepository;
     private final PromptService promptService;
     @Value("${saved.chats.limit}")
@@ -99,5 +100,11 @@ public class SavedChatServiceImpl implements ChatService<SavedChat, RegisteredUs
         responseRepository.save(response);
         promptRepository.save(prompt);
         savedChatRepository.save((SavedChat) chat);
+    }
+
+    @Override
+    public Chat updateChat(Chat chat) {
+        // return savedChatRepository.save((SavedChat) chat);
+        return chatRepository.save(chat);
     }
 }

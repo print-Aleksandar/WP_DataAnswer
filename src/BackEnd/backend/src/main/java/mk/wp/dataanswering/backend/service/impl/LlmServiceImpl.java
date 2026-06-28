@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
@@ -87,6 +88,28 @@ public class LlmServiceImpl implements LlmService {
 
         return result;
     }
+
+    @Override
+    public String generateChatTitle(String promptText, String responseText){
+        URI endpoint = URI.create(baseUrl + "/generate/title");
+
+        Map<String, String> request = Map.of(
+            "user_message", promptText,
+            "assistant_response", responseText
+        );
+
+        @SuppressWarnings("unchecked")
+        Map<String, String> response = restTemplate.postForObject(
+                endpoint,
+                request,
+                Map.class
+        );
+
+
+        
+        return response.get("title");
+    }
+
 
     private void handleChunk(JsonNode node, OutputStream out, Map<String, String> pending, LlmStreamDto result) throws IOException {
 

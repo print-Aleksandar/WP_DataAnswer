@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import mk.wp.dataanswering.backend.model.*;
 import mk.wp.dataanswering.backend.model.exceptions.ExceededDayChatLimitException;
 import mk.wp.dataanswering.backend.model.exceptions.InChatTokenExceededException;
+import mk.wp.dataanswering.backend.model.exceptions.InvalidArgumentsException;
 import mk.wp.dataanswering.backend.repository.ChatRepository;
 import mk.wp.dataanswering.backend.service.*;
 import mk.wp.dataanswering.backend.service.impl.SavedChatServiceImpl;
@@ -19,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 import mk.wp.dataanswering.backend.config.AuthUtils;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.service.impl.ChatServiceRegistry;
+
 
 @Controller
 @RequestMapping("/chat")
@@ -33,6 +35,7 @@ public class ChatController {
     private final AuthUtils authUtils;
     private final ChatService<SavedChat, RegisteredUser> savedChatService;
     private final SavedChatServiceImpl savedChatServiceImpl;
+    private final LlmService llmService;
 
 
     @GetMapping("/{chatId}")
@@ -202,4 +205,23 @@ public class ChatController {
 
         return "redirect:/user/" + current.getUserId();
     }
+
+    @ResponseBody
+    @PostMapping("/rename/{chatId}")
+    public String renameChat(@PathVariable Long chatId, @RequestBody(required = false) String newName) {
+        
+        
+        if(newName == null) {
+            Prompt prompt = promptService.getPromptsForChat(chatId).getFirst();
+            Response response = prompt.getResponse();
+            newName = llmService.generateChatTitle(prompt.getPromptText(), response.getResponseText());
+        } 
+        
+        Chat chat = chatServiceRegistry.getCorrectChatService().findById(chatId);
+        chat.setChatName(newName);
+        chatServiceRegistry.getCorrectChatService().updateChat(chat);
+
+        return newName;
+    }
+    
 }

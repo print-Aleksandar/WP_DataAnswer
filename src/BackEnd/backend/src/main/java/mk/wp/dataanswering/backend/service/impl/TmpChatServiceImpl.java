@@ -83,4 +83,9 @@ public class TmpChatServiceImpl implements ChatService<TmpChat, TmpUser> {
     public void unlinkChatFromRegisteredUser(RegisteredUser registeredUser, SavedChat savedChat) {
 
     }
+
+    @Override
+    public Chat updateChat(Chat chat) {
+        return chatRepository.save(chat);
+    }
 }

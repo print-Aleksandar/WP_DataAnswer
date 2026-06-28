@@ -37,4 +37,4 @@ async def ask_model(req:PromptRequest):
 
 @app.post('/generate/title')
 async def generate_title(req:ChatGenerationRequest):
-    return await generate_chat_title(req.user_message, req.assistant_response)
+    return { "title": await generate_chat_title(req.user_message, req.assistant_response)}

@@ -4,15 +4,21 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +47,7 @@ import mk.wp.dataanswering.backend.model.dto.LlmStreamDto;
 import mk.wp.dataanswering.backend.model.dto.MessageDto;
 import mk.wp.dataanswering.backend.model.dto.PromptRequest;
 import mk.wp.dataanswering.backend.model.dto.ToolCallDto;
+import mk.wp.dataanswering.backend.model.exceptions.InChatTokenExceededException;
 import mk.wp.dataanswering.backend.model.exceptions.InvalidUserException;
 import mk.wp.dataanswering.backend.service.LlmService;
 import mk.wp.dataanswering.backend.service.MinioService;
@@ -64,6 +71,22 @@ public class ApiController {
     private final ToolCallService toolCallService;
     private final AuthUtils authUtils;
     private ObjectMapper objectMapper= new ObjectMapper();
+
+    @ExceptionHandler(InChatTokenExceededException.class)
+    public ResponseEntity<Map<String, Object>> handleTokenLimitExceeded(InChatTokenExceededException ex) {
+        Map<String, Object> errorResponseBody = Map.of(
+            "error", "Too Many Requests",
+            "message", "Token limit exceeded.",
+            "limitExpiresAt", Long.valueOf(
+                ex.getLimitTill().toEpochSecond(
+                    ZoneId.systemDefault().getRules()
+                    .getOffset(LocalDateTime.now())
+                )
+            )
+        );
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(errorResponseBody);
+    }
 
     @GetMapping("/download/file/{userId}/{chatId}")
     public ResponseEntity<Resource> downloadFileFromChat(@PathVariable Long userId, @PathVariable Long chatId) {
@@ -129,6 +152,11 @@ public class ApiController {
         Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
         User user = userService.getCurrentUser();
 
+        LocalDateTime tokenLimit = user.getLimitTill();
+        if(tokenLimit != null) {
+            throw new InChatTokenExceededException(tokenLimit);
+        }
+
         Prompt req;
 
         try {
@@ -150,6 +178,11 @@ public class ApiController {
     ) {
         Chat chat = chatServiceRegistry.getCorrectChatService().findById(promptRequest.chatId());
         User user = userService.getCurrentUser();
+
+        LocalDateTime tokenLimit = user.getLimitTill();
+        if(tokenLimit != null) {
+            throw new InChatTokenExceededException(tokenLimit);
+        }
 
         Prompt req = promptService.regeneratePrompt(
                 chat.getId(),
@@ -232,9 +265,26 @@ public class ApiController {
                     }
 
                     Response res = promptService.saveResult(req.getId(), responseText.toString(), stopped, streamDto.getTokenUsage());
-                    toolCallService.saveAllToResponse(streamDto.getToolCalls(), res);    
+                    toolCallService.saveAllToResponse(streamDto.getToolCalls(), res);
                 } catch ( Exception e) {
                     System.out.println("[TOOL_CALLING_SAVE]: " + e.getMessage());
+                }
+
+                if(!promptService.isTokenLimitNotExceeded(userService.getCurrentUser().getUserId())) {
+                    // Calculate the epoch seconds 
+                    long epochSeconds = userService.getCurrentUser()
+                        .getLimitTill().toEpochSecond(
+                            ZoneId.systemDefault().getRules()
+                            .getOffset(LocalDateTime.now())
+                        );
+
+                    // Create the chunk payload
+                    Map<String, Long> limitPayload = Map.of("limit_exceeded", epochSeconds);
+
+
+                    String jsonChunk = objectMapper.writeValueAsString(limitPayload) + "\n";
+                    helperStream.write(jsonChunk.getBytes(StandardCharsets.UTF_8));
+                    helperStream.flush();
                 }
             }
         };

@@ -13,4 +13,5 @@ public interface ChatService<T extends Chat, R extends User> {
     List<? extends Chat> getChatsForCurrentUser();
     void addPrompt(Chat chat, Prompt prompt, Response response);
     void unlinkChatFromRegisteredUser(RegisteredUser registeredUser, SavedChat savedChat);
+    Chat updateChat(Chat chat);
 }

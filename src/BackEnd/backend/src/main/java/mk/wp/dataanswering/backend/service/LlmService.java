@@ -11,4 +11,5 @@ import mk.wp.dataanswering.backend.model.dto.ToolCallDto;
 
 public interface LlmService {
     public LlmStreamDto streamPrompt(LlmRequest request, OutputStream outputStream) throws IOException, JsonParseException;
+    public String generateChatTitle(String promptText, String responseText);
 }
