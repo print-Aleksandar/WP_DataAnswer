@@ -1,5 +1,6 @@
 package mk.wp.dataanswering.backend.web.controler;
 
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 
 import mk.wp.dataanswering.backend.service.PromptService;
@@ -70,7 +71,10 @@ public class HomeController {
 
                 if (userService.getCurrentUser().getLimitTill() != null) {
                     model.addAttribute("disabled", true);
-                    model.addAttribute("limitTill", userService.getCurrentUser().getLimitTill());
+                    model.addAttribute("limitTill", 
+                        userService.getCurrentUser().getLimitTill()
+                        .toEpochSecond(ZoneOffset.UTC)
+                    );
                 }
             }
         } catch (Exception e) {

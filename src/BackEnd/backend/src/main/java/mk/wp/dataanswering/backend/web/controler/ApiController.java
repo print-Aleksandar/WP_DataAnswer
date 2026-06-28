@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -78,11 +79,8 @@ public class ApiController {
             "error", "Too Many Requests",
             "message", "Token limit exceeded.",
             "limitExpiresAt", Long.valueOf(
-                ex.getLimitTill().toEpochSecond(
-                    ZoneId.systemDefault().getRules()
-                    .getOffset(LocalDateTime.now())
+                    ex.getLimitTill().toEpochSecond(ZoneOffset.UTC)
                 )
-            )
         );
 
         return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(errorResponseBody);
@@ -273,10 +271,7 @@ public class ApiController {
                 if(!promptService.isTokenLimitNotExceeded(userService.getCurrentUser().getUserId())) {
                     // Calculate the epoch seconds 
                     long epochSeconds = userService.getCurrentUser()
-                        .getLimitTill().toEpochSecond(
-                            ZoneId.systemDefault().getRules()
-                            .getOffset(LocalDateTime.now())
-                        );
+                        .getLimitTill().toEpochSecond(ZoneOffset.UTC);
 
                     // Create the chunk payload
                     Map<String, Long> limitPayload = Map.of("limit_exceeded", epochSeconds);

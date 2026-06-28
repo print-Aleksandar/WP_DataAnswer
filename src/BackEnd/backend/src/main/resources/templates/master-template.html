@@ -289,6 +289,33 @@
         <div class="sidebar" th:replace="~{fragments/sidebar}"></div>
         <section class="main" th:replace="~{${bodyContent}}"></section>
     </div>
+
+    <script>
+        
+        function parseTimestampSpans() {
+            document.querySelectorAll(".timestamp-span")
+            .forEach(e => {
+                console.log(e)
+                const utcTime = e.dataset.time;
+                if(utcTime)
+                    e.innerText = formatTimestamp(utcTime);
+            })
+        }
+
+        function formatTimestamp(epochSeconds) {
+            const resetTimestamp = new Date(epochSeconds * 1000);
+            const pad = (num) => String(num).padStart(2, '0');
+            const yyyy = resetTimestamp.getFullYear();
+            const mm = pad(resetTimestamp.getMonth() + 1);
+            const dd = pad(resetTimestamp.getDate());
+            const hh = pad(resetTimestamp.getHours());
+            const min = pad(resetTimestamp.getMinutes());
+
+            return `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+        }
+
+        parseTimestampSpans()
+    </script>
 </div>
 </body>
 </html>

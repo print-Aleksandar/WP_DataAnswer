@@ -1,5 +1,6 @@
 package mk.wp.dataanswering.backend.web.controler;
 
+import java.time.ZoneOffset;
 import java.util.List;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -87,7 +88,10 @@ public class ChatController {
                 if ((error != null && error.contains("Token Exceeded")) ||
                         userService.getCurrentUser().getLimitTill() != null) {
                     model.addAttribute("disabled", true);
-                    model.addAttribute("limitTill", userService.getCurrentUser().getLimitTill());
+                    model.addAttribute("limitTill", 
+                        userService.getCurrentUser().getLimitTill()
+                        .toEpochSecond(ZoneOffset.UTC)
+                    );
                 }
             }
         } catch (Exception e) {

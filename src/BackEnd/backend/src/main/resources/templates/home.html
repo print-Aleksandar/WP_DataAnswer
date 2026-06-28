@@ -59,7 +59,7 @@
 
             <p th:if="${disabled}" class="inline-error text-center mt-1 mb-0">
                 Token limit reached, it will reset after:
-                <span th:text="${#temporals.format(limitTill, 'dd MMM yyyy HH:mm')}"></span>
+                <span class="timestamp-span" th:data-time="${limitTill}"></span>
             </p>
 
         </form>

@@ -89,7 +89,7 @@
         <p class="inline-error text-center mt-2"
            th:if="${disabled}">
             Token limit reached, it will reset after:
-            <span th:text="${#temporals.format(limitTill, 'dd.MM.yyyy HH:mm')}"></span>
+            <span class="timestamp-span" th:data-time="${limitTill}"></span>
         </p>
 
         <p class="inline-error text-center mt-2"
@@ -329,17 +329,7 @@
         const timestampSpan = document.createElement('span')
         errorDisplay.appendChild(timestampSpan)
 
-        console.log(epochSeconds, new Date(epochSeconds * 1000))
-
-        const resetTimestamp = new Date(epochSeconds * 1000);
-        const pad = (num) => String(num).padStart(2, '0');
-        const yyyy = resetTimestamp.getFullYear();
-        const mm = pad(resetTimestamp.getMonth() + 1);
-        const dd = pad(resetTimestamp.getDate());
-        const hh = pad(resetTimestamp.getHours());
-        const min = pad(resetTimestamp.getMinutes());
-
-         timestampSpan.innerText += `${dd}.${mm}.${yyyy} ${hh}:${min}`;
+        timestampSpan.innerText = formatTimestamp(epochSeconds);
     }
 
     function enableTitleEdit(element) {
