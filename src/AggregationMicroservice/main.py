@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from storage import DB_Storage
 from pydantic import BaseModel
 from typing import List, Any, Optional, Tuple
-from static import AGG_MAP, BOOLEAN_TRANSFORMS, NUMERIC_PREDICATES, NUMERIC_TRANSFORMS, TEXT_PREDICATES, TEXT_TRANSFORMS, VALUE_NEEDED_TRANSFORMS
+from static import AGG_MAP, BOOLEAN_TRANSFORMS, NUMERIC_PREDICATES, NUMERIC_TRANSFORMS, PREDICATE_MAP, TEXT_PREDICATES, TEXT_TRANSFORMS, VALUE_NEEDED_TRANSFORMS
 from agg_cl import Aggregator
 
 app = FastAPI()
@@ -69,7 +69,7 @@ def get_tools():
     return [
             {
                 "name": "aggregate_file",
-                "description": "Aggregate, transform, filter and manipulate tabular or structured data (example spreadsheet, csv, json, etc.).",
+                "description": "Aggregate, transform, filter and manipulate tabular or structured data (example spreadsheet, csv, json, etc.). Call `get_columns` first (if available) to get a better idea of the structure of the data.",
                 "parameters": {
                     "type": 'object',
                     "properties": {
@@ -111,7 +111,14 @@ def get_tools():
                             "items": { "type": "string" },
                             'description': f"Columns to exclude from the result set before aggregation is applied."
                         },
-                        # TODO target_criteria_predicate, target_criteria_value
+                        'target_criteria_predicate': {
+                            'type': 'string',
+                            'description': f"Optional predicate applied to the aggregated target column. Allowed values: [{', '.join(PREDICATE_MAP.keys())}]"
+                        },
+                        'target_criteria_value': {
+                            'type': ['string', 'number', 'boolean'],
+                            'description': "The value to compare the aggregated result against. Use a number for numeric predicates, a string for text predicates, and a boolean for boolean predicates. Required when `target_criteria_predicate` is set."
+                        }
                     },
                     "required": ["aggregate_function", "target_column"]
                 },
